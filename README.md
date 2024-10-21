@@ -1,1 +1,0 @@
-# selcukustuns.github.io
