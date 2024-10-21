@@ -1,0 +1,109 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 20px 40px;
+    background-color: #f9f9f9;
+    border: 1px solid #dddddd;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Header */
+h1 {
+    font-size: 36px;
+    text-align: center;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.contact-info p, .contact-info a {
+    margin: 5px 0;
+    color: #555555;
+    text-decoration: none;
+}
+
+.contact-info a {
+    color: #1a73e8;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+h2 {
+    font-size: 24px;
+    color: #444444;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* P Type  */
+p {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #333333;
+}
+
+/* Projects List */
+ul {
+    margin: 10px 0 10px 40px;
+    padding: 0;
+    list-style-type: disc;
+    color: #333333;
+}
+
+ul li {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+/* Sections */
+.education, .work-experience, .skills, .projects, .certificates, .languages, .interests {
+    margin-bottom: 40px;
+}
+
+/* Colors */
+.skills p, .languages p, .interests p {
+    font-size: 18px;
+}
+
+.certificates p {
+    font-size: 18px;
+    margin: 5px 0;
+}
+
+/* Footer */
+a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Word Type */
+.container {
+    background-color: #ffffff;
+    padding: 20px 40px;
+    border: 1px solid #dddddd;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.15);
+}
