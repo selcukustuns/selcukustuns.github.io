@@ -5,8 +5,7 @@ var gl;
 
 var bufferTri, bufferRect1, bufferRect2, bufferRect3, triVertices, rectVertices;
 var vPosition;
-var transformationMatrix, transformationMatrixLoc;
-var colorLoc;
+var transformationMatrixLoc, colorLoc;
 
 var translation = [0.0, 0.0];
 var scale = 1.0;
@@ -99,13 +98,12 @@ window.onload = function init() {
 
 function applyTransformations() {
     var transformMatrix = mat4();
-    transformMatrix = mult(transformMatrix, translate(translation[0] - 0.1, translation[1] - 0.2, 0.0));
+    transformMatrix = mult(transformMatrix, translate(translation[0], translation[1], 0.0));
+    transformMatrix = mult(transformMatrix, translate(-0.1, -0.2, 0.0));
     transformMatrix = mult(transformMatrix, rotateZ(rotation));
-    transformMatrix = mult(transformMatrix, translate(0.1, 0.2, 0.0));
     transformMatrix = mult(transformMatrix, scalem(scale, scale, 1.0));
     return transformMatrix;
 }
-
 
 function drawWing(buffer, color, angleOffset, baseTransform) {
     var transformMatrix = mult(baseTransform, translate(0.0, 0.3, 0.0));
