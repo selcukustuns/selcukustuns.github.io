@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Windmill</title>
-    <!-- Gerekli script dosyalarını ekle -->
     <script src="Common/webgl-utils.js"></script>
     <script src="Common/initShaders.js"></script>
     <script src="Common/MV.js"></script>
@@ -13,7 +12,9 @@
     <script src="main.js"></script>
 </head>
 <body style="background-color: #d2f0f7;">
-    <!-- Kontrol Paneli -->
+    <div style="position: absolute; top: 10px; left: 10px; font-weight: bold;">
+        Selçuk Üstün 20050111072
+    </div>    
     <div style="position: absolute; top: 10px; right: 10px; background: #c2eaf5; padding: 10px; border: 1px solid black;">
         <h4>----- Camera related -----</h4>
         <label>FOVY: <input type="range" id="fovy" min="30" max="120" value="45" oninput="updateValue('fovyVal', this.value)"> 
@@ -69,7 +70,6 @@
         <span id="colorBVal">0.0</span><br>
     </div>
 
-    <!-- WebGL Canvas -->
     <canvas id="gl-canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
 </body>
 </html>

@@ -87,7 +87,7 @@ function initShadersFromText(gl, vertexShaderText, fragmentShaderText) {
 }
 
 function setupBuffers() {
-    const numSegments = 30;
+    const numSegments = 28;
 
     const coneVertices = [];
     coneVertices.push(vec3(0, 1, 0));
@@ -382,7 +382,7 @@ function drawSmallCone() {
     transform = mult(transform, rotateX(90)); 
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
-    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0)); 
+    gl.uniform4fv(colorLoc, vec4(0.0, 0.0, 0.0, 1.0));
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
 }
 
@@ -430,7 +430,7 @@ function drawSmallConeWithTransform(parentTransform) {
     transform = mult(transform, rotateX(90));
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
-    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0));
+    gl.uniform4fv(colorLoc, vec4(0.0, 0.0, 0.0, 1.0)); 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
 }
 
