@@ -5,7 +5,6 @@ let modelMatrix, viewMatrix, projectionMatrix;
 let modelMatrixLoc, viewMatrixLoc, projectionMatrixLoc, colorLoc;
 
 let rotationAngle = 0;
-let speed = 0.5;
 
 let cameraSettings = {
     fovy: 45,
@@ -21,8 +20,23 @@ let windmillSettings = {
     speed: 0.5
 };
 
+let transformSettings = {
+    posX: 0,
+    posY: 0,
+    posZ: 0,
+    scale: 1,
+    rotX: 0,
+    rotY: 0,
+    rotZ: 0
+};
 
-let coneBuffer, smallConeBuffer, groundBuffer, bladeBuffer , baseBuffer;
+let colorSettings = {
+    colorR: 0.0,
+    colorG: 0.0,
+    colorB: 0.0
+};
+
+let coneBuffer, smallConeBuffer, groundBuffer, bladeBuffer, baseBuffer;
 
 window.onload = function init() {
     // Canvas ve WebGL başlatma
@@ -53,12 +67,17 @@ window.onload = function init() {
     // Kontrolleri başlat
     setupCameraControls();    // Kamera ayarlarını kontrol eden fonksiyon
     setupWindmillControls();  // Rüzgar gülü hızını kontrol eden fonksiyon
+    setupTransformControls(); // Transform ayarlarını kontrol eden fonksiyon
+    setupColorControls();     // Renk ayarlarını kontrol eden fonksiyon
 
     // İlk kamera ayarlarını uygula
     updateCamera();
 
     // Çizim döngüsünü başlat
     render();
+
+    // Rüzgar gülünü animasyona başlat
+    animateWindmill();
 };
 
 
@@ -157,6 +176,10 @@ function setupBuffers() {
     gl.bufferData(gl.ARRAY_BUFFER, flatten(groundVertices), gl.STATIC_DRAW);
 }
 
+function animateWindmill() {
+    rotationAngle += windmillSettings.speed; // Sadece hız ayarıyla etkilenir
+    setTimeout(animateWindmill, 16); // ~60 FPS için
+}
 
 function setupCameraControls() {
     document.getElementById("fovy").oninput = function(event) {
@@ -182,12 +205,95 @@ function setupCameraControls() {
         updateValue('camPosZVal', event.target.value);
         updateCamera();
     };
+
+    document.getElementById("targetX").oninput = function(event) {
+        cameraSettings.targetX = parseFloat(event.target.value);
+        updateValue('targetXVal', event.target.value);
+        updateCamera();
+    };
+
+    document.getElementById("targetY").oninput = function(event) {
+        cameraSettings.targetY = parseFloat(event.target.value);
+        updateValue('targetYVal', event.target.value);
+        updateCamera();
+    };
+
+    document.getElementById("targetZ").oninput = function(event) {
+        cameraSettings.targetZ = parseFloat(event.target.value);
+        updateValue('targetZVal', event.target.value);
+        updateCamera();
+    };
 }
 
 function setupWindmillControls() {
-    document.getElementById("speed").oninput = function(event) {
+    document.getElementById("speed").oninput = function (event) {
         windmillSettings.speed = parseFloat(event.target.value);
         updateValue('speedVal', event.target.value);
+    };
+}
+
+function setupTransformControls() {
+    document.getElementById("posX").oninput = function(event) {
+        transformSettings.posX = parseFloat(event.target.value);
+        updateValue('posXVal', event.target.value);
+        render(); // Yalnızca çizimi günceller
+    };
+
+    document.getElementById("posY").oninput = function(event) {
+        transformSettings.posY = parseFloat(event.target.value);
+        updateValue('posYVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("posZ").oninput = function(event) {
+        transformSettings.posZ = parseFloat(event.target.value);
+        updateValue('posZVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("scale").oninput = function(event) {
+        transformSettings.scale = parseFloat(event.target.value);
+        updateValue('scaleVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("rotX").oninput = function(event) {
+        transformSettings.rotX = parseFloat(event.target.value);
+        updateValue('rotXVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("rotY").oninput = function(event) {
+        transformSettings.rotY = parseFloat(event.target.value);
+        updateValue('rotYVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("rotZ").oninput = function(event) {
+        transformSettings.rotZ = parseFloat(event.target.value);
+        updateValue('rotZVal', event.target.value);
+        render();
+    };
+}
+
+
+function setupColorControls() {
+    document.getElementById("colorR").oninput = function(event) {
+        colorSettings.colorR = parseFloat(event.target.value);
+        updateValue('colorRVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("colorG").oninput = function(event) {
+        colorSettings.colorG = parseFloat(event.target.value);
+        updateValue('colorGVal', event.target.value);
+        render();
+    };
+
+    document.getElementById("colorB").oninput = function(event) {
+        colorSettings.colorB = parseFloat(event.target.value);
+        updateValue('colorBVal', event.target.value);
+        render();
     };
 }
 
@@ -201,22 +307,21 @@ function updateCamera() {
 
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(viewMatrixLoc, false, flatten(viewMatrix));
-    render();
+    // Kamera güncellemesi render döngüsünü tetiklemez
 }
-
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Çizim fonksiyonları
     drawGround();
     drawCone();
     drawSmallCone();
     drawBlades();
 
-    // Rüzgar gülü dönüşünü güncelle
-    rotationAngle += windmillSettings.speed;
-    requestAnimationFrame(render);
+    requestAnimationFrame(render); // Çizimi sürekli tekrar eder
 }
+
 
 
 function drawGround() {
@@ -230,29 +335,29 @@ function drawGround() {
 }
 
 function drawCone() {
-    // Koninin gövdesini çiz
     gl.bindBuffer(gl.ARRAY_BUFFER, coneBuffer);
     gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     let transform = mat4();
-    transform = mult(transform, translate(0, -0.3, 0)); // Koniyi biraz aşağıya taşı
-    transform = mult(transform, scalem(1.5, 1.5, 1.5)); // Koniyi büyüt
+    transform = mult(transform, translate(0, -0.2, 0)); // Büyük koniyi biraz daha aşağı taşı
+    transform = mult(transform, scalem(transformSettings.scale, transformSettings.scale, transformSettings.scale));
+    transform = mult(transform, rotateX(transformSettings.rotX));
+    transform = mult(transform, rotateY(transformSettings.rotY));
+    transform = mult(transform, rotateZ(transformSettings.rotZ));
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
-    gl.uniform4fv(colorLoc, vec4(0.3, 0.3, 0.3, 1.0)); // Gri renk
+    gl.uniform4fv(colorLoc, vec4(colorSettings.colorR, colorSettings.colorG, colorSettings.colorB, 1.0)); // Siyah büyük koni
 
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 31); // Gövdeyi çiz
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 31);
 
-    // Koninin tabanını çiz
     gl.bindBuffer(gl.ARRAY_BUFFER, baseBuffer);
     gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     gl.uniform4fv(colorLoc, vec4(0.2, 0.2, 0.2, 1.0)); // Taban için ayrı bir renk
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 32); // Tabanı çiz
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
 }
-
 
 function drawBlades() {
     const colors = [
@@ -267,9 +372,10 @@ function drawBlades() {
         gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
         let transform = mat4();
-        transform = mult(transform, translate(0, 1.1, 0)); // Küçük koninin keskin ucuna taşı
-        transform = mult(transform, rotateZ(rotationAngle + i * 120)); // Dairesel döndürme (120° aralıklarla)
-        transform = mult(transform, translate(0.5, 0, 0)); // Çember üzerinde yarıçap kadar uzaklaştır
+        transform = mult(transform, translate(0, 1.0, 0)); // Küçük koninin y eksenindeki uç noktasına taşı
+        transform = mult(transform, translate(0, 0, 0)); // Pervaneleri küçük koninin z eksenindeki merkezine sabitle
+        transform = mult(transform, rotateZ(rotationAngle + i * 120)); // Bıçakları 120° aralıklarla döndür
+        transform = mult(transform, translate(0.5, 0, 0)); // Çember üzerindeki mesafeyi ayarla
         transform = mult(transform, rotateZ(90)); // Dikdörtgeni dik hale getir
 
         gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
@@ -278,25 +384,17 @@ function drawBlades() {
     }
 }
 
-
-
-
 function drawSmallCone() {
     gl.bindBuffer(gl.ARRAY_BUFFER, smallConeBuffer);
     gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     let transform = mat4();
-    transform = mult(transform, translate(0, 1.0, 0)); // Büyük koninin tepesine taşı
-    transform = mult(transform, scalem(0.3, 0.3, 0.3)); // Küçük koni ölçeği
-    transform = mult(transform, rotateX(90)); // Küçük koniyi +z eksenine bakacak şekilde döndür
+    transform = mult(transform, translate(0, 1.0, 0)); // Küçük koniyi büyük koninin en ucuna yerleştir
+    transform = mult(transform, scalem(0.5, 0.5, 0.5)); // Küçük koniyi uygun boyutta ölçeklendir
+    transform = mult(transform, rotateX(90)); // Küçük koniyi z eksenine hizala
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
-    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0)); // Küçük koni rengi: gri
+    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0)); // Gri renk
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
 }
-
-
-
-
-
