@@ -39,44 +39,32 @@ let colorSettings = {
 let coneBuffer, smallConeBuffer, groundBuffer, bladeBuffer, baseBuffer;
 
 window.onload = function init() {
-    // Canvas ve WebGL başlatma
+
     canvas = document.getElementById("gl-canvas");
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) {
         alert("WebGL isn't available");
     }
 
-    // WebGL ayarları
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
-    // Shader programını oluştur
     program = initShadersFromText(gl, vertexShaderText, fragmentShaderText);
     gl.useProgram(program);
 
-    // Uniform değişkenlerin yerlerini al
     modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
     colorLoc = gl.getUniformLocation(program, "uColor");
 
-    // Buffer'ları kur
     setupBuffers();
-
-    // Kontrolleri başlat
-    setupCameraControls();    // Kamera ayarlarını kontrol eden fonksiyon
-    setupWindmillControls();  // Rüzgar gülü hızını kontrol eden fonksiyon
-    setupTransformControls(); // Transform ayarlarını kontrol eden fonksiyon
-    setupColorControls();     // Renk ayarlarını kontrol eden fonksiyon
-
-    // İlk kamera ayarlarını uygula
+    setupCameraControls();
+    setupWindmillControls();
+    setupTransformControls();
+    setupColorControls();
     updateCamera();
-
-    // Çizim döngüsünü başlat
     render();
-
-    // Rüzgar gülünü animasyona başlat
     animateWindmill();
 };
 
@@ -99,11 +87,10 @@ function initShadersFromText(gl, vertexShaderText, fragmentShaderText) {
 }
 
 function setupBuffers() {
-    const numSegments = 30; // Segment sayısı
+    const numSegments = 30;
 
-    // Büyük koni vertex verileri
     const coneVertices = [];
-    coneVertices.push(vec3(0, 1, 0)); // Tepe nokta
+    coneVertices.push(vec3(0, 1, 0));
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i * 2 * Math.PI) / numSegments;
@@ -118,9 +105,8 @@ function setupBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, coneBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(coneVertices), gl.STATIC_DRAW);
 
-    // Koninin taban vertex verileri
     const baseVertices = [];
-    baseVertices.push(vec3(0, 0, 0)); // Taban merkezi
+    baseVertices.push(vec3(0, 0, 0));
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i * 2 * Math.PI) / numSegments;
@@ -135,9 +121,8 @@ function setupBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, baseBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(baseVertices), gl.STATIC_DRAW);
 
-    // Küçük koni vertex verileri
     const smallConeVertices = [];
-    smallConeVertices.push(vec3(0, 0.2, 0)); // Tepe nokta
+    smallConeVertices.push(vec3(0, 0.2, 0));
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i * 2 * Math.PI) / numSegments;
@@ -152,7 +137,7 @@ function setupBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, smallConeBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(smallConeVertices), gl.STATIC_DRAW);
 
-    // Pervane vertex verileri
+ 
     const bladeVertices = [
         vec3(-0.1, 0, 0),
         vec3(0.1, 0, 0),
@@ -164,7 +149,7 @@ function setupBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, bladeBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(bladeVertices), gl.STATIC_DRAW);
 
-    // Zemin vertex verileri
+    
     const groundVertices = [
         vec3(-2, 0, -2),
         vec3(2, 0, -2),
@@ -177,8 +162,8 @@ function setupBuffers() {
 }
 
 function animateWindmill() {
-    rotationAngle += windmillSettings.speed; // Sadece hız ayarıyla etkilenir
-    setTimeout(animateWindmill, 16); // ~60 FPS için
+    rotationAngle += windmillSettings.speed;
+    setTimeout(animateWindmill, 16); 
 }
 
 function setupCameraControls() {
@@ -231,7 +216,7 @@ function setupTransformControls() {
     document.getElementById("posX").oninput = function(event) {
         transformSettings.posX = parseFloat(event.target.value);
         updateValue('posXVal', event.target.value);
-        render(); // Yalnızca çizimi günceller
+        render(); 
     };
 
     document.getElementById("posY").oninput = function(event) {
@@ -293,16 +278,15 @@ function setupColorControls() {
 }
 
 function updateCamera() {
-    // Kamera pozisyonu ve hedefi doğru şekilde ayarla
+
     const eye = vec3(cameraSettings.camPosX, cameraSettings.camPosY, cameraSettings.camPosZ);
     const at = vec3(cameraSettings.targetX, cameraSettings.targetY, cameraSettings.targetZ);
-    const up = vec3(0, 1, 0); // Yukarı vektörü sabit: Y ekseni
+    const up = vec3(0, 1, 0);
 
-    // Kamera matrislerini oluştur
+
     viewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(cameraSettings.fovy, canvas.width / canvas.height, 0.1, 100);
 
-    // Shader'a yeni matrisleri yükle
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(viewMatrixLoc, false, flatten(viewMatrix));
 }
@@ -311,14 +295,12 @@ function updateCamera() {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // Çizim fonksiyonları
     drawGround();
-    drawCone();
-    drawSmallCone();
-    drawBlades();
+    drawCombinedShape();
 
-    requestAnimationFrame(render); // Çizimi sürekli tekrar eder
+    requestAnimationFrame(render); 
 }
+
 
 
 
@@ -328,7 +310,7 @@ function drawGround() {
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(mat4()));
-    gl.uniform4fv(colorLoc, vec4(0.6, 0.4, 0.2, 1.0)); // Kahverengi zemin
+    gl.uniform4fv(colorLoc, vec4(0.6, 0.4, 0.2, 1.0)); 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
 
@@ -338,7 +320,7 @@ function drawCone() {
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     let transform = mat4();
-    transform = mult(transform, translate(0, -0.2, 0)); // Büyük koniyi biraz daha aşağı taşı
+    transform = mult(transform, translate(0, 0, 0)); 
     transform = mult(transform, scalem(transformSettings.scale, transformSettings.scale, transformSettings.scale));
     transform = mult(transform, rotateX(transformSettings.rotX));
     transform = mult(transform, rotateY(transformSettings.rotY));
@@ -353,16 +335,21 @@ function drawCone() {
     gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
-    gl.uniform4fv(colorLoc, vec4(0.2, 0.2, 0.2, 1.0)); // Taban için ayrı bir renk
+    gl.uniform4fv(colorLoc, vec4(0.2, 0.2, 0.2, 1.0)); 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
 }
 
 function drawBlades() {
     const colors = [
-        vec4(1.0, 0.0, 0.0, 1.0), // Kırmızı
-        vec4(0.0, 1.0, 0.0, 1.0), // Yeşil
-        vec4(0.0, 0.0, 1.0, 1.0)  // Mavi
+        vec4(1.0, 0.0, 0.0, 1.0), 
+        vec4(0.0, 1.0, 0.0, 1.0),
+        vec4(0.0, 0.0, 1.0, 1.0)  
     ];
+
+    
+    const smallConeZScale = 1.5; 
+    const smallConeBaseHeight = 0.2; 
+    const bladeCenterZ = smallConeBaseHeight * smallConeZScale; 
 
     for (let i = 0; i < 3; i++) {
         gl.bindBuffer(gl.ARRAY_BUFFER, bladeBuffer);
@@ -370,17 +357,18 @@ function drawBlades() {
         gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
         let transform = mat4();
-        transform = mult(transform, translate(0, 1.0, 0)); // Küçük koninin y eksenindeki uç noktasına taşı
-        transform = mult(transform, translate(0, 0, 0)); // Pervaneleri küçük koninin z eksenindeki merkezine sabitle
-        transform = mult(transform, rotateZ(rotationAngle + i * 120)); // Bıçakları 120° aralıklarla döndür
-        transform = mult(transform, translate(0.5, 0, 0)); // Çember üzerindeki mesafeyi ayarla
-        transform = mult(transform, rotateZ(90)); // Dikdörtgeni dik hale getir
+        transform = mult(transform, translate(0, 1.0, bladeCenterZ));
+        transform = mult(transform, rotateZ(rotationAngle + i * 120)); 
+        transform = mult(transform, translate(0.5, 0, 0)); 
+        transform = mult(transform, rotateZ(90)); 
 
         gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
         gl.uniform4fv(colorLoc, colors[i]);
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); // Dikdörtgen çizimi
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }
 }
+
+
 
 function drawSmallCone() {
     gl.bindBuffer(gl.ARRAY_BUFFER, smallConeBuffer);
@@ -388,11 +376,88 @@ function drawSmallCone() {
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
 
     let transform = mat4();
-    transform = mult(transform, translate(0, 1.0, 0)); // Küçük koniyi büyük koninin en ucuna yerleştir
-    transform = mult(transform, scalem(0.5, 0.5, 0.5)); // Küçük koniyi uygun boyutta ölçeklendir
-    transform = mult(transform, rotateX(90)); // Küçük koniyi z eksenine hizala
+
+    transform = mult(transform, translate(0, 1.0, 0)); 
+    transform = mult(transform, scalem(0.8, 0.8, 1.5));
+    transform = mult(transform, rotateX(90)); 
 
     gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
-    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0)); // Gri renk
+    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0)); 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
+}
+
+function drawCombinedShape() {
+    let mainTransform = mat4();
+    mainTransform = mult(mainTransform, translate(transformSettings.posX, transformSettings.posY, transformSettings.posZ)); // Ana pozisyon
+    mainTransform = mult(mainTransform, rotateX(transformSettings.rotX)); 
+    mainTransform = mult(mainTransform, rotateY(transformSettings.rotY));
+    mainTransform = mult(mainTransform, rotateZ(transformSettings.rotZ));
+    mainTransform = mult(mainTransform, scalem(transformSettings.scale, transformSettings.scale, transformSettings.scale)); 
+
+    drawConeWithTransform(mainTransform);
+
+    drawSmallConeWithTransform(mainTransform);
+
+    drawBladesWithTransform(mainTransform);
+}
+
+function drawConeWithTransform(parentTransform) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, coneBuffer);
+    gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
+
+    let transform = mult(parentTransform, translate(0, 0, 0));
+    gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
+    gl.uniform4fv(colorLoc, vec4(colorSettings.colorR, colorSettings.colorG, colorSettings.colorB, 1.0)); 
+
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 31);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, baseBuffer);
+    gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
+
+    gl.uniform4fv(colorLoc, vec4(0.2, 0.2, 0.2, 1.0));
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
+}
+
+function drawSmallConeWithTransform(parentTransform) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, smallConeBuffer);
+    gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
+
+    let transform = mult(parentTransform, translate(0, 1.0, 0));
+    transform = mult(transform, scalem(0.8, 0.8, 1.5));
+    transform = mult(transform, rotateX(90));
+
+    gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
+    gl.uniform4fv(colorLoc, vec4(0.6, 0.6, 0.6, 1.0));
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 32);
+}
+
+
+function drawBladesWithTransform(parentTransform) {
+    const colors = [
+        vec4(1.0, 0.0, 0.0, 1.0),
+        vec4(0.0, 1.0, 0.0, 1.0), 
+        vec4(0.0, 0.0, 1.0, 1.0)  
+    ];
+
+    const smallConeZScale = 1.5; 
+    const smallConeBaseHeight = 0.2; 
+    const bladeCenterZ = smallConeBaseHeight * smallConeZScale; 
+
+    for (let i = 0; i < 3; i++) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, bladeBuffer);
+        gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
+
+        let transform = mult(parentTransform, translate(0, 1.0, bladeCenterZ)); 
+        transform = mult(transform, rotateZ(rotationAngle + i * 120)); 
+        transform = mult(transform, translate(0.5, 0, 0)); 
+        transform = mult(transform, rotateZ(90)); 
+
+        gl.uniformMatrix4fv(modelMatrixLoc, false, flatten(transform));
+        gl.uniform4fv(colorLoc, colors[i]);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4); 
+    }
 }
