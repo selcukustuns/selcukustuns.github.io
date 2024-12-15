@@ -182,48 +182,43 @@ function animateWindmill() {
 }
 
 function setupCameraControls() {
-    document.getElementById("fovy").oninput = function(event) {
-        cameraSettings.fovy = parseFloat(event.target.value);
-        updateValue('fovyVal', event.target.value);
-        updateCamera();
-    };
-
-    document.getElementById("camPosX").oninput = function(event) {
+    document.getElementById("camPosX").oninput = function (event) {
         cameraSettings.camPosX = parseFloat(event.target.value);
         updateValue('camPosXVal', event.target.value);
         updateCamera();
     };
 
-    document.getElementById("camPosY").oninput = function(event) {
+    document.getElementById("camPosY").oninput = function (event) {
         cameraSettings.camPosY = parseFloat(event.target.value);
         updateValue('camPosYVal', event.target.value);
         updateCamera();
     };
 
-    document.getElementById("camPosZ").oninput = function(event) {
+    document.getElementById("camPosZ").oninput = function (event) {
         cameraSettings.camPosZ = parseFloat(event.target.value);
         updateValue('camPosZVal', event.target.value);
         updateCamera();
     };
 
-    document.getElementById("targetX").oninput = function(event) {
+    document.getElementById("targetX").oninput = function (event) {
         cameraSettings.targetX = parseFloat(event.target.value);
         updateValue('targetXVal', event.target.value);
         updateCamera();
     };
 
-    document.getElementById("targetY").oninput = function(event) {
+    document.getElementById("targetY").oninput = function (event) {
         cameraSettings.targetY = parseFloat(event.target.value);
         updateValue('targetYVal', event.target.value);
         updateCamera();
     };
 
-    document.getElementById("targetZ").oninput = function(event) {
+    document.getElementById("targetZ").oninput = function (event) {
         cameraSettings.targetZ = parseFloat(event.target.value);
         updateValue('targetZVal', event.target.value);
         updateCamera();
     };
 }
+
 
 function setupWindmillControls() {
     document.getElementById("speed").oninput = function (event) {
@@ -298,17 +293,20 @@ function setupColorControls() {
 }
 
 function updateCamera() {
-    viewMatrix = lookAt(
-        vec3(cameraSettings.camPosX, cameraSettings.camPosY, cameraSettings.camPosZ),
-        vec3(cameraSettings.targetX, cameraSettings.targetY, cameraSettings.targetZ),
-        vec3(0, 1, 0)
-    );
+    // Kamera pozisyonu ve hedefi doğru şekilde ayarla
+    const eye = vec3(cameraSettings.camPosX, cameraSettings.camPosY, cameraSettings.camPosZ);
+    const at = vec3(cameraSettings.targetX, cameraSettings.targetY, cameraSettings.targetZ);
+    const up = vec3(0, 1, 0); // Yukarı vektörü sabit: Y ekseni
+
+    // Kamera matrislerini oluştur
+    viewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(cameraSettings.fovy, canvas.width / canvas.height, 0.1, 100);
 
+    // Shader'a yeni matrisleri yükle
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(viewMatrixLoc, false, flatten(viewMatrix));
-    // Kamera güncellemesi render döngüsünü tetiklemez
 }
+
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
