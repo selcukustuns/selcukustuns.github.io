@@ -25,6 +25,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(0, 20, 10);
 scene.add(directionalLight);
 
+
 // Create a Floor (Land)
 const floorGeometry = new THREE.PlaneGeometry(48, 50);
 const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x22cb22 }); // Green grass
@@ -32,6 +33,40 @@ const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.set(-30, 0, 0);
 scene.add(floor);
+
+function createGrassFloor(scene) {
+  // Texture Loader
+  const textureLoader = new THREE.TextureLoader();
+
+  // Load grass texture from the specified path
+  const grassTexture = textureLoader.load('./three.js-master/examples/textures/terrain/grasslight-big.jpg');
+
+  // Set texture properties for wrapping and repeating
+  grassTexture.wrapS = THREE.RepeatWrapping;
+  grassTexture.wrapT = THREE.RepeatWrapping;
+  grassTexture.repeat.set(10, 10); // Repeat the texture 10x10
+
+  // Create the geometry and material
+  const floorGeometry = new THREE.PlaneGeometry(48, 50); // Size of the floor
+  const floorMaterial = new THREE.MeshLambertMaterial({
+    map: grassTexture, // Apply the grass texture
+  });
+
+  // Create the floor mesh
+  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+
+  // Set the rotation and position
+  floor.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
+  floor.position.set(-30, 0, 0); // Position the floor
+
+  // Add to the scene
+  scene.add(floor);
+}
+
+// Create grass floor and add it to the scene
+createGrassFloor(scene);
+
+
 
 // Create Underwater Section
 const waterGeometry = new THREE.PlaneGeometry(108, 50);
@@ -98,6 +133,8 @@ function checkCollision(object, obstacles) {
 // Store obstacles for collision detection
 const obstacles = [trunk, foliage, cable, cablePost1, cablePost2];
 
+
+
 // Load Zebra Model
 const fbxLoader = new FBXLoader();
 fbxLoader.load(
@@ -116,40 +153,53 @@ fbxLoader.load(
     });
 
     let t = 0;
-    let jumpDirection = 1;
-    let movingForward = true;
+    let jumpActive = false;
     const curve = new CatmullRomCurve3([
       new THREE.Vector3(-30, 2.5, 0),
-      new THREE.Vector3(-20, 2.5, 10),
-      new THREE.Vector3(-10, 2.5, 0),
-      new THREE.Vector3(-20, 2.5, -10),
+      new THREE.Vector3(-25, 2.5, 5),
+      new THREE.Vector3(-20, 2.5, 0),
+      new THREE.Vector3(-25, 2.5, -5),
       new THREE.Vector3(-30, 2.5, 0),
     ]);
 
     function animateZebra() {
-      t += movingForward ? 0.002 : -0.002;
-      if (t > 1) {
-        t = 1;
-        movingForward = false;
-        fbx.rotation.y = Math.PI; // Turn backward
-      } else if (t < 0) {
-        t = 0;
-        movingForward = true;
-        fbx.rotation.y = 0; // Turn forward
-      }
+      if (!jumpActive) {
+        t += 0.001; // Slower moving
+        if (t > 1) t = 0;
 
-      const position = curve.getPointAt(t);
-      fbx.position.copy(position);
-
-      fbx.position.y += 0.05 * jumpDirection;
-      if (fbx.position.y > 5 || fbx.position.y < 2.5) {
-        jumpDirection *= -1;
-      }
-
-      if (checkCollision(fbx, obstacles)) {
-        fbx.position.copy(curve.getPointAt(t - (movingForward ? 0.002 : -0.002)));
+        const position = curve.getPointAt(t);
+        fbx.position.copy(position);
       }
     }
+
+    function jumpZebra() {
+      if (!jumpActive) {
+        jumpActive = true;
+        let jumpHeight = 0;
+        let jumpDirection = 1;
+
+        function performJump() {
+          jumpHeight += 0.10 * jumpDirection;
+          fbx.position.y = 2.5 + Math.sin(jumpHeight) * 1.5;
+
+          if (jumpHeight > Math.PI) {
+            jumpDirection = -1;
+          } else if (jumpHeight < 0) {
+            jumpActive = false;
+            fbx.position.y = 2.5; // Back to the floor
+            animateCallbacks.splice(animateCallbacks.indexOf(performJump), 1);
+          }
+        }
+
+        animateCallbacks.push(performJump);
+      }
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        jumpZebra();
+      }
+    });
 
     animateCallbacks.push(animateZebra);
   },
@@ -160,48 +210,61 @@ fbxLoader.load(
 );
 
 // Load Giraffe Model
+let giraffe;
+let giraffeAnimating = true;
 const objLoader = new OBJLoader();
 objLoader.load(
   './models/Giraffe_Selcuk.obj',
   (object) => {
-    object.scale.set(3, 3, 3);
-    object.position.set(-20, 0, -5); // Daha yakın başlangıç pozisyonu
+    giraffe = object;
+    giraffe.scale.set(3, 3, 3);
+    giraffe.position.set(-20, 0, -5);
 
     const textureLoader = new THREE.TextureLoader();
     const giraffeTexture = textureLoader.load('./textures/giraffetexture.jpg');
-    object.traverse((child) => {
+    giraffe.traverse((child) => {
       if (child.isMesh) {
         child.material = new THREE.MeshStandardMaterial({ map: giraffeTexture });
       }
     });
 
     let giraffeDirection = 1;
-    let giraffeZ = -5; // Daha yakın başlangıç Z konumu
-    let giraffeHeadAngle = 0;
-    let walking = true;
+    let giraffeZ = -5;
 
     function animateGiraffe() {
-      if (walking) {
+      if (giraffeAnimating) {
         giraffeZ += 0.05 * giraffeDirection;
-        object.position.z = giraffeZ;
-        object.rotation.y = giraffeDirection > 0 ? 0 : Math.PI;
+        giraffe.position.z = giraffeZ;
+        giraffe.rotation.y = giraffeDirection > 0 ? 0 : Math.PI;
 
-        if (giraffeZ > 5 || giraffeZ < -5) { // Yakın hareket sınırları
+        if (giraffeZ > 5 || giraffeZ < -5) {
           giraffeDirection *= -1;
-          walking = false;
-        }
-      } else {
-        giraffeHeadAngle += 0.03;
-        object.rotation.x = Math.sin(giraffeHeadAngle) * 0.2;
-        if (giraffeHeadAngle > Math.PI * 2) {
-          giraffeHeadAngle = 0;
-          walking = true;
         }
       }
     }
 
-    scene.add(object);
+    giraffe.userData.animateGiraffe = animateGiraffe;
     animateCallbacks.push(animateGiraffe);
+
+    giraffe.userData.rotateGiraffe = () => {
+      giraffeAnimating = false;
+      let rotationAngle = 0;
+      const rotationSpeed = 0.02;
+
+      function animateRotation() {
+        rotationAngle += rotationSpeed;
+        giraffe.rotation.y += rotationSpeed;
+
+        if (rotationAngle >= Math.PI * 2) {
+          animateCallbacks.splice(animateCallbacks.indexOf(animateRotation), 1);
+          giraffeAnimating = true;
+        }
+      }
+
+      animateCallbacks.push(animateRotation);
+    };
+
+    scene.add(giraffe);
   },
   undefined,
   (error) => {
@@ -209,41 +272,83 @@ objLoader.load(
   }
 );
 
-// Load Horse Model and Add Jump Animation
+// Load Zebra Model and Add Jump Animation
+let zebra;
 objLoader.load(
-  './models/Horse.obj',
-  (horse) => {
-    horse.scale.set(2, 2, 2);
-    horse.position.set(0, 0, -10);
-    scene.add(horse);
+  './models/Zebra.obj',
+  (object) => {
+    zebra = object;
+    zebra.scale.set(2, 2, 2);
+    zebra.position.set(0, 0, -10);
+    scene.add(zebra);
 
     const textureLoader = new THREE.TextureLoader();
-    const horseTexture = textureLoader.load('./textures/horseTexture.jpg');
-    horse.traverse((child) => {
+    const zebraTexture = textureLoader.load('./textures/zebraTexture.jpg');
+    zebra.traverse((child) => {
       if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({ map: horseTexture });
+        child.material = new THREE.MeshStandardMaterial({ map: zebraTexture });
       }
     });
 
-    let jumpHeight = 0;
-    let jumpDirection = 1;
+    let zebraZ = -10;
+    let zebraDirection = 1;
+    let zebraSpeed = 0.02; 
+    let jumpActive = false;
 
-    function animateHorse() {
-      jumpHeight += 0.05 * jumpDirection;
-      horse.position.y = Math.sin(jumpHeight) * 2;
+    function animateZebra() {
+      zebraZ += zebraSpeed * zebraDirection;
+      zebra.position.z = zebraZ;
 
-      if (jumpHeight > Math.PI || jumpHeight < 0) {
-        jumpDirection *= -1;
+      if (zebraZ > -5 || zebraZ < -15) {
+        zebraDirection *= -1;
       }
     }
 
-    animateCallbacks.push(animateHorse);
+    function jumpZebra() {
+      if (!jumpActive) {
+        jumpActive = true;
+        let jumpHeight = 0;
+        let jumpDirection = 1;
+
+        function performJump() {
+          jumpHeight += 0.15 * jumpDirection;
+          zebra.position.y = Math.sin(jumpHeight) * 2 + 1; 
+
+          if (jumpHeight > Math.PI) {
+            jumpDirection = -1;
+          } else if (jumpHeight < 0) {
+            jumpDirection = 1;
+            zebra.position.y = 1;
+            animateCallbacks.splice(animateCallbacks.indexOf(performJump), 1);
+            jumpActive = false;
+          }
+        }
+
+        animateCallbacks.push(performJump);
+      }
+    }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        jumpZebra();
+      }
+    });
+
+    animateCallbacks.push(animateZebra);
   },
   undefined,
   (error) => {
-    console.error('Error loading Horse model:', error);
+    console.error('Error loading Zebra model:', error);
   }
 );
+
+
+// Add Event Listeners
+window.addEventListener('click', (event) => {
+  if (giraffe && giraffe.userData.rotateGiraffe) {
+    giraffe.userData.rotateGiraffe();
+  }
+});
 
 // Animation Loop
 function animate() {
