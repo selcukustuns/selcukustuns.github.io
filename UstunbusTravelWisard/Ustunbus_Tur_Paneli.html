@@ -13,8 +13,55 @@
         h2, h3 { margin-top: 0; color: var(--dark); border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 20px; }
         
         .tab-container { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #fff;
+            color: #1f2937;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .tab-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        /* Pasifken tüm buton yazıları siyah/koyu ve okunabilir. */
+        #tabAll {
+            color: #1f2937;
+            background: #fff;
+            border-color: #94a3b8;
+        }
+        #tabGunu {
+            color: #1f2937;
+            background: #fff;
+            border-color: #f59e0b;
+        }
+        #tabKona {
+            color: #1f2937;
+            background: #fff;
+            border-color: #22c55e;
+        }
+
+        /* Aktif butonlar: Tüm Turlar mavi, Günübirlik turuncu, Konaklamalı yeşil. */
+        #tabAll.active {
+            background: #3498db;
+            color: #fff;
+            border-color: #3498db;
+        }
+        #tabGunu.active {
+            background: #f59e0b;
+            color: #fff;
+            border-color: #f59e0b;
+        }
+        #tabKona.active {
+            background: #22c55e;
+            color: #fff;
+            border-color: #22c55e;
+        }
         
         label { font-weight: 600; display: block; margin: 10px 0 5px; color: #4a5568; font-size: 14px; }
         select, input, textarea { width: 100%; padding: 11px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
