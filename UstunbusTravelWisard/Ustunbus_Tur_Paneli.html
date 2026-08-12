@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üstünbus Turizm - Çağrı Personeli Paneli</title>
+    <style>
+        :root { --primary: #3498db; --success: #2ecc71; --warning: #e67e22; --danger: #e74c3c; --dark: #2c3e50; --bg: #f4f6f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .main-container { max-width: 1350px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+        @media (max-width: 992px) { .main-container { grid-template-columns: 1fr; } }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); height: fit-content; }
+        h2, h3 { margin-top: 0; color: var(--dark); border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 20px; }
+        
+        .tab-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        label { font-weight: 600; display: block; margin: 10px 0 5px; color: #4a5568; font-size: 14px; }
+        select, input, textarea { width: 100%; padding: 11px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .row-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        
+        button { color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; transition: all 0.2s; }
+        button:hover { transform: translateY(-1px); opacity: 0.9; }
+        
+        .btn-blue { background-color: var(--primary); }
+        .btn-green { background-color: var(--success); }
+        .btn-orange { background-color: var(--warning); }
+        .btn-red { background-color: var(--danger); }
+        
+        .info-box { background: #f8fafc; padding: 20px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 15px; }
+        .info-row { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+        .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .info-title { font-size: 12px; text-transform: uppercase; color: #718096; font-weight: bold; margin-bottom: 4px; display: block; }
+        .info-content { font-size: 15px; color: #2d3748; white-space: pre-line; font-weight: 500; }
+        
+        .admin-item { background: #f8fafc; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .admin-actions { display: flex; gap: 5px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px; }
+        .badge-konaklama { background: #e0f2fe; color: #0369a1; }
+        .badge-gunubirlik { background: #fef3c7; color: #92400e; }
+        .badge-bolge { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        
+        .otel-grup { background: #f7fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; }
+        .btn-small { padding: 6px 12px; font-size: 12px; margin: 0; width: auto; }
+        .filtre-paneli { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+        .ust-panel-tabs { display: flex; gap: 8px; margin-bottom: 15px; background: white; padding: 8px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .ust-panel-tab { flex: 0 0 auto; padding: 11px 18px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: var(--dark); cursor: pointer; font-weight: 700; }
+        .ust-panel-tab.active { background: var(--dark); color: white; border-color: var(--dark); }
+        .operator-login-card { display: none; max-width: 520px; margin: 0 auto 20px auto; background: #fffdf9; border: 1px solid #fbd38d; }
+        .operator-login-card h2 { border-color: var(--warning); }
+        .operator-status { display: none; padding: 10px 14px; border-radius: 7px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 13px; font-weight: 700; }
+        .admin-panel-card { display: none; }
+    </style>
+</head>
+<body>
+
+<div style="background: var(--dark); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <div style="font-size: 22px; font-weight: bold; letter-spacing: 0.5px;">🚌 Üstünbus Turizm Tur Programı Sistemi</div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 14px; font-weight: 500;">📂 Mevcut Veri Dosyasını Okutun:</span>
+        <input type="file" id="dosyaOku" accept=".json" onchange="veritabaniniYukle(event)" style="margin:0; width: auto; padding: 5px; background: white; border-radius: 4px; color: #333;">
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 14px; font-weight: 500;">📢 Duyuru Kütüphanesini Okutun:</span>
+        <input type="file" id="duyuruDosyaOku" accept=".json" onchange="duyuruSablonlariniYukle(event)" style="margin:0; width: auto; padding: 5px; background: white; border-radius: 4px; color: #333;">
+    </div>
+</div>
+
+<!-- ÜST SEKME BARI: Operatör yönetim alanı varsayılan olarak kapalıdır. -->
+<div class="ust-panel-tabs">
+    <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
+    <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
+    <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
+</div>
+
+<!-- Operatör giriş alanı: yalnızca üstteki "Operatör Girişi" sekmesine tıklanınca görünür. -->
+<div id="operatorLoginCard" class="card operator-login-card">
+    <h2>🔐 Operatör Girişi</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px;">Tur programlarını eklemek, düzenlemek veya silmek için operatör hesabınızla giriş yapın.</p>
+    <label for="operatorUsername">Kullanıcı Adı:</label>
+    <input type="text" id="operatorUsername" autocomplete="username" placeholder="Kullanıcı adı">
+    <label for="operatorPassword">Şifre:</label>
+    <input type="password" id="operatorPassword" autocomplete="current-password" placeholder="Şifre" onkeydown="if(event.key==='Enter') operatorGirisYap()">
+    <button onclick="operatorGirisYap()" class="btn-orange" style="width:100%;">🔓 Giriş Yap</button>
+    <div id="operatorLoginError" style="display:none; margin-top:10px; padding:10px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:13px; font-weight:600;"></div>
+</div>
+
+<div class="main-container">
+    
+    <!-- SOL BLOK: ÇAĞRI PERSONELİ EKRANI (GELİŞMİŞ ÇOKLU FİLTRELEME) -->
+    <div class="card">
+        <h2>🗓️ Tur Programı Çağrı Personeli Paneli</h2>
+        
+        <!-- GELİŞMİŞ SÜZGEÇ VE ARAMA PANELİ -->
+        <div class="filtre-paneli">
+            <span style="font-weight: bold; font-size: 13px; color: var(--dark); text-transform: uppercase; display:block; margin-bottom:10px;">🔍 Akıllı Arama Filtreleri</span>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" id="tabAll" onclick="filtreleTip('all')">Tüm Turlar</button>
+                <button class="tab-btn" id="tabGunu" onclick="filtreleTip('gunubirlik')">☀️ Günübirlik</button>
+                <button class="tab-btn" id="tabKona" onclick="filtreleTip('konaklamali')">🏨 Konaklamalı</button>
+            </div>
+
+            <div class="row-inputs">
+                <div>
+                    <label>📍 Bölge / Destinasyon Seçimi:</label>
+                    <select id="filtreBolge" onchange="listeleriYenile();">
+                        <!-- JavaScript dinamik dolduracak (aktif sekmeye göre) -->
+                    </select>
+                </div>
+                <div>
+                    <label>📅 Belirli Tarih Aralığı:</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="date" id="filtreBaslangic" onchange="listeleriYenile();" placeholder="Başlangıç">
+                        <input type="date" id="filtreBitis" onchange="listeleriYenile();" placeholder="Bitiş">
+                    </div>
+                </div>
+            </div>
+            <button onclick="filtreleriTemizle()" class="btn-blue btn-small" style="width:100%; margin-top:5px; background:#94a3b8;">Süzgeçleri Temizle / Sıfırla</button>
+        </div>
+
+        <label for="turSecimi">Filtrelenmiş Güncel Tur Listesi (Tarihe Göre Sıralı):</label>
+        <select id="turSecimi" onchange="turDetayiniGetir()">
+            <option value="">-- Lütfen Yukarıdan Dosya Okutun Veya Tur Seçin --</option>
+        </select>
+
+        <div id="detayPaneli" style="display: none;">
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-title">📅 Tur Tarihi</span>
+                    <div id="pTurAraligi" class="info-content" style="color: var(--warning); font-weight: bold; font-size: 16px;">-</div>
+                    <div id="pSureAciklama" class="info-content" style="color: var(--dark); font-weight: 600; font-size: 13px; margin-top: 4px;">-</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-title">🛫 Araç Kalkış (Hareket) Zamanı ve Yeri</span>
+                    <div id="pKalkisZamani" class="info-content">-</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-title">🛬 Dönüş Saat ve Varış Detayı</span>
+                    <div id="pDonusZamani" class="info-content">-</div>
+                </div>
+                <div id="pOtelBloku" class="info-row">
+                    <span class="info-title">🏨 Otel Listesi</span>
+                    <div id="pOtelDetay" class="info-content">-</div>
+                </div>
+                <div class="info-row">
+                    <span class="info-title">🗺️ Detaylı Tur Programı</span>
+                    <div id="pProgram" class="info-content">-</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0;">
+                <h4 style="margin: 0 0 10px 0; color: #166534;">💬 Müşteriye WhatsApp Bilgisi Gönder</h4>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="mAd" placeholder="Müşteri Adı Soyadı" style="margin:0;">
+                    <input type="text" id="mTel" placeholder="Telefon (532...)" style="margin:0;">
+                    <button onclick="whatsappGonder()" class="btn-green" style="white-space: nowrap;">Mesaj At</button>
+                    <button onclick="mesajKopyala()" id="btnKopyala" class="btn-blue" style="white-space: nowrap; transition: background-color 0.2s;">Kopyala</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BAĞIMSIZ BÖLÜM: HIZLI MESAJ BARI (tur seçilmesine gerek yok, sabit/otomatik hızlı cevaplar) -->
+    <div class="card" style="max-width: 1350px; margin: 20px auto 0 auto; background: #eff6ff; border: 1px solid #bfdbfe;">
+        <h2>⚡ Hızlı Mesaj Barı</h2>
+        <p style="font-size: 13px; color: #64748b; margin-top: -10px; margin-bottom: 20px;">Burası tur açmaya gerek olmayan, sabit ve otomatik hızlı cevaplar içindir.</p>
+
+        <div class="row-inputs" style="max-width: 500px;">
+            <div>
+                <label>Müşteri Adı Soyadı (opsiyonel):</label>
+                <input type="text" id="hmAd" placeholder="Müşteri Adı Soyadı">
+            </div>
+            <div>
+                <label>Telefon:</label>
+                <input type="text" id="hmTel" placeholder="Telefon (532...)">
+            </div>
+        </div>
+
+        <div class="row-inputs">
+            <!-- SÜTUN 1: DURAK NOKTALARINI GÖNDER -->
+            <div class="otel-grup">
+                <h3 style="font-size: 15px; border: none; padding-bottom: 0; margin-bottom: 8px;">📍 Durak Noktalarını Gönder</h3>
+                <p style="font-size: 12px; color: #718096; margin-top: 0;">Müşteri "durak noktanız / konumunuz nerede?" diye sorduğunda kullanılır. Süre/saat bilgisi içermez — sadece sabit Mersin, Tarsus, Adana duraklarının Google Maps konumlarını ve önemli durak duyurusunu gönderir. Tura özel değildir, her zaman aynıdır.</p>
+                <button onclick="duraklariGonder()" class="btn-blue" style="width: 100%;">📍 Durak Konumlarını Gönder</button>
+            </div>
+
+            <!-- SÜTUN 2: BÖLGE + SÜREYE ÖZEL DUYURU GÖRÜNTÜLEYİCİ (bağımsız kütüphane, sayfa üstündeki dosyadan otomatik/elle okunur) -->
+            <div class="otel-grup">
+                <h3 style="font-size: 15px; border: none; padding-bottom: 0; margin-bottom: 8px;">📢 Bölgeye Özel Ek Duyurular</h3>
+                <p style="font-size: 12px; color: #718096; margin-top: 0;">Bölge + Süre kombinasyonunu seçin, o kombinasyona ait duyuru metni aşağıda görünsün. Metni kopyalayıp WhatsApp'a yapıştırabilirsiniz.</p>
+
+                <div class="row-inputs">
+                    <div>
+                        <label style="margin-top: 0;">Bölge:</label>
+                        <select id="duyuruBolge" onchange="duyuruBolgeDegisti()"></select>
+                    </div>
+                    <div>
+                        <label style="margin-top: 0;">Süre:</label>
+                        <select id="duyuruSure" onchange="duyuruSablonuGetir()"></select>
+                    </div>
+                </div>
+
+                <textarea id="ekDuyuruMetni" rows="6" readonly placeholder="Bu bölge / süre kombinasyonu için henüz bir duyuru yüklenmedi."></textarea>
+                <button onclick="duyuruKopyala()" id="btnDuyuruKopyala" class="btn-blue" style="width: 100%; margin-top: 8px; transition: background-color 0.2s;">Kopyala</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ -->
+    <div id="adminPanelCard" class="card admin-panel-card" style="background: #fffdf9; border: 1px solid #fbd38d;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+            <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı Ekleme Paneli</h2>
+            <button onclick="operatorCikisYap()" class="btn-red btn-small">🔒 Çıkış Yap</button>
+        </div>
+        
+        <div class="row-inputs">
+            <div>
+                <label>Tur Tipi:</label>
+                <select id="yeniTip" onchange="tipDegisti()">
+                    <option value="konaklamali">🏨 Konaklamalı Tur</option>
+                    <option value="gunubirlik">☀️ Günübirlik Tur</option>
+                </select>
+            </div>
+            <div>
+                <label>📍 Bölge / Rota Sınıflandırması:</label>
+                <select id="yeniBolge">
+                    <!-- Seçili tur tipine göre JavaScript dolduracak -->
+                </select>
+            </div>
+        </div>
+
+        <div id="geceSayisiBloku">
+            <label>Kaç Gece Konaklamalı?:</label>
+            <select id="yeniGeceSayisi" onchange="otelAlanlariniOlustur()">
+                <option value="1">1 Gece</option>
+                <option value="2">2 Gece</option>
+                <option value="3">3 Gece</option>
+                <option value="4">4 Gece</option>
+                <option value="5">5 Gece</option>
+                <option value="6">6 Gece</option>
+                <option value="7">7 Gece</option>
+            </select>
+        </div>
+
+        <label>Tur Adı:</label>
+        <input type="text" id="yeniAd" placeholder="Örn: Kültür Karadeniz Turu Veya Butik Antep Turu">
+
+        <div class="row-inputs">
+            <div>
+                <label>📅 Tur Başlangıç Tarihi:</label>
+                <input type="date" id="turBaslangicTarih">
+            </div>
+            <div>
+                <label>📅 Tur Bitiş Tarihi:</label>
+                <input type="date" id="turBitisTarih">
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 15px 0;">
+
+        <div class="row-inputs">
+            <div>
+                <label>🛫 Araç Kalkış Tarihi:</label>
+                <input type="date" id="kalkisTarih">
+            </div>
+        </div>
+
+        <div class="otel-grup">
+            <h4 style="margin-top:0;">🚏 Sabit Kalkış Durakları ve Saatleri</h4>
+            <p style="font-size:12px; color:#718096; margin:-8px 0 12px 0;">Durak isimlerini yazmanıza gerek yok, sabittir. Bu turda hangi şehirden kalkış varsa sadece o şehrin saatini girin; kalkış olmayan şehri boş bırakın.</p>
+
+            <label style="margin-top:0;">🕐 Mersin Kalkış Saati <span style="font-weight:400; color:#718096;">(Vipol, Forum AVM, Eski Devlet Hastanesi)</span>:</label>
+            <input type="time" id="mersinSaat">
+
+            <label>🕐 Tarsus Kalkış Saati <span style="font-weight:400; color:#718096;">(Şehitler Tepesi Ofis, Madame Home, Cengiz Topel, Kleopatra)</span>:</label>
+            <input type="time" id="tarsusSaat">
+
+            <label>🕐 Adana Kalkış Saati <span style="font-weight:400; color:#718096;">(Duygu Kafe)</span>:</label>
+            <input type="time" id="adanaSaat">
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 15px 0;">
+
+        <div class="row-inputs">
+            <div>
+                <label>🛬 Tahmini Dönüş Saati:</label>
+                <input type="time" id="donusSaat">
+            </div>
+            <div>
+                <label>🛬 Varış / İndirme Noktası:</label>
+                <input type="text" id="donusNokta" placeholder="Örn: Alınan Noktalar">
+            </div>
+        </div>
+
+        <div id="dinamikOteller" class="otel-grup">
+            <!-- JavaScript burayı dolduracak -->
+        </div>
+
+        <label>Detaylı Tur Programı Akışı:</label>
+        <textarea id="yeniProgram" rows="4" placeholder="1. Gün: Sabah saatlerinde varış..."></textarea>
+
+        <input type="hidden" id="duzenlenenTurId" value="">
+        <button onclick="turEkle()" class="btn-orange" style="width: 100%; margin-bottom: 10px;" id="anaEklemeBtn">➕ Formatlı Turu Havuza Ekle</button>
+        <button onclick="veriyiDisariAktar()" class="btn-blue" style="width: 100%;">💾 Tüm Listeyi Güncelle ve İndir</button>
+
+        <h3 style="margin-top: 25px; color: var(--warning); border-color: var(--warning);">📋 Havuzdaki Mevcut Turlar</h3>
+        <div id="adminTurListesi"></div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   OPERATÖR ERİŞİMİ
+   Bu panelde tek bir operatör hesabı tanımlıdır.
+   Şifre doğrudan HTML içinde tutulmaz; SHA-256 özeti ile doğrulanır.
+   Not: Bu bir istemci tarafı erişim kontrolüdür; gerçek sunucu güvenliği değildir.
+   ============================================================ */
+const OPERATOR_HESAPLARI = [
+    {
+        kullaniciAdi: "selcukustun",
+        sifreSha256: "d5f4d4a0f1d253da1b798f4f27e93e06dfef8b5f27e40c0c956f8ff5adb4e360"
+    }
+];
+
+let operatorOturumuAcik = false;
+
+async function metinSha256(metin) {
+    const veri = new TextEncoder().encode(metin);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", veri);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+function panelSekmesiDegistir(sekme) {
+    const loginCard = document.getElementById("operatorLoginCard");
+    const adminCard = document.getElementById("adminPanelCard");
+    const personelTab = document.getElementById("tabPersonel");
+    const operatorTab = document.getElementById("tabOperator");
+
+    if (sekme === "personel") {
+        loginCard.style.display = "none";
+        adminCard.style.display = "none";
+        personelTab.classList.add("active");
+        operatorTab.classList.remove("active");
+        return;
+    }
+
+    personelTab.classList.remove("active");
+    operatorTab.classList.add("active");
+
+    if (operatorOturumuAcik) {
+        loginCard.style.display = "none";
+        adminCard.style.display = "block";
+    } else {
+        adminCard.style.display = "none";
+        loginCard.style.display = "block";
+        document.getElementById("operatorUsername").focus();
+    }
+}
+
+async function operatorGirisYap() {
+    const kullaniciAdi = document.getElementById("operatorUsername").value.trim();
+    const sifre = document.getElementById("operatorPassword").value;
+    const hata = document.getElementById("operatorLoginError");
+
+    hata.style.display = "none";
+    hata.textContent = "";
+
+    if (!kullaniciAdi || !sifre) {
+        hata.textContent = "Lütfen kullanıcı adı ve şifreyi girin.";
+        hata.style.display = "block";
+        return;
+    }
+
+    const hesap = OPERATOR_HESAPLARI.find(h => h.kullaniciAdi === kullaniciAdi);
+    const sifreHash = await metinSha256(sifre);
+
+    if (!hesap || hesap.sifreSha256 !== sifreHash) {
+        hata.textContent = "Kullanıcı adı veya şifre hatalı.";
+        hata.style.display = "block";
+        document.getElementById("operatorPassword").value = "";
+        return;
+    }
+
+    operatorOturumuAcik = true;
+    document.getElementById("operatorLoginCard").style.display = "none";
+    document.getElementById("adminPanelCard").style.display = "block";
+    document.getElementById("operatorStatus").style.display = "inline-block";
+    alert("Operatör girişi başarılı. Tur Programı Ekleme Paneli açıldı.");
+}
+
+function operatorCikisYap() {
+    operatorOturumuAcik = false;
+    document.getElementById("operatorUsername").value = "";
+    document.getElementById("operatorPassword").value = "";
+    document.getElementById("operatorLoginError").style.display = "none";
+    document.getElementById("operatorStatus").style.display = "none";
+    panelSekmesiDegistir("personel");
+}
+// SEKTÖREL BÖLGE / DESTİNASYON LİSTELERİ (Tur tipine göre ayrıştırılmış)
+const KONAKLAMALI_BOLGELER = [
+    { code: "dogu_karadeniz", name: "🌲 Doğu Karadeniz" },
+    { code: "bati_karadeniz", name: "🌊 Batı Karadeniz" },
+    { code: "kuzey_ege", name: "🫒 Kuzey Ege" },
+    { code: "istanbul", name: "🌉 İstanbul" },
+    { code: "gap", name: "☀️ GAP (Güneydoğu Anadolu)" },
+    { code: "kaplica", name: "♨️ Kaplıca" },
+    { code: "dogu_anadolu", name: "❄️ Doğu Anadolu" },
+    { code: "kas_demre", name: "🏖️ Kaş - Demre (Antalya)" },
+    { code: "guney_ege", name: "🌅 Güney Ege" },
+    { code: "canakkale", name: "⚓ Çanakkale" },
+    { code: "tunceli_kemaliye", name: "🏔️ Tunceli - Kemaliye" },
+    { code: "isparta", name: "🌷 Isparta" },
+    { code: "tokat_amasya", name: "🍑 Tokat - Amasya" },
+    { code: "bursa", name: "🌰 Bursa" },
+    { code: "diger_konaklamali", name: "🗺️ Diğer" }
+];
+
+const GUNUBIRLIK_BOLGELER = [
+    { code: "kapadokya", name: "🎈 Kapadokya Turu" },
+    { code: "gaziantep", name: "🥙 Gaziantep Turu" },
+    { code: "ankara", name: "🏛️ Ankara Turu" },
+    { code: "eskisehir", name: "🚤 Eskişehir Turu" },
+    { code: "hatay", name: "🏺 Hatay Turu" },
+    { code: "sanliurfa", name: "🕊️ Şanlıurfa Turu" },
+    { code: "mardin_midyat", name: "🏘️ Mardin - Midyat Turu" },
+    { code: "adiyaman_nemrut", name: "🗿 Adıyaman - Nemrut Turu" },
+    { code: "mut_yerkopru", name: "🏞️ Mut - Yerköprü Turu" },
+    { code: "konya", name: "🕌 Konya Turu" },
+    { code: "erciyes", name: "⛷️ Erciyes Turu" },
+    { code: "diger_gunubirlik", name: "🗺️ Diğer" }
+];
+
+// Yönetici listesindeki rozet/etiket eşleştirmesi ve admin panel arama için birleşik havuz
+const TUM_BOLGELER = [...KONAKLAMALI_BOLGELER, ...GUNUBIRLIK_BOLGELER];
+
+// SABİT KALKIŞ DURAKLARI (şehir sırası, durak isimleri ve konum linkleri hep aynı; sadece saatler değişir)
+const SABIT_DURAKLAR = [
+    { key: "mersin", sehir: "Mersin", duraklar: [
+        { isim: "Vipol AVM", harita: "https://maps.app.goo.gl/7W79esaZCTQXnioC7" },
+        { isim: "Forum AVM", harita: "https://maps.app.goo.gl/Fohj4EZxtCSEppc7A" },
+        { isim: "Eski Devlet Hastanesi", harita: "https://maps.app.goo.gl/N1UToGRf5KM6MgN98" }
+    ]},
+    { key: "tarsus", sehir: "Tarsus", duraklar: [
+        { isim: "Şehitler Tepesi Ofis", harita: "https://maps.app.goo.gl/uuodXP2fXSZ1AW387" },
+        { isim: "Madame Home (Eski Vatan Bilgisayar)", harita: "https://maps.app.goo.gl/66dyQkq5A3idR4kZ8" },
+        { isim: "Cengiz Topel", harita: "https://maps.app.goo.gl/g16Fain2ePpUTLMw7" },
+        { isim: "Kleopatra Kapısı", harita: "https://maps.app.goo.gl/TQPikmNHAU7E8pcPA" }
+    ]},
+    { key: "adana", sehir: "Adana", duraklar: [
+        { isim: "Duygu Kafe", harita: "https://maps.app.goo.gl/H6KKoUfpaY151w8h7" }
+    ]}
+];
+
+// "Durak Noktalarını Gönder" mesajının sonuna otomatik eklenen sabit önemli duyuru metni
+const ONEMLI_DURAK_DUYURUSU = "Değerli misafirimiz, turumuzun kalkış saatlerinin aksamaması adına sizleri yalnızca önceden belirttiğiniz duraklardan alabilmekteyiz. Seçtiğiniz konum genel duraklarımız arasında yer alsa bile, listemizde adınız bulunmadığında araçlarımız o durakta durmayacaktır. Tur günü bir mağduriyet yaşamamanız ve operasyonel aksaklıklara yol açmamak adına seçtiğiniz durakta zamanında bulunmanızı rica ederiz. Durak değişikliği taleplerinizi, tur kalkışından en geç 1 gün öncesine kadar çağrı merkezimizi arayarak bize iletebilirsiniz. Şimdiden keyifli yolculuklar dileriz!";
+
+// Kalkış tarihi ve şehir bazlı saatlerden (boş bırakılan şehirler atlanır), durak isimleri
+// otomatik eklenmiş halde tam kalkış metnini üretir.
+function kalkisMetniOlustur(kTarihFormatli, saatler) {
+    let satirlar = [kTarihFormatli];
+    SABIT_DURAKLAR.forEach(blok => {
+        const saat = saatler[blok.key];
+        if (saat) {
+            satirlar.push(`🕐 ${blok.sehir} Kalkış Saati: ${saat}`);
+            blok.duraklar.forEach(durak => satirlar.push(`   • ${durak.isim}`));
+        }
+    });
+    return satirlar.join("\n");
+}
+
+// Sabit durakların Google Maps konumlarını ve önemli duyuruyu tek bir metinde birleştirir.
+// Tura özel değildir, süre/saat içermez — her zaman aynı sabit cevaptır.
+function durakKonumlariMesajiOlustur() {
+    let satirlar = [];
+    SABIT_DURAKLAR.forEach(blok => {
+        satirlar.push(`🏙️ *${blok.sehir} Durak Noktalarımız ve Konumları:*`);
+        blok.duraklar.forEach(durak => {
+            satirlar.push(`📍 ${durak.isim}:\n${durak.harita}`);
+        });
+        satirlar.push("");
+    });
+    satirlar.push(`⚠️ *Önemli Duyuru:*\n${ONEMLI_DURAK_DUYURUSU}`);
+    return satirlar.join("\n");
+}
+
+let anaTurListesi = [];
+let aktifTipFiltresi = 'all';
+
+window.onload = function() {
+    bolgeSecenekleriniDoldur();
+    otelAlanlariniOlustur();
+    duyuruSecimKutulariniOlustur();
+    duyuruSablonuGetir();
+
+    // Sayfa açılır açılmaz tur_listesi.json otomatik aranır.
+    // Otomatik okuma başarısız olursa kullanıcı üstteki manuel JSON yükleme alanını kullanabilir.
+    turListesiniOtomatikYukle();
+    duyuruKutuphanesiniOtomatikYukle();
+};
+
+// Tip -> ilgili bölge listesini döndürür ('all' ise tamamı)
+function bolgeListesiGetir(tip) {
+    if (tip === 'konaklamali') return KONAKLAMALI_BOLGELER;
+    if (tip === 'gunubirlik') return GUNUBIRLIK_BOLGELER;
+    return TUM_BOLGELER;
+}
+
+// Sayfa ilk açıldığında her iki bölge seçim kutusunu da varsayılan tiplere göre doldurur
+function bolgeSecenekleriniDoldur() {
+    bolgeSelectGuncelle('yeniBolge', document.getElementById("yeniTip").value, false);
+    bolgeSelectGuncelle('filtreBolge', aktifTipFiltresi, true);
+}
+
+// Belirtilen select kutusunu, verilen tur tipine uygun bölge seçenekleriyle yeniden doldurur.
+// ilkSecenekVarMi = true ise en üste "-- Tüm Bölgeler --" seçeneği eklenir (arama filtresi için).
+function bolgeSelectGuncelle(selectId, tip, ilkSecenekVarMi) {
+    const select = document.getElementById(selectId);
+    const oncekiDeger = select.value;
+    select.innerHTML = "";
+
+    if (ilkSecenekVarMi) {
+        let optAll = document.createElement("option");
+        optAll.value = "all";
+        optAll.text = "-- Tüm Bölgeler / Rotalar --";
+        select.appendChild(optAll);
+    }
+
+    if (tip === 'all') {
+        // "Tüm Turlar" sekmesindeyken bölgeleri iki grup halinde göster, karışıklığı önle
+        const grupKona = document.createElement("optgroup");
+        grupKona.label = "🏨 Konaklamalı Rotalar";
+        KONAKLAMALI_BOLGELER.forEach(b => {
+            let opt = document.createElement("option");
+            opt.value = b.code;
+            opt.text = b.name;
+            grupKona.appendChild(opt);
+        });
+        select.appendChild(grupKona);
+
+        const grupGunu = document.createElement("optgroup");
+        grupGunu.label = "☀️ Günübirlik Rotalar";
+        GUNUBIRLIK_BOLGELER.forEach(b => {
+            let opt = document.createElement("option");
+            opt.value = b.code;
+            opt.text = b.name;
+            grupGunu.appendChild(opt);
+        });
+        select.appendChild(grupGunu);
+    } else {
+        bolgeListesiGetir(tip).forEach(b => {
+            let opt = document.createElement("option");
+            opt.value = b.code;
+            opt.text = b.name;
+            select.appendChild(opt);
+        });
+    }
+
+    // Önceki seçilen değer yeni listede hâlâ varsa koru, yoksa ilk seçeneğe dön
+    const yeniSecenekler = Array.from(select.options).map(o => o.value);
+    if (yeniSecenekler.includes(oncekiDeger)) {
+        select.value = oncekiDeger;
+    } else {
+        select.selectedIndex = 0;
+    }
+}
+
+function tipDegisti() {
+    const tip = document.getElementById("yeniTip").value;
+    document.getElementById("geceSayisiBloku").style.display = (tip === 'gunubirlik') ? 'none' : 'block';
+    document.getElementById("dinamikOteller").style.display = (tip === 'gunubirlik') ? 'none' : 'block';
+    bolgeSelectGuncelle('yeniBolge', tip, false);
+}
+
+function otelAlanlariniOlustur(hazirVeri = null) {
+    const geceSayisi = parseInt(document.getElementById("yeniGeceSayisi").value);
+    const konteyner = document.getElementById("dinamikOteller");
+    konteyner.innerHTML = "<h4>🏨 Otel Listesi</h4>";
+    
+    for(let i = 1; i <= geceSayisi; i++) {
+        let varsayilanOtel = "";
+        if(hazirVeri && hazirVeri[i-1]) {
+            varsayilanOtel = hazirVeri[i-1].replace(`${i}. Gece: `, "").trim();
+        }
+        konteyner.innerHTML += `
+            <div style="margin-bottom:8px;">
+                <span style="font-size:12px; font-weight:bold; color:var(--warning);">${i}. Gece Kalınacak Otel:</span>
+                <input type="text" class="otel-input" data-gece="${i}" value="${varsayilanOtel}" placeholder="Örn: Ayder Haşimoğlu Otel">
+            </div>
+        `;
+    }
+}
+
+// Kayıtlı gece sayısını (raw varsa oradan, yoksa otel listesindeki satır sayısından) bulur
+function turGeceSayisiGetir(tur) {
+    if (tur.raw && tur.raw.geceSayisi) return parseInt(tur.raw.geceSayisi, 10);
+    if (tur.oteller) {
+        const satirlar = tur.oteller.split("\n").filter(s => s.trim() !== "" && s.trim() !== "Günübirlik Tur (Konaklama Yok)");
+        if (satirlar.length > 0) return satirlar.length;
+    }
+    return 1;
+}
+
+// Otomatik "X Gece Y Gün" açıklaması üretir (kural: gün sayısı = gece sayısı + 1)
+function turSureAciklamasi(tur) {
+    if (tur.tip === 'gunubirlik') return "Günübirlik (1 Gün)";
+    const gece = turGeceSayisiGetir(tur);
+    const gun = gece + 1;
+    return `${gece} Gece ${gun} Gün`;
+}
+
+function tarihFormatlaMetin(tarihStr) {
+    if(!tarihStr) return "";
+    const secilenTarih = new Date(tarihStr);
+    return secilenTarih.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// Türkçe uzun tarih metnini ("15 Ocak 2026 Perşembe" gibi) <input type="date"> için
+// gereken ISO formatına (YYYY-MM-DD) geri çevirir. Bulamazsa boş döner.
+const TURKCE_AYLAR = {
+    "ocak": 1, "şubat": 2, "subat": 2, "mart": 3, "nisan": 4,
+    "mayıs": 5, "mayis": 5, "haziran": 6, "temmuz": 7,
+    "ağustos": 8, "agustos": 8, "eylül": 9, "eylul": 9,
+    "ekim": 10, "kasım": 11, "kasim": 11, "aralık": 12, "aralik": 12
+};
+
+function turkceTarihiISOyeCevir(metin) {
+    if (!metin) return "";
+    const eslesme = metin.match(/(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)\s+(\d{4})/);
+    if (!eslesme) return "";
+    const gun = eslesme[1].padStart(2, "0");
+    const ayAdi = eslesme[2].toLocaleLowerCase("tr-TR");
+    const ay = TURKCE_AYLAR[ayAdi];
+    if (!ay) return "";
+    return `${eslesme[3]}-${String(ay).padStart(2, "0")}-${gun}`;
+}
+
+// Kayıtta ham ("raw") veri bulunmadığında, ekranda gösterilen formatlı metinlerden
+// (turAraligi, kalkisDetay, donusDetay, oteller) form alanlarını geri üretir.
+function turdanRawCikar(tur) {
+    const araParcalar = (tur.turAraligi || "").split(" - ");
+    const tBaslangic = turkceTarihiISOyeCevir(araParcalar[0] || "");
+    const tBitis = turkceTarihiISOyeCevir(araParcalar[1] || "");
+
+    const kalkisMetin = tur.kalkisDetay || "";
+    const kTarih = turkceTarihiISOyeCevir((kalkisMetin.split("\n")[0] || ""));
+    let mersinSaat = "", tarsusSaat = "", adanaSaat = "";
+    SABIT_DURAKLAR.forEach(blok => {
+        const eslesme = kalkisMetin.match(new RegExp(blok.sehir + "\\s*Kalkış Saati:\\s*(\\d{1,2}:\\d{2})"));
+        if (eslesme) {
+            if (blok.key === "mersin") mersinSaat = eslesme[1];
+            if (blok.key === "tarsus") tarsusSaat = eslesme[1];
+            if (blok.key === "adana") adanaSaat = eslesme[1];
+        }
+    });
+
+    const donusMetin = tur.donusDetay || "";
+    const dSaatEslesme = donusMetin.match(/Saat:\s*(\d{1,2}:\d{2})/);
+    const dSaat = dSaatEslesme ? dSaatEslesme[1] : "";
+    const dNoktaEslesme = donusMetin.match(/Varış Yeri:\s*(.+)$/);
+    let dNokta = dNoktaEslesme ? dNoktaEslesme[1].trim() : "";
+    if (dNokta === "Belirtilmedi") dNokta = "";
+
+    let geceSayisi = "1";
+    if (tur.tip === 'konaklamali' && tur.oteller) {
+        const satirlar = tur.oteller.split("\n").filter(s => s.trim() !== "");
+        if (satirlar.length > 0) geceSayisi = String(satirlar.length);
+    }
+
+    return { tBaslangic, tBitis, kTarih, mersinSaat, tarsusSaat, adanaSaat, dSaat, dNokta, geceSayisi };
+}
+
+function turEkle() {
+    const duzenlenenId = document.getElementById("duzenlenenTurId").value;
+    const tip = document.getElementById("yeniTip").value;
+    const bolge = document.getElementById("yeniBolge").value;
+    const ad = document.getElementById("yeniAd").value.trim();
+    
+    const tBaslangic = document.getElementById("turBaslangicTarih").value;
+    const tBitis = document.getElementById("turBitisTarih").value;
+    
+    const kTarih = document.getElementById("kalkisTarih").value;
+    const mersinSaat = document.getElementById("mersinSaat").value;
+    const tarsusSaat = document.getElementById("tarsusSaat").value;
+    const adanaSaat = document.getElementById("adanaSaat").value;
+    
+    const dSaat = document.getElementById("donusSaat").value;
+    const dNokta = document.getElementById("donusNokta").value.trim();
+    
+    const program = document.getElementById("yeniProgram").value.trim();
+
+    if(!ad || !tBaslangic || !tBitis || !kTarih || (!mersinSaat && !tarsusSaat && !adanaSaat) || !program) { 
+        alert("Lütfen zorunlu alanları eksiksiz doldurun! (Kalkış için en az bir şehrin saatini girmelisiniz)"); 
+        return; 
+    }
+
+    let otellerDizisi = [];
+    if(tip === 'konaklamali') {
+        const otelInputs = document.querySelectorAll(".otel-input");
+        otelInputs.forEach(input => {
+            const geceNo = input.getAttribute("data-gece");
+            const otelAdi = input.value.trim() || "Belirtilmedi";
+            otellerDizisi.push(`${geceNo}. Gece: ${otelAdi}`);
+        });
+    } else {
+        otellerDizisi.push("Günübirlik Tur (Konaklama Yok)");
+    }
+
+    const turAralikFormatli = `${tarihFormatlaMetin(tBaslangic)} - ${tarihFormatlaMetin(tBitis)}`;
+
+    const turData = {
+        id: duzenlenenId ? duzenlenenId : Date.now().toString(),
+        tip,
+        bolge,
+        ad,
+        siralamaTarih: tBaslangic,
+        turAraligi: turAralikFormatli,
+        kalkisDetay: kalkisMetniOlustur(tarihFormatlaMetin(kTarih), { mersin: mersinSaat, tarsus: tarsusSaat, adana: adanaSaat }),
+        donusDetay: `⏰ Saat: ${dSaat || 'Belirtilmedi'} | 📍 Varış Yeri: ${dNokta || 'Belirtilmedi'}`,
+        oteller: otellerDizisi.join("\n"),
+        program,
+        raw: { tBaslangic, tBitis, kTarih, mersinSaat, tarsusSaat, adanaSaat, dSaat, dNokta, geceSayisi: document.getElementById("yeniGeceSayisi").value }
+    };
+
+    if(duzenlenenId) {
+        const index = anaTurListesi.findIndex(t => t.id === duzenlenenId);
+        if(index !== -1) anaTurListesi[index] = turData;
+        document.getElementById("duzenlenenTurId").value = "";
+        document.getElementById("anaEklemeBtn").innerText = "➕ Formatlı Turu Havuza Ekle";
+        document.getElementById("anaEklemeBtn").className = "btn-orange";
+        alert("Tur başarıyla güncellendi!");
+    } else {
+        anaTurListesi.push(turData);
+        alert("Yeni tur başarıyla eklendi!");
+    }
+
+    anaTurListesi.sort((a, b) => new Date(a.siralamaTarih) - new Date(b.siralamaTarih));
+    listeleriYenile();
+    formuTemizle();
+}
+
+function turDuzenle(id) {
+    const tur = anaTurListesi.find(t => t.id === id);
+    if(!tur) return;
+
+    document.getElementById("duzenlenenTurId").value = tur.id;
+    document.getElementById("yeniTip").value = tur.tip;
+    tipDegisti(); // bölge listesini de seçilen tur tipine göre günceller
+
+    document.getElementById("yeniAd").value = tur.ad;
+    document.getElementById("yeniProgram").value = tur.program;
+
+    const varsayilanBolge = tur.tip === 'gunubirlik' ? 'diger_gunubirlik' : 'diger_konaklamali';
+    document.getElementById("yeniBolge").value = tur.bolge || varsayilanBolge;
+
+    // Kayıtta "raw" (ham) veri varsa doğrudan onu kullan; yoksa (örn. eski/başka bir
+    // dosyadan yüklenen turlarda) görüntülenen metinlerden (tarih aralığı, kalkış/dönüş
+    // detayı, otel listesi) geri hesaplayarak doldur — böylece hiçbir alan boş kalmaz.
+    const raw = (tur.raw && tur.raw.tBaslangic) ? tur.raw : turdanRawCikar(tur);
+
+    document.getElementById("turBaslangicTarih").value = raw.tBaslangic || "";
+    document.getElementById("turBitisTarih").value = raw.tBitis || "";
+    document.getElementById("kalkisTarih").value = raw.kTarih || "";
+    document.getElementById("mersinSaat").value = raw.mersinSaat || "";
+    document.getElementById("tarsusSaat").value = raw.tarsusSaat || "";
+    document.getElementById("adanaSaat").value = raw.adanaSaat || "";
+    document.getElementById("donusSaat").value = raw.dSaat || "";
+    document.getElementById("donusNokta").value = raw.dNokta || "";
+
+    if(tur.tip === 'konaklamali') {
+        document.getElementById("yeniGeceSayisi").value = raw.geceSayisi || "1";
+        const otellerListesi = (tur.oteller || "").split("\n").filter(s => s.trim() !== "");
+        otelAlanlariniOlustur(otellerListesi);
+    }
+
+    document.getElementById("anaEklemeBtn").innerText = "💾 Değişiklikleri Kaydet ve Listeyi Yenile";
+    document.getElementById("anaEklemeBtn").className = "btn-green";
+    document.getElementById("yeniAd").focus();
+}
+
+function turSil(id) {
+    if(confirm("Bu turu listeden silmek istediğinize emin misiniz?")) {
+        anaTurListesi = anaTurListesi.filter(t => t.id !== id);
+        listeleriYenile();
+        document.getElementById("detayPaneli").style.display = "none";
+    }
+}
+
+// Sayfa açılışında aynı klasördeki tur_listesi.json dosyasını otomatik yükler.
+// Dosya yoksa, tarayıcı file:// kısıtı nedeniyle okunamazsa veya JSON bozuksa
+// mevcut manuel yükleme alanı açık kalır ve kullanıcı isterse dosyayı elle seçebilir.
+function turListesiniUygula(veri, kaynak = "tur_listesi.json") {
+    if (!Array.isArray(veri)) {
+        throw new Error("Geçersiz format: tur listesi bir JSON dizisi olmalı.");
+    }
+
+    anaTurListesi = veri;
+    anaTurListesi.sort((a, b) => new Date(a.siralamaTarih) - new Date(b.siralamaTarih));
+    listeleriYenile();
+
+    const dosyaAlani = document.getElementById("dosyaOku");
+    if (dosyaAlani) dosyaAlani.title = `Aktif veri: ${kaynak}`;
+
+    console.log(`✅ Tur listesi yüklendi (${anaTurListesi.length} tur) — ${kaynak}`);
+}
+
+// Sayfa nasıl açılırsa açılsın (çift tıklayarak file:// ile, ya da bir web sunucusu
+// üzerinden http(s):// ile) tur listesini otomatik yüklemeyi dener. Tarayıcılar
+// güvenlik nedeniyle fetch() isteklerini file:// üzerinden genelde engellediği için,
+// önce fetch denenir; o başarısız olursa <script> etiketiyle tur_listesi.js dosyası
+// yüklenir (bu yöntem file:// dahil her ortamda çalışır). İkisi de başarısız olursa
+// mevcut manuel yükleme alanı yedek olarak kullanılır.
+function turListesiniOtomatikYukle() {
+    fetch("tur_listesi.json", { cache: "no-store" })
+        .then(res => {
+            if (!res.ok) throw new Error(`tur_listesi.json okunamadı (${res.status})`);
+            return res.json();
+        })
+        .then(veri => {
+            turListesiniUygula(veri, "tur_listesi.json (fetch)");
+        })
+        .catch(err => {
+            console.warn(
+                "⚠️ tur_listesi.json fetch ile okunamadı (muhtemelen dosya çift tıklanarak açıldı). " +
+                "tur_listesi.js üzerinden yedek yöntem deneniyor.",
+                err
+            );
+            turListesiniScriptTagIleYukle();
+        });
+}
+
+// file:// ortamında fetch çalışmadığında kullanılan yedek yöntem: aynı klasördeki
+// tur_listesi.js dosyasını normal bir <script> etiketiyle sayfaya ekler. Bu dosyanın
+// içinde "const TUR_LISTESI_JSON = [ ... ];" şeklinde bir tanım bulunmalı — panel
+// üzerindeki "Dışa Aktar" butonu tur_listesi.json ile birlikte bu dosyayı da otomatik
+// üretir, ikisi her zaman senkron kalır.
+function turListesiniScriptTagIleYukle() {
+    const script = document.createElement("script");
+    script.src = "tur_listesi.js";
+    script.onload = function() {
+        if (typeof TUR_LISTESI_JSON !== "undefined" && Array.isArray(TUR_LISTESI_JSON)) {
+            turListesiniUygula(TUR_LISTESI_JSON, "tur_listesi.js (otomatik yedek)");
+        } else {
+            otomatikTurYuklemeBasarisiz();
+        }
+    };
+    script.onerror = otomatikTurYuklemeBasarisiz;
+    document.head.appendChild(script);
+}
+
+function otomatikTurYuklemeBasarisiz() {
+    console.warn(
+        "⚠️ Ne tur_listesi.json (fetch) ne de tur_listesi.js (script) otomatik yüklenebildi. " +
+        "Manuel yükleme alanını kullanabilirsiniz."
+    );
+    const secici = document.getElementById("dosyaOku");
+    if (secici) {
+        secici.title = "Otomatik tur listesi yüklenemedi — manuel JSON seçebilirsiniz.";
+        secici.style.outline = "2px solid #e67e22";
+    }
+}
+
+function veritabaniniYukle(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const veri = JSON.parse(e.target.result);
+            turListesiniUygula(veri, file.name);
+            alert(`Üstünbus Turizm tur listesi başarıyla yüklendi! (${anaTurListesi.length} tur)`);
+        } catch (err) {
+            alert("Dosya okunamadı veya JSON formatı hatalı! Lütfen geçerli bir tur_listesi.json dosyası seçin.");
+            console.error(err);
+        }
+    };
+    reader.onerror = function() {
+        alert("Dosya okunurken bir hata oluştu. Lütfen tekrar deneyin.");
+    };
+    reader.readAsText(file);
+
+    // Aynı dosyayı tekrar seçebilmek için input'u sıfırla.
+    event.target.value = "";
+}
+
+// Bir metni dosya olarak indirtir (yardımcı fonksiyon)
+function dosyaIndir(icerik, dosyaAdi, mimeTuru) {
+    const dataStr = `data:${mimeTuru};charset=utf-8,` + encodeURIComponent(icerik);
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", dosyaAdi);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+}
+
+// Tur listesini HEM tur_listesi.json (sunucu/http için) HEM tur_listesi.js
+// (dosya çift tıklanarak file:// ile açıldığında otomatik yükleme yedeği için) olarak
+// indirir. İkisini de aynı klasöre koyduğunuzda, panel nasıl açılırsa açılsın otomatik
+// yüklenir. Her tur listesi güncellemesinde bu butonla ikisini birden yeniden üretip
+// eski dosyaların üzerine yazmanız yeterli.
+function veriyiDisariAktar() {
+    if(anaTurListesi.length === 0) { alert("Listede indirilecek tur yok!"); return; }
+    const json = JSON.stringify(anaTurListesi, null, 2);
+    dosyaIndir(json, "tur_listesi.json", "text/json");
+    dosyaIndir(
+        `// Bu dosya panel tarafından otomatik üretilmiştir. Elle düzenlemeyin.\nconst TUR_LISTESI_JSON = ${json};\n`,
+        "tur_listesi.js",
+        "text/javascript"
+    );
+}
+
+// ⏳ FILTRE DEĞİŞİKLİKLERİNİ TETİKLEYEN HAFİF MOTORLAR
+function filtreleTip(tip) {
+    aktifTipFiltresi = tip;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if(tip === 'all') document.getElementById('tabAll').classList.add('active');
+    if(tip === 'gunubirlik') document.getElementById('tabGunu').classList.add('active');
+    if(tip === 'konaklamali') document.getElementById('tabKona').classList.add('active');
+    bolgeSelectGuncelle('filtreBolge', tip, true); // sekmeye göre bölge seçeneklerini de daralt
+    listeleriYenile();
+    document.getElementById("detayPaneli").style.display = "none";
+}
+
+function filtreleriTemizle() {
+    document.getElementById("filtreBaslangic").value = "";
+    document.getElementById("filtreBitis").value = "";
+    filtreleTip('all');
+}
+
+// 🎯 GELİŞMİŞ ÇOK KANALLI FİLTRELEME VE EKRAN BASMA MOTORU
+function listeleriYenile() {
+    const select = document.getElementById("turSecimi");
+    select.innerHTML = '<option value="">-- Tur Seçiniz --</option>';
+    
+    const secilenFiltreBolge = document.getElementById("filtreBolge").value;
+    const fBaslangic = document.getElementById("filtreBaslangic").value;
+    const fBitis = document.getElementById("filtreBitis").value;
+
+    // Personel listesini 3 kanaldan birden süzüyoruz (Tip + Bölge + Tarih Aralığı)
+    const filtreliList = anaTurListesi.filter(tur => {
+        // 1. Tip Kontrolü
+        if (aktifTipFiltresi !== 'all' && tur.tip !== aktifTipFiltresi) return false;
+        
+        // 2. Bölge Kontrolü
+        if (secilenFiltreBolge !== 'all' && tur.bolge !== secilenFiltreBolge) return false;
+        
+        // 3. Tarih Aralığı Kontrolü (Gelişmiş Takvim Filtresi)
+        if (fBaslangic && new Date(tur.siralamaTarih) < new Date(fBaslangic)) return false;
+        if (fBitis && new Date(tur.siralamaTarih) > new Date(fBitis)) return false;
+
+        return true;
+    });
+    
+    filtreliList.forEach(tur => {
+        const fTarih = new Date(tur.siralamaTarih).toLocaleDateString('tr-TR');
+        const ikon = tur.tip === 'gunubirlik' ? '☀️' : '🏨';
+        const sure = turSureAciklamasi(tur);
+        let opt = document.createElement("option");
+        opt.value = tur.id;
+        opt.text = `${ikon} [${fTarih}] - ${tur.ad} (${sure})`;
+        select.appendChild(opt);
+    });
+
+    // Yönetici Listesi Güncelleme (Her zaman tüm listeyi gösterir)
+    const adminListe = document.getElementById("adminTurListesi");
+    adminListe.innerHTML = "";
+    anaTurListesi.forEach(tur => {
+        const fTarih = new Date(tur.siralamaTarih).toLocaleDateString('tr-TR');
+        const badgeClass = tur.tip === 'gunubirlik' ? 'badge-gunubirlik' : 'badge-konaklama';
+        const badgeText = tur.tip === 'gunubirlik' ? 'Günübirlik' : 'Konaklamalı';
+        const bObjesi = TUM_BOLGELER.find(b => b.code === tur.bolge) || { name: "Diğer" };
+        
+        let div = document.createElement("div");
+        div.className = "admin-item";
+        div.innerHTML = `<div><strong>${tur.ad}</strong><span class="badge ${badgeClass}">${badgeText}</span><span class="badge badge-bolge">${bObjesi.name}</span><br><small>Başlangıç: ${fTarih}</small></div>
+                         <div class="admin-actions">
+                            <button onclick="turDuzenle('${tur.id}')" class="btn-blue btn-small">Düzenle</button>
+                            <button onclick="turSil('${tur.id}')" class="btn-red btn-small">Sil</button>
+                         </div>`;
+        adminListe.appendChild(div);
+    });
+
+    // (Bölgeye özel duyuru kütüphanesi artık tur listesinden bağımsızdır, burada güncellenmesine gerek yok)
+}
+
+function turDetayiniGetir() {
+    const id = document.getElementById("turSecimi").value;
+    if(!id) { document.getElementById("detayPaneli").style.display = "none"; return; }
+    
+    const tur = anaTurListesi.find(t => t.id === id);
+    
+    document.getElementById("pTurAraligi").innerText = tur.turAraligi;
+    document.getElementById("pSureAciklama").innerText = `⏱️ ${turSureAciklamasi(tur)}`;
+    document.getElementById("pKalkisZamani").innerText = tur.kalkisDetay;
+    document.getElementById("pDonusZamani").innerText = tur.donusDetay;
+    document.getElementById("pProgram").innerText = tur.program;
+    document.getElementById("pOtelDetay").innerText = tur.oteller;
+    
+    document.getElementById("pOtelBloku").style.display = (tur.tip === 'gunubirlik') ? 'none' : 'block';
+    document.getElementById("detayPaneli").style.display = "block";
+}
+
+// Kalkış Tarihi ve Zamanı için kısa özet satırı üretir (tarih + her şehrin saati, tek satırda)
+function turKalkisOzet(tur) {
+    const kalkisMetin = tur.kalkisDetay || "";
+    const tarihSatiri = kalkisMetin.split("\n")[0] || "";
+    const saatler = [];
+    SABIT_DURAKLAR.forEach(blok => {
+        const eslesme = kalkisMetin.match(new RegExp(blok.sehir + "\\s*Kalkış Saati:\\s*(\\d{1,2}:\\d{2})"));
+        if (eslesme) saatler.push(`${blok.sehir}: ${eslesme[1]}`);
+    });
+    return saatler.length > 0 ? `${tarihSatiri} — ${saatler.join(", ")}` : tarihSatiri;
+}
+
+// Müşteri adı/telefon alanlarını kontrol eder; telefon zorunlu, ad boşsa genel hitapla devam eder
+function musteriBilgisiKontrolEt() {
+    const tel = document.getElementById("mTel").value.trim();
+    if(!tel) { alert("Lütfen müşteri telefon numarasını girin!"); return null; }
+    const ad = document.getElementById("mAd").value.trim() || "Değerli Yolcumuz";
+    return { ad, tel };
+}
+
+// Verilen mesajı panoya kopyalar ve WhatsApp'ı metin otomatik dolu şekilde açar
+function whatsappAc(tel, msg) {
+    const dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = msg;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+    window.open(`https://wa.me/90${tel}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+function seciliTuruGetir() {
+    const id = document.getElementById("turSecimi").value;
+    if(!id) { alert("Lütfen önce bir tur seçin!"); return null; }
+    return anaTurListesi.find(t => t.id === id);
+}
+
+function whatsappMesajOlustur(tur, ad) {
+    let msg = `🚌 *${tur.ad}*\n\n` +
+              `📅 *Kalkış Tarihi ve Zamanı:*\n${turKalkisOzet(tur)}\n\n` +
+              `🗓️ *Tur Tarihi:*\n${tur.turAraligi}\n⏱️ ${turSureAciklamasi(tur)}\n\n` +
+              `🛫 *Araç Kalkış Noktası, Zamanı ve Yeri:*\n${tur.kalkisDetay}\n\n`;
+
+    if(tur.tip !== 'gunubirlik') msg += `🏨 *Otel Listesi:*\n${tur.oteller}\n\n`;
+
+    msg += `🗺️ *Tur Programı:*\n${tur.program}\n\n` +
+           `🛬 *Dönüş Saati:*\n${tur.donusDetay}\n\n`;
+
+    if(tur.ekDuyuru) msg += `📢 *Ek Duyuru:*\n${tur.ekDuyuru}\n\n`;
+
+    msg += `Sayın ${ad}, keyifli yolculuklar dileriz! 🚀`;
+    return msg;
+}
+
+function whatsappGonder() {
+    const tur = seciliTuruGetir();
+    if(!tur) return;
+    const musteri = musteriBilgisiKontrolEt();
+    if(!musteri) return;
+
+    const msg = whatsappMesajOlustur(tur, musteri.ad);
+    whatsappAc(musteri.tel, msg);
+}
+
+function kopyalandiGoster(btnId = "btnKopyala") {
+    const btn = document.getElementById(btnId);
+    if(btn.dataset.zamanlayici) clearTimeout(Number(btn.dataset.zamanlayici));
+
+    const eskiMetin = btn.dataset.orijinalMetin || btn.innerText;
+    btn.dataset.orijinalMetin = eskiMetin;
+    btn.innerText = "Kopyalandı ✅";
+    btn.style.backgroundColor = "var(--success)";
+
+    const zamanlayici = setTimeout(() => {
+        btn.innerText = eskiMetin;
+        btn.style.backgroundColor = "";
+        delete btn.dataset.zamanlayici;
+    }, 2000);
+    btn.dataset.zamanlayici = zamanlayici;
+}
+
+function mesajKopyala() {
+    const tur = seciliTuruGetir();
+    if(!tur) return;
+
+    const ad = document.getElementById("mAd").value.trim() || "Değerli Yolcumuz";
+    const msg = whatsappMesajOlustur(tur, ad);
+
+    navigator.clipboard.writeText(msg).then(() => {
+        kopyalandiGoster("btnKopyala");
+    }).catch(() => {
+        const dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = msg;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        kopyalandiGoster("btnKopyala");
+    });
+}
+
+// Bölgeye özel duyuru metnini içeriği bire bir (aynen) panoya kopyalar
+function duyuruKopyala() {
+    const msg = document.getElementById("ekDuyuruMetni").value;
+    if(!msg.trim()) { alert("Kopyalanacak bir duyuru metni yok. Lütfen önce bir Bölge / Süre seçin."); return; }
+
+    navigator.clipboard.writeText(msg).then(() => {
+        kopyalandiGoster("btnDuyuruKopyala");
+    }).catch(() => {
+        const dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = msg;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        kopyalandiGoster("btnDuyuruKopyala");
+    });
+}
+
+// ⚡ HIZLI MESAJ BARI: Sabit durak konumlarını (Google Maps linkleri) ve önemli duyuruyu gönderir.
+// Bağımsızdır — herhangi bir tur seçilmesine gerek yoktur, süre/saat bilgisi içermez.
+function duraklariGonder() {
+    const tel = document.getElementById("hmTel").value.trim();
+    if(!tel) { alert("Lütfen müşteri telefon numarasını girin!"); return; }
+    const ad = document.getElementById("hmAd").value.trim() || "Değerli Yolcumuz";
+
+    const msg = `Merhaba ${ad},\n\n${durakKonumlariMesajiOlustur()}`;
+    whatsappAc(tel, msg);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📢 BÖLGEYE ÖZEL DUYURU KÜTÜPHANESİ (bağımsız, kendi JSON dosyasında saklanır)
+// Her kayıt: { id, bolge, gece, metin } — bolge+gece kombinasyonu benzersizdir.
+// gece: 0 = Günübirlik, 1 = 1 Gece 2 Gün, 2 = 2 Gece 3 Gün, ... 7 = 7 Gece 8 Gün
+// ═══════════════════════════════════════════════════════════════
+let duyuruSablonlari = [];
+
+const DUYURU_SURE_SECENEKLERI = [
+    { gece: 0, label: "☀️ Günübirlik" },
+    { gece: 1, label: "1 Gece 2 Gün" },
+    { gece: 2, label: "2 Gece 3 Gün" },
+    { gece: 3, label: "3 Gece 4 Gün" },
+    { gece: 4, label: "4 Gece 5 Gün" },
+    { gece: 5, label: "5 Gece 6 Gün" },
+    { gece: 6, label: "6 Gece 7 Gün" },
+    { gece: 7, label: "7 Gece 8 Gün" }
+];
+
+// Her bölgede gerçekte hangi süre seçeneklerinin satıldığını belirtir.
+// Burada listelenmeyen konaklamalı bölgeler için (henüz netleşmemiş) tüm süreler gösterilir;
+// günübirlik bölgeler otomatik olarak sadece "Günübirlik" seçeneğini alır (aşağıdaki fonksiyona bakınız).
+const BOLGE_SURE_KISITLAMALARI = {
+    guney_ege: [3],                    // Güney Ege: sadece 3 Gece 4 Gün
+    kuzey_ege: [1, 2],                 // Kuzey Ege: 1 Gece 2 Gün / 2 Gece 3 Gün
+    dogu_karadeniz: [2, 3, 4],         // Doğu Karadeniz: 2G3G / 3G4G / 4G5G
+    kas_demre: [1],                    // Antalya Kaş - Demre: sadece 1 Gece 2 Gün
+    bati_karadeniz: [1, 2],            // Batı Karadeniz: 1 Gece 2 Gün / 2 Gece 3 Gün
+    dogu_anadolu: [3],                 // Doğu Anadolu: sadece 3 Gece 4 Gün
+    gap: [1],                          // GAP: sadece 1 Gece 2 Gün
+    canakkale: [1, 2],                 // Çanakkale: 1 Gece 2 Gün / 2 Gece 3 Gün
+    tunceli_kemaliye: [1],             // Tunceli - Kemaliye: sadece 1 Gece 2 Gün
+    bursa: [1],                        // Bursa: sadece 1 Gece 2 Gün
+    istanbul: [2],                     // İstanbul: sadece 2 Gece 3 Gün
+    kaplica: [2, 3, 4],                // Kaplıca: 2 Gece 3 Gün / 3 Gece 4 Gün / 4 Gece 5 Gün
+    isparta: [1],                      // Isparta: sadece 1 Gece 2 Gün
+    tokat_amasya: [1]                  // Tokat - Amasya: sadece 1 Gece 2 Gün
+};
+
+function duyuruSureEtiketiGetir(gece) {
+    const s = DUYURU_SURE_SECENEKLERI.find(x => x.gece === Number(gece));
+    return s ? s.label : `${gece} Gece`;
+}
+
+// Seçili bölge için hangi süre (gece) seçeneklerinin geçerli olduğunu döndürür
+function bolgeIcinIzinliGeceler(bolgeKod) {
+    if (BOLGE_SURE_KISITLAMALARI[bolgeKod]) return BOLGE_SURE_KISITLAMALARI[bolgeKod];
+    if (GUNUBIRLIK_BOLGELER.some(b => b.code === bolgeKod)) return [0];
+    // Henüz kısıtlaması netleşmemiş konaklamalı bölgeler için tüm süreler (1-7 gece) gösterilir
+    return [1, 2, 3, 4, 5, 6, 7];
+}
+
+// Bölge + Süre seçim kutularını doldurur (sayfa ilk açıldığında bir kere çağrılır)
+function duyuruSecimKutulariniOlustur() {
+    const bolgeSelect = document.getElementById("duyuruBolge");
+    bolgeSelect.innerHTML = "";
+    TUM_BOLGELER.forEach(b => {
+        const opt = document.createElement("option");
+        opt.value = b.code;
+        opt.text = b.name;
+        bolgeSelect.appendChild(opt);
+    });
+
+    duyuruSureListesiniOlustur();
+}
+
+// Seçili bölgeye göre Süre kutusunu, sadece o bölgede gerçekten satılan sürelerle yeniden doldurur
+function duyuruSureListesiniOlustur() {
+    const bolge = document.getElementById("duyuruBolge").value;
+    const sureSelect = document.getElementById("duyuruSure");
+    const oncekiDeger = sureSelect.value;
+    sureSelect.innerHTML = "";
+
+    bolgeIcinIzinliGeceler(bolge).forEach(gece => {
+        const opt = document.createElement("option");
+        opt.value = gece;
+        opt.text = duyuruSureEtiketiGetir(gece);
+        sureSelect.appendChild(opt);
+    });
+
+    const mevcutDegerler = Array.from(sureSelect.options).map(o => o.value);
+    if (mevcutDegerler.includes(oncekiDeger)) sureSelect.value = oncekiDeger;
+}
+
+// Bölge değiştiğinde: önce süre listesini o bölgeye göre daralt, sonra ilgili kaydı yükle
+function duyuruBolgeDegisti() {
+    duyuruSureListesiniOlustur();
+    duyuruSablonuGetir();
+}
+
+// Seçili Bölge + Süre kombinasyonuna ait kayıtlı duyuru varsa metin kutusuna yükler, yoksa boşaltır
+function duyuruSablonuGetir() {
+    const bolge = document.getElementById("duyuruBolge").value;
+    const gece = Number(document.getElementById("duyuruSure").value);
+    const kayit = duyuruSablonlari.find(d => d.bolge === bolge && d.gece === gece);
+    document.getElementById("ekDuyuruMetni").value = kayit ? kayit.metin : "";
+}
+
+// Sayfa açılır açılmaz, aynı klasördeki "turduyurusu.json" (bulunamazsa "turduyurusu.txt")
+// dosyasını otomatik olarak okuyup duyuru kütüphanesini doldurur. Bu dosya bulunamazsa veya
+// bozuksa (örn. henüz sunucuya konmadıysa) sessizce hataya düşer ve mevcut "📂 Kütüphane Yükle"
+// butonuyla elle yükleme yapılabilir — otomatik yükleme başarısız olduğunda kullanılacak yedek budur.
+function duyuruKutuphanesiniOtomatikYukle() {
+    function uygula(veri, kaynak) {
+        if (!Array.isArray(veri)) throw new Error("Geçersiz format: dizi bekleniyor");
+        duyuruSablonlari = veri;
+        duyuruSablonuGetir();
+        console.log(`✅ Duyuru kütüphanesi otomatik yüklendi (${duyuruSablonlari.length} kayıt) — ${kaynak}`);
+    }
+
+    // 1) fetch ile turduyurusu.json dene (http/https sunucularda çalışır)
+    fetch("turduyurusu.json")
+        .then(res => { if (!res.ok) throw new Error("turduyurusu.json bulunamadı"); return res.json(); })
+        .then(veri => uygula(veri, "turduyurusu.json (fetch)"))
+        .catch(() => {
+            // 2) fetch ile turduyurusu.txt dene
+            fetch("turduyurusu.txt")
+                .then(res => { if (!res.ok) throw new Error("turduyurusu.txt bulunamadı"); return res.text(); })
+                .then(metin => uygula(JSON.parse(metin), "turduyurusu.txt (fetch)"))
+                .catch(() => {
+                    // 3) fetch hiç çalışmıyorsa (file:// ile açılmış olabilir) script-tag yedeğini dene
+                    const script = document.createElement("script");
+                    script.src = "turduyurusu.js";
+                    script.onload = function() {
+                        if (typeof TUR_DUYURUSU_JSON !== "undefined" && Array.isArray(TUR_DUYURUSU_JSON)) {
+                            uygula(TUR_DUYURUSU_JSON, "turduyurusu.js (otomatik yedek)");
+                        } else {
+                            console.warn("⚠️ Otomatik duyuru dosyası bulunamadı/okunamadı. Gerekirse üstteki 'Duyuru Kütüphanesini Okutun' alanından elle yükleyin.");
+                        }
+                    };
+                    script.onerror = function() {
+                        console.warn("⚠️ Otomatik duyuru dosyası bulunamadı/okunamadı. Gerekirse üstteki 'Duyuru Kütüphanesini Okutun' alanından elle yükleyin.");
+                    };
+                    document.head.appendChild(script);
+                });
+        });
+}
+
+// Sayfa üstündeki "Duyuru Kütüphanesini Okutun" alanından elle seçilen JSON dosyasını okur
+function duyuruSablonlariniYukle(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const veri = JSON.parse(e.target.result);
+            if(!Array.isArray(veri)) throw new Error("Geçersiz format");
+            duyuruSablonlari = veri;
+            duyuruSablonuGetir();
+            alert(`Duyuru kütüphanesi yüklendi! (${duyuruSablonlari.length} kayıt)`);
+        } catch(err) {
+            alert("Dosya okunamadı, geçerli bir duyuru JSON dosyası seçin.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+}
+
+function formuTemizle() {
+    document.getElementById("duzenlenenTurId").value = "";
+    document.getElementById("yeniAd").value = "";
+    document.getElementById("turBaslangicTarih").value = "";
+    document.getElementById("turBitisTarih").value = "";
+    document.getElementById("kalkisTarih").value = "";
+    document.getElementById("mersinSaat").value = "";
+    document.getElementById("tarsusSaat").value = "";
+    document.getElementById("adanaSaat").value = "";
+    document.getElementById("donusSaat").value = "";
+    document.getElementById("donusNokta").value = "";
+    document.getElementById("yeniProgram").value = "";
+    document.getElementById("yeniGeceSayisi").value = "1";
+    bolgeSelectGuncelle('yeniBolge', document.getElementById("yeniTip").value, false);
+    document.getElementById("anaEklemeBtn").innerText = "➕ Formatlı Turu Havuza Ekle";
+    document.getElementById("anaEklemeBtn").className = "btn-orange";
+    otelAlanlariniOlustur();
+}
+</script>
+</body>
+</html>
