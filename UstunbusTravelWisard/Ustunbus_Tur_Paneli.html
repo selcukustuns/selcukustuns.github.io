@@ -106,6 +106,42 @@
         .file-upload-title { font-weight: 700; color: var(--dark); margin-bottom: 7px; }
         .instagram-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 15px; border-radius: 7px; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: white; text-decoration: none; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
         .instagram-btn:hover { transform: translateY(-1px); opacity: 0.95; }
+    
+        .site-footer {
+            margin-top: 30px;
+            padding: 28px 20px 24px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, 0.10);
+            color: #1e3a8a;
+        }
+        .site-footer-logo {
+            display: block;
+            width: min(420px, 80%);
+            max-height: 110px;
+            object-fit: contain;
+            margin: 0 auto 18px;
+            filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.10));
+        }
+        .site-footer-motto {
+            margin: 0 auto;
+            max-width: 850px;
+            font-size: 17px;
+            line-height: 1.6;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: #1e3a8a;
+        }
+        .site-footer-motto span {
+            display: inline-block;
+            margin-top: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.78;
+        }
+
     </style>
 </head>
 <body>
@@ -382,6 +418,14 @@
         <div id="adminTurListesi"></div>
     </div>
 </div>
+
+
+    <footer class="site-footer">
+        <img class="site-footer-logo" src="ustunbuslogo.png" alt="Üstünbus Turizm">
+        <p class="site-footer-motto">
+            Üstünbus Turizm — Birlikte daha iyi hizmet, daha mutlu yolcular, daha güçlü bir ekip.
+        </p>
+    </footer>
 
 <script>
 /* ============================================================
