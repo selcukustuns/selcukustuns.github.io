@@ -99,11 +99,56 @@
         .operator-login-card { display: none; max-width: 520px; margin: 0 auto 20px auto; background: #fffdf9; border: 1px solid #fbd38d; }
         .operator-login-card h2 { border-color: var(--warning); }
         .operator-status { display: none; padding: 10px 14px; border-radius: 7px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 13px; font-weight: 700; }
-        .admin-panel-card { display: none; }
         .file-upload-card { display: none; max-width: 760px; margin: 0 auto 20px auto; background: #f8fafc; border: 1px solid #cbd5e1; }
         .file-upload-box { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; }
         .file-upload-box:last-child { margin-bottom: 0; }
         .file-upload-title { font-weight: 700; color: var(--dark); margin-bottom: 7px; }
+
+        /* Tur Programı Ekleme Paneli: üç bağımsız panel — sol form / sağ mevcut havuz / alt geçmiş havuz.
+           Her biri kendi kutusu (arka plan, kenarlık, gölge) ile ayrı ayrı durur; ortak bir kutuya sıkışmaz.
+           grid-column: 1 / -1 -> üst grid'de tek eleman olarak kaldığında sadece sol sütuna sıkışmasın,
+           sayfanın tüm genişliğini kullansın ki üç panel arasında gerçek nefes payı olsun. */
+        .admin-panel-outer { display: none; grid-column: 1 / -1; }
+        .admin-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+        .admin-split-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: start; margin-bottom: 36px; }
+        @media (max-width: 992px) { .admin-split-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+        .admin-form-card, .admin-pool-card, .admin-gecmis-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+        }
+        .admin-form-card {
+            background: #fffdf9;
+            border: 1px solid #fbd38d;
+            padding: 28px;
+            justify-self: start;
+            width: 100%;
+        }
+        .admin-pool-card {
+            border: 1px solid #fde3b0;
+            padding: 24px;
+            justify-self: end;
+            width: 100%;
+        }
+        .admin-pool-card h3 { font-size: 15px; margin-top: 0; }
+        .admin-pool-empty { font-size: 13px; color: #94a3b8; padding: 10px 0; }
+
+        /* Geçmiş Havuzdaki Turlar: alt bağımsız panel, tıklanmadan açılmayan akordeon menü.
+           Üsttekilerle dip dibe olmaması için belirgin bir üst boşluk bırakılıyor. */
+        .admin-gecmis-card { border: 1px solid #cbd5e1; overflow: hidden; margin-top: 4px; }
+        .gecmis-havuz-blok { }
+        .gecmis-havuz-baslik {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 18px; cursor: pointer; user-select: none;
+            background: #f1f5f9; color: var(--dark); font-weight: 700; font-size: 15px;
+        }
+        .gecmis-havuz-baslik:hover { background: #e2e8f0; }
+        .gecmis-havuz-ok { transition: transform 0.2s; font-size: 13px; }
+        .gecmis-havuz-blok.acik .gecmis-havuz-ok { transform: rotate(180deg); }
+        .gecmis-havuz-icerik { display: none; padding: 16px 18px; border-top: 1px solid #e2e8f0; }
+        .gecmis-havuz-blok.acik .gecmis-havuz-icerik { display: block; }
+
         .instagram-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 15px; border-radius: 7px; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: white; text-decoration: none; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
         .instagram-btn:hover { transform: translateY(-1px); opacity: 0.95; }
     
@@ -154,6 +199,7 @@
 <!-- ÜST SEKME BARI: Operatör yönetim alanı varsayılan olarak kapalıdır. -->
 <div class="ust-panel-tabs">
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
+    <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
@@ -183,6 +229,17 @@
     </div>
 </div>
 
+<!-- Evrak Yönetimi alanı: yalnızca üstteki "Evrak Yönetimi" sekmesine tıklanınca görünür. -->
+<div id="evrakYonetimiCard" class="card" style="display:none; max-width: 700px; margin: 0 auto 20px auto;">
+    <h2>🗂️ Evrak Yönetimi</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px;">
+        Tur evrakları, sözleşmeler ve dosyalar için ortak Drive alanına buradan ulaşabilirsiniz.
+    </p>
+    <a href="https://drive.google.com/drive/folders/1irHZHkgesvcm25-PgWAjvPmxdta4tIwH?authuser=terasusturizm@gmail.com" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+        <button class="btn-blue" style="width:100%;">📁 Drive'a Ulaş</button>
+    </a>
+</div>
+
 <!-- Operatör giriş alanı: yalnızca üstteki "Operatör Girişi" sekmesine tıklanınca görünür. -->
 <div id="operatorLoginCard" class="card operator-login-card">
     <h2>🔐 Operatör Girişi</h2>
@@ -198,7 +255,7 @@
 <div class="main-container">
     
     <!-- SOL BLOK: ÇAĞRI PERSONELİ EKRANI (GELİŞMİŞ ÇOKLU FİLTRELEME) -->
-    <div class="card">
+    <div id="personelPaneliCard" class="card">
         <h2>🗓️ Tur Programı Çağrı Personeli Paneli</h2>
         
         <!-- GELİŞMİŞ SÜZGEÇ VE ARAMA PANELİ -->
@@ -272,7 +329,7 @@
     </div>
 
     <!-- BAĞIMSIZ BÖLÜM: HIZLI MESAJ BARI (tur seçilmesine gerek yok, sabit/otomatik hızlı cevaplar) -->
-    <div class="card" style="max-width: 1350px; margin: 20px auto 0 auto; background: #eff6ff; border: 1px solid #bfdbfe;">
+    <div id="hizliMesajBariCard" class="card" style="max-width: 1350px; margin: 20px auto 0 auto; background: #eff6ff; border: 1px solid #bfdbfe;">
         <h2>⚡ Hızlı Mesaj Barı</h2>
         <p style="font-size: 13px; color: #64748b; margin-top: -10px; margin-bottom: 20px;">Burası tur açmaya gerek olmayan, sabit ve otomatik hızlı cevaplar içindir.</p>
 
@@ -317,13 +374,17 @@
         </div>
     </div>
 
-    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ -->
-    <div id="adminPanelCard" class="card admin-panel-card" style="background: #fffdf9; border: 1px solid #fbd38d;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ — 3 bağımsız panel: sol form / sağ mevcut havuz / alt geçmiş havuz -->
+    <div id="adminPanelCard" class="admin-panel-outer">
+        <div class="admin-panel-header">
             <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı Ekleme Paneli</h2>
             <button onclick="operatorCikisYap()" class="btn-red btn-small">🔒 Çıkış Yap</button>
         </div>
-        
+
+        <div class="admin-split-grid">
+        <!-- SOL: BAĞIMSIZ PANEL — FORMATLI TUR EKLEME / DÜZENLEME FORMU -->
+        <div class="admin-form-card">
+
         <div class="row-inputs">
             <div>
                 <label>Tur Tipi:</label>
@@ -414,8 +475,26 @@
         <button onclick="turEkle()" class="btn-orange" style="width: 100%; margin-bottom: 10px;" id="anaEklemeBtn">➕ Formatlı Turu Havuza Ekle</button>
         <button onclick="veriyiDisariAktar()" class="btn-blue" style="width: 100%;">💾 Tüm Listeyi Güncelle ve İndir</button>
 
-        <h3 style="margin-top: 25px; color: var(--warning); border-color: var(--warning);">📋 Havuzdaki Mevcut Turlar</h3>
-        <div id="adminTurListesi"></div>
+        </div>
+        <!-- SAĞ: BAĞIMSIZ PANEL — GÜNÜN TARİHİNE GÖRE SADECE GÜNCEL/GELECEK TURLARI GÖSTEREN HAVUZ LİSTESİ -->
+        <div class="admin-pool-card">
+            <h3 style="color: var(--warning); border-color: var(--warning);">📋 Havuzdaki Mevcut Turlar</h3>
+            <p style="font-size: 12px; color: #718096; margin-top: -10px;">Bugünün tarihi baz alınır; başlangıç tarihi geçmişte kalan turlar burada listelenmez, aşağıdaki "Geçmiş Havuzdaki Turlar" bölümüne taşınır.</p>
+            <div id="adminTurListesi"></div>
+        </div>
+        </div>
+
+        <!-- ALT: BAĞIMSIZ PANEL — GEÇMİŞ HAVUZDAKİ TURLAR: tıklanmadan açılmayan akordeon liste -->
+        <div id="gecmisHavuzBlok" class="gecmis-havuz-blok admin-gecmis-card">
+            <div class="gecmis-havuz-baslik" onclick="gecmisHavuzuAcKapat()">
+                <span>🗄️ Geçmiş Havuzdaki Turlar</span>
+                <span class="gecmis-havuz-ok">▼</span>
+            </div>
+            <div id="gecmisHavuzIcerik" class="gecmis-havuz-icerik">
+                <p style="font-size: 12px; color: #718096; margin-top: 0;">Başlangıç tarihi bugünden önce olan turlar burada listelenir.</p>
+                <div id="adminTurListesiGecmis"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -455,26 +534,42 @@ function panelSekmesiDegistir(sekme) {
     const loginCard = document.getElementById("operatorLoginCard");
     const adminCard = document.getElementById("adminPanelCard");
     const fileCard = document.getElementById("fileUploadCard");
+    const evrakCard = document.getElementById("evrakYonetimiCard");
+    const personelCard = document.getElementById("personelPaneliCard");
+    const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     const personelTab = document.getElementById("tabPersonel");
     const operatorTab = document.getElementById("tabOperator");
     const fileTab = document.getElementById("tabDosya");
+    const evrakTab = document.getElementById("tabEvrak");
 
     personelTab.classList.remove("active");
     operatorTab.classList.remove("active");
     fileTab.classList.remove("active");
+    evrakTab.classList.remove("active");
 
     loginCard.style.display = "none";
     adminCard.style.display = "none";
     fileCard.style.display = "none";
+    evrakCard.style.display = "none";
+    personelCard.style.display = "none";
+    hizliMesajCard.style.display = "none";
 
     if (sekme === "personel") {
         personelTab.classList.add("active");
+        personelCard.style.display = "block";
+        hizliMesajCard.style.display = "block";
         return;
     }
 
     if (sekme === "dosya") {
         fileTab.classList.add("active");
         fileCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "evrak") {
+        evrakTab.classList.add("active");
+        evrakCard.style.display = "block";
         return;
     }
 
@@ -1093,15 +1188,47 @@ function listeleriYenile() {
         select.appendChild(opt);
     });
 
-    // Yönetici Listesi Güncelleme (Her zaman tüm listeyi gösterir)
-    const adminListe = document.getElementById("adminTurListesi");
-    adminListe.innerHTML = "";
+    // Yönetici Listesi Güncelleme: Bugünün tarihi baz alınarak ikiye ayrılır —
+    // "Havuzdaki Mevcut Turlar" (bugün ve sonrası) / "Geçmiş Havuzdaki Turlar" (bugünden önce)
+    const bugun = new Date();
+    bugun.setHours(0, 0, 0, 0);
+
+    const guncelTurlar = [];
+    const gecmisTurlar = [];
     anaTurListesi.forEach(tur => {
+        const turTarihi = new Date(tur.siralamaTarih);
+        if (turTarihi >= bugun) guncelTurlar.push(tur); else gecmisTurlar.push(tur);
+    });
+
+    adminHavuzListesiCiz(guncelTurlar, "adminTurListesi", "Bu tarihten itibaren havuzda görüntülenecek tur bulunmuyor.");
+    adminHavuzListesiCiz(gecmisTurlar, "adminTurListesiGecmis", "Geçmiş havuzda tur bulunmuyor.");
+
+    // Geçmiş havuzdaki tur sayısını akordeon başlığında göster
+    const gecmisBaslikMetin = document.querySelector("#gecmisHavuzBlok .gecmis-havuz-baslik span:first-child");
+    if (gecmisBaslikMetin) gecmisBaslikMetin.textContent = `🗄️ Geçmiş Havuzdaki Turlar (${gecmisTurlar.length})`;
+
+    // (Bölgeye özel duyuru kütüphanesi artık tur listesinden bağımsızdır, burada güncellenmesine gerek yok)
+}
+
+// Verilen tur dizisini, verilen konteyner id'sinin içine "Havuzdaki Mevcut Turlar" ile
+// birebir aynı tasarımda (rozetler + Düzenle/Sil butonları) çizer. Hem güncel hem
+// geçmiş havuz listesi bu tek fonksiyonu kullanır, ikisi arasında tasarım farkı yoktur.
+function adminHavuzListesiCiz(liste, konteynerId, bosMesaji) {
+    const konteyner = document.getElementById(konteynerId);
+    if (!konteyner) return;
+    konteyner.innerHTML = "";
+
+    if (liste.length === 0) {
+        konteyner.innerHTML = `<div class="admin-pool-empty">${bosMesaji}</div>`;
+        return;
+    }
+
+    liste.forEach(tur => {
         const fTarih = new Date(tur.siralamaTarih).toLocaleDateString('tr-TR');
         const badgeClass = tur.tip === 'gunubirlik' ? 'badge-gunubirlik' : 'badge-konaklama';
         const badgeText = tur.tip === 'gunubirlik' ? 'Günübirlik' : 'Konaklamalı';
         const bObjesi = TUM_BOLGELER.find(b => b.code === tur.bolge) || { name: "Diğer" };
-        
+
         let div = document.createElement("div");
         div.className = "admin-item";
         div.innerHTML = `<div><strong>${tur.ad}</strong><span class="badge ${badgeClass}">${badgeText}</span><span class="badge badge-bolge">${bObjesi.name}</span><br><small>Başlangıç: ${fTarih}</small></div>
@@ -1109,10 +1236,15 @@ function listeleriYenile() {
                             <button onclick="turDuzenle('${tur.id}')" class="btn-blue btn-small">Düzenle</button>
                             <button onclick="turSil('${tur.id}')" class="btn-red btn-small">Sil</button>
                          </div>`;
-        adminListe.appendChild(div);
+        konteyner.appendChild(div);
     });
+}
 
-    // (Bölgeye özel duyuru kütüphanesi artık tur listesinden bağımsızdır, burada güncellenmesine gerek yok)
+// Geçmiş Havuzdaki Turlar akordeonunu açar/kapatır. Sayfa ilk açıldığında ve her
+// yenilemede kapalıdır; sadece başlığa tıklanınca aşağı doğru açılır.
+function gecmisHavuzuAcKapat() {
+    const blok = document.getElementById("gecmisHavuzBlok");
+    blok.classList.toggle("acik");
 }
 
 function turDetayiniGetir() {
