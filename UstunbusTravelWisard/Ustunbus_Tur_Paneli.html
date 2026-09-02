@@ -124,6 +124,17 @@
             padding: 28px;
             justify-self: start;
             width: 100%;
+            max-width: 620px;
+            text-align: left;
+        }
+        .admin-form-card label,
+        .admin-form-card select,
+        .admin-form-card input,
+        .admin-form-card textarea {
+            text-align: left;
+        }
+        @media (max-width: 992px) {
+            .admin-form-card { max-width: 100%; }
         }
         .admin-pool-card {
             border: 1px solid #fde3b0;
@@ -193,7 +204,10 @@
 
 <div style="background: var(--dark); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="font-size: 22px; font-weight: bold; letter-spacing: 0.5px;">🚌 Üstünbus Turizm Tur Programı Sistemi</div>
-    <a class="instagram-btn" href="https://www.instagram.com/ustunbustravel/" target="_blank" rel="noopener noreferrer" aria-label="Üstünbus Turizm Instagram">📸 Instagram</a>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <a class="instagram-btn" href="https://www.instagram.com/ustunbustravel/" target="_blank" rel="noopener noreferrer" aria-label="Üstünbus Turizm Instagram">📸 Instagram</a>
+        <button id="cikisYapBtnUst" onclick="operatorCikisYap()" class="btn-red btn-small" style="display:none;">🔒 Çıkış Yap</button>
+    </div>
 </div>
 
 <!-- ÜST SEKME BARI: Operatör yönetim alanı varsayılan olarak kapalıdır. -->
@@ -378,7 +392,6 @@
     <div id="adminPanelCard" class="admin-panel-outer">
         <div class="admin-panel-header">
             <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı Ekleme Paneli</h2>
-            <button onclick="operatorCikisYap()" class="btn-red btn-small">🔒 Çıkış Yap</button>
         </div>
 
         <div class="admin-split-grid">
@@ -611,6 +624,7 @@ async function operatorGirisYap() {
     document.getElementById("operatorLoginCard").style.display = "none";
     document.getElementById("adminPanelCard").style.display = "block";
     document.getElementById("operatorStatus").style.display = "inline-block";
+    document.getElementById("cikisYapBtnUst").style.display = "inline-flex";
     alert("Operatör girişi başarılı. Tur Programı Ekleme Paneli açıldı.");
 }
 
@@ -620,6 +634,7 @@ function operatorCikisYap() {
     document.getElementById("operatorPassword").value = "";
     document.getElementById("operatorLoginError").style.display = "none";
     document.getElementById("operatorStatus").style.display = "none";
+    document.getElementById("cikisYapBtnUst").style.display = "none";
     panelSekmesiDegistir("personel");
 }
 // SEKTÖREL BÖLGE / DESTİNASYON LİSTELERİ (Tur tipine göre ayrıştırılmış)
