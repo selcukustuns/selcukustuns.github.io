@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üstünbus Turizm Resmi Kimlik Doğrulama Sistemi</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #3f519b 0%, #3e9a3b 50%, #f5ad0b 100%);
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 25px 20px; 
+        }
+
+        /* Üst Logo (Barın Dışında) */
+        .top-navbar {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 25px;
+            background: transparent;
+        }
+
+        .logo-ustunbus {
+            max-width: 300px;
+            width: 85%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        
+        .container { 
+            background: white; 
+            width: 100%; 
+            max-width: 420px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25); 
+            overflow: hidden; 
+        }
+        
+        .card-header { 
+            background: #ffffff; 
+            color: #1a365d; 
+            text-align: center; 
+            padding: 22px 20px 10px 20px; 
+            font-weight: 800; 
+            letter-spacing: 1.5px; 
+            font-size: 15px; 
+        }
+
+        .content { 
+            padding: 20px 24px 30px 24px; 
+            text-align: center; 
+            min-height: 410px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+        
+        .loader-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
+        .loader { 
+            border: 4px solid #edf2f7; 
+            border-top: 4px solid #3f519b; 
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            animation: spin 1s linear infinite; 
+            margin-bottom: 20px; 
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        
+        .hidden { display: none !important; }
+        
+        .profile-img { 
+            width: 130px; 
+            height: 130px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 4px solid #edf2f7; 
+            margin: 0 auto 15px auto; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+        }
+
+        .status-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            font-size: 13px; 
+            margin-bottom: 25px; 
+        }
+
+        .status-valid { 
+            background: #e6fffa; 
+            color: #234e52; 
+            border: 1px solid #b2f5ea; 
+        }
+
+        .status-invalid { 
+            background: #fff5f5; 
+            color: #742a2a; 
+            border: 1px solid #fed7d7; 
+        }
+        
+        .info-container { width: 100%; text-align: left; }
+        .info-group { margin-bottom: 12px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px; }
+        .info-group:last-child { border-bottom: none; }
+        .info-label { font-size: 11px; color: #718096; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .info-value { font-size: 15px; color: #2d3748; font-weight: 600; margin-top: 4px; }
+        
+        .footer { 
+            background: #f8fafc; 
+            text-align: center; 
+            padding: 16px 20px; 
+            font-size: 11px; 
+            color: #a0aec0; 
+            border-top: 1px solid #edf2f7; 
+            line-height: 1.6;
+        }
+
+        /* Kutunun Dışındaki Alt Logo */
+        .bottom-logo-container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 25px;
+            background: transparent;
+        }
+
+        .logo-turkiyesenin-outside {
+            max-width: 220px;
+            width: 65%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+    </style>
+</head>
+<body>
+
+    
+    <header class="top-navbar">
+        <img src="ustunbuswhite.png" alt="Üstünbus Turizm Logo" class="logo-ustunbus">
+    </header>
+
+    <!-- Ana Beyaz Kutu -->
+    <main class="container">
+        <div class="card-header">
+            PERSONEL DOĞRULAMA SİSTEMİ
+        </div>
+        
+        <div class="content" id="loading-section">
+            <div class="loader-container">
+                <div class="loader"></div>
+                <p style="color: #4a5568; font-weight: 600;">Sistem taranıyor...</p>
+                <p style="color: #a0aec0; font-size: 12px; margin-top: 5px;">Lütfen bekleyiniz</p>
+            </div>
+        </div>
+
+        <div class="content hidden" id="result-section">
+            <img id="user-photo" src="" alt="Profil Fotoğrafı" class="profile-img">
+            
+            <div>
+                <span id="status-badge" class="status-badge status-valid">✓ Aktif ve Onaylı</span>
+            </div>
+            
+            <div class="info-container">
+                <div class="info-group">
+                    <div class="info-label">Ad Soyad</div>
+                    <div class="info-value" id="user-name">-</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">T.C. Kimlik No</div>
+                    <div class="info-value" id="user-tc">-</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Unvan / Görev</div>
+                    <div class="info-value" id="user-title">-</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Sicil / Belge No</div>
+                    <div class="info-value" id="user-sicil">-</div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Geçerlilik Tarihi</div>
+                    <div class="info-value" id="user-expire">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            Sistem Saati: <span id="current-time"></span><br>
+            Bu sayfa yetkisiz erişime karşı korunmaktadır.
+        </footer>
+    </main>
+
+    
+    <div class="bottom-logo-container">
+        <img src="turkiyesenin.png" alt="Türkiye Senin Logo" class="logo-turkiyesenin-outside">
+    </div>
+
+    <script>
+        const originalTitle = 'Üstünbus Turizm Resmi Kimlik Doğrulama Sistemi';
+        document.title = originalTitle;
+
+        let marqueeInterval = null;
+        let isVerificationStarted = false;
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                let alertText = '⚠️ Doğrulamayı Kaçırma !  ---  ';
+                if (!marqueeInterval) {
+                    marqueeInterval = setInterval(() => {
+                        alertText = alertText.substring(1) + alertText.substring(0, 1);
+                        document.title = alertText;
+                    }, 250);
+                }
+            } else {
+                clearInterval(marqueeInterval);
+                marqueeInterval = null;
+                document.title = originalTitle;
+
+                if (!isVerificationStarted) {
+                    startVerification();
+                }
+            }
+        });
+
+        const timeElement = document.getElementById('current-time');
+        setInterval(() => {
+            const now = new Date();
+            timeElement.innerText = now.toLocaleString('tr-TR');
+        }, 1000);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryId = urlParams.get('id');
+
+        const database = {
+            'GB2030': {
+                name: 'Günseli Beydüz',
+                tc: '2*86***8**6',
+                title: 'Acenta Görevlisi',
+                sicilNo: 'UST-94285-B',
+                expire: '31.12.2030', 
+                status: 'valid',
+                photo: 'UST-94285-B.jpeg'
+            }
+        };
+
+        function startVerification() {
+            isVerificationStarted = true;
+
+            setTimeout(() => {
+                document.getElementById('loading-section').classList.add('hidden');
+                const resultSection = document.getElementById('result-section');
+                resultSection.classList.remove('hidden');
+
+                const user = database[queryId];
+
+                if (user && user.status === 'valid') {
+                    document.getElementById('user-photo').src = user.photo;
+                    document.getElementById('user-name').innerText = user.name;
+                    document.getElementById('user-tc').innerText = user.tc;
+                    document.getElementById('user-title').innerText = user.title;
+                    document.getElementById('user-sicil').innerText = user.sicilNo;
+                    document.getElementById('user-expire').innerText = user.expire;
+                } else {
+                    document.getElementById('user-photo').style.display = 'none';
+                    document.getElementById('user-name').innerText = 'KAYIT BULUNAMADI';
+                    document.getElementById('user-tc').innerText = '-';
+                    document.getElementById('user-title').innerText = '-';
+                    document.getElementById('user-sicil').innerText = '-'; 
+                    document.getElementById('user-expire').innerText = '-';
+                    
+                    const badge = document.getElementById('status-badge');
+                    badge.className = 'status-badge status-invalid';
+                    badge.innerText = '✕ Geçersiz veya Sahte Kimlik';
+                }
+            }, 1500); 
+        }
+
+        if (!document.hidden) {
+            startVerification();
+        }
+    </script>
+</body>
+</html>
