@@ -18,7 +18,6 @@
             padding: 25px 20px; 
         }
 
-        /* Üst Logo (Barın Dışında) */
         .top-navbar {
             width: 100%;
             max-width: 420px;
@@ -37,7 +36,6 @@
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
         }
 
-        /* Yarı Saydam Gri Tabanlı Cam Kutu */
         .container { 
             background: rgba(255, 255, 255, 0.16); 
             backdrop-filter: blur(14px);
@@ -50,7 +48,6 @@
             overflow: hidden; 
         }
         
-        /* Transparan Olmayan Sabit Başlık Barı */
         .card-header { 
             background: #102a43; 
             color: #ffffff; 
@@ -104,33 +101,62 @@
             box-shadow: 0 6px 14px rgba(0,0,0,0.2); 
         }
 
+        /* Pop-Up Rozet Alanı */
+        .badge-wrapper {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
         .status-badge { 
             display: inline-flex; 
             align-items: center; 
-            padding: 8px 18px; 
-            border-radius: 20px; 
+            padding: 9px 22px; 
+            border-radius: 24px; 
             font-weight: 700; 
-            font-size: 13px; 
-            margin-bottom: 25px; 
+            font-size: 14px; 
+            opacity: 0;
+            transform: scale(0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        .status-badge.show-popup {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Tam Canlı Yeşil Tik Rengi */
         .status-valid { 
-            background: rgba(46, 133, 64, 0.85); 
+            background: #10b981; 
             color: #ffffff; 
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 1.5px solid #a7f3d0; 
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.55);
+            letter-spacing: 0.3px;
         }
 
         .status-invalid { 
-            background: rgba(197, 48, 48, 0.85); 
+            background: rgba(220, 38, 38, 0.95); 
             color: #ffffff; 
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 6px 18px rgba(220, 38, 38, 0.55);
         }
         
-        /* Beyaz Yazı ve Çizgi Stilleri */
         .info-container { width: 100%; text-align: left; }
-        .info-group { margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 8px; }
+        
+        .info-group { 
+            margin-bottom: 12px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+            padding-bottom: 8px; 
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .info-group.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
         .info-group:last-child { border-bottom: none; }
         
         .info-label { 
@@ -149,7 +175,6 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.25);
         }
         
-        /* Saydam Footer */
         .footer { 
             background: rgba(0, 0, 0, 0.15); 
             text-align: center; 
@@ -160,7 +185,6 @@
             line-height: 1.6;
         }
 
-        /* Kutunun Dışındaki Alt Logo */
         .bottom-logo-container {
             width: 100%;
             max-width: 420px;
@@ -182,14 +206,11 @@
 </head>
 <body>
 
-    <!-- Üst Logo (Barın Dışında) -->
     <header class="top-navbar">
         <img src="ustunbuswhite.png" alt="Üstünbus Turizm Logo" class="logo-ustunbus">
     </header>
 
-    <!-- Ana Kutu -->
     <main class="container">
-        <!-- Transparan Olmayan Opak Başlık -->
         <div class="card-header">
             PERSONEL DOĞRULAMA SİSTEMİ
         </div>
@@ -205,28 +226,28 @@
         <div class="content hidden" id="result-section">
             <img id="user-photo" src="" alt="Profil Fotoğrafı" class="profile-img">
             
-            <div>
-                <span id="status-badge" class="status-badge status-valid">✓ Aktif ve Onaylı</span>
+            <div class="badge-wrapper">
+                <span id="status-badge" class="status-badge"></span>
             </div>
             
             <div class="info-container">
-                <div class="info-group">
+                <div class="info-group" id="row-name">
                     <div class="info-label">Ad Soyad</div>
                     <div class="info-value" id="user-name">-</div>
                 </div>
-                <div class="info-group">
+                <div class="info-group" id="row-tc">
                     <div class="info-label">T.C. Kimlik No</div>
                     <div class="info-value" id="user-tc">-</div>
                 </div>
-                <div class="info-group">
+                <div class="info-group" id="row-title">
                     <div class="info-label">Unvan / Görev</div>
                     <div class="info-value" id="user-title">-</div>
                 </div>
-                <div class="info-group">
+                <div class="info-group" id="row-sicil">
                     <div class="info-label">Sicil / Belge No</div>
                     <div class="info-value" id="user-sicil">-</div>
                 </div>
-                <div class="info-group">
+                <div class="info-group" id="row-expire">
                     <div class="info-label">Geçerlilik Tarihi</div>
                     <div class="info-value" id="user-expire">-</div>
                 </div>
@@ -239,7 +260,6 @@
         </footer>
     </main>
 
-    <!-- Kutunun Tamamen Dışındaki Alt Logo -->
     <div class="bottom-logo-container">
         <img src="turkiyesenin.png" alt="Türkiye Senin Logo" class="logo-turkiyesenin-outside">
     </div>
@@ -301,27 +321,56 @@
                 resultSection.classList.remove('hidden');
 
                 const user = database[queryId];
+                const badge = document.getElementById('status-badge');
 
                 if (user && user.status === 'valid') {
                     document.getElementById('user-photo').src = user.photo;
+
+                    // 1. İsim gelir
                     document.getElementById('user-name').innerText = user.name;
-                    document.getElementById('user-tc').innerText = user.tc;
-                    document.getElementById('user-title').innerText = user.title;
-                    document.getElementById('user-sicil').innerText = user.sicilNo;
-                    document.getElementById('user-expire').innerText = user.expire;
+                    document.getElementById('row-name').classList.add('visible');
+
+                    // 2. T.C. Kimlik gelir
+                    setTimeout(() => {
+                        document.getElementById('user-tc').innerText = user.tc;
+                        document.getElementById('row-tc').classList.add('visible');
+                    }, 250);
+
+                    // 3. Unvan gelir
+                    setTimeout(() => {
+                        document.getElementById('user-title').innerText = user.title;
+                        document.getElementById('row-title').classList.add('visible');
+                    }, 500);
+
+                    // 4. Sicil No gelir
+                    setTimeout(() => {
+                        document.getElementById('user-sicil').innerText = user.sicilNo;
+                        document.getElementById('row-sicil').classList.add('visible');
+                    }, 750);
+
+                    // 5. Geçerlilik Tarihi gelir
+                    setTimeout(() => {
+                        document.getElementById('user-expire').innerText = user.expire;
+                        document.getElementById('row-expire').classList.add('visible');
+                    }, 1000);
+
+                    // 6. En son Geçerli Kimlik Kartı ✅ Pop-Up olarak fırlar
+                    setTimeout(() => {
+                        badge.className = 'status-badge status-valid show-popup';
+                        badge.innerText = 'Geçerli Kimlik Kartı ✅';
+                    }, 1250);
+
                 } else {
                     document.getElementById('user-photo').style.display = 'none';
                     document.getElementById('user-name').innerText = 'KAYIT BULUNAMADI';
-                    document.getElementById('user-tc').innerText = '-';
-                    document.getElementById('user-title').innerText = '-';
-                    document.getElementById('user-sicil').innerText = '-'; 
-                    document.getElementById('user-expire').innerText = '-';
+                    document.getElementById('row-name').classList.add('visible');
+                    document.getElementById('user-sicil').innerText = queryId || 'Parametre Eksik';
+                    document.getElementById('row-sicil').classList.add('visible');
                     
-                    const badge = document.getElementById('status-badge');
-                    badge.className = 'status-badge status-invalid';
-                    badge.innerText = '✕ Geçersiz veya Sahte Kimlik';
+                    badge.className = 'status-badge status-invalid show-popup';
+                    badge.innerText = 'Geçersiz / Sahte Kimlik Kartı ✕';
                 }
-            }, 1500); 
+            }, 1200); 
         }
 
         if (!document.hidden) {
