@@ -38,7 +38,7 @@
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
 </div>
 
-<!-- TUR TAKSİT TABLOSU ALANI -->
+<!-- TUR TAKSİT TABLOSU ALANI (Sadece Personel Hesaplama & WhatsApp Gönderimi) -->
 <div id="taksitTablosuCard" class="card" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
     <h2>💳 Tur Taksit Hesaplama Tablosu</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
@@ -168,7 +168,7 @@
     </div>
 
     <div class="file-upload-box">
-        <div class="file-upload-title">💳 Tur Fiyatları Tablosu</div>
+        <div class="file-upload-title">💳 Tur Fiyatları ve Oran Tablosu</div>
         <div style="font-size:13px; color:#64748b; margin-bottom:10px;">
             <strong>turfiyatlari.json</strong> dosyasını seçin.
         </div>
@@ -470,10 +470,10 @@
         </div>
     </div>
 
-    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ -->
+    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ (OPERATÖR GİRİŞİ YAPILINCA AÇILAN ALAN) -->
     <div id="adminPanelCard" class="admin-panel-outer">
         <div class="admin-panel-header">
-            <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı Ekleme Paneli</h2>
+            <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı ve Yönetici Paneli</h2>
         </div>
 
         <div class="admin-split-grid">
@@ -580,7 +580,7 @@
             </div>
         </div>
 
-        <div id="gecmisHavuzBlok" class="gecmis-havuz-blok admin-gecmis-card">
+        <div id="gecmisHavuzBlok" class="gecmis-havuz-blok admin-gecmis-card" style="margin-bottom: 25px;">
             <div class="gecmis-havuz-baslik" onclick="gecmisHavuzuAcKapat()">
                 <span>🗄️ Geçmiş Havuzdaki Turlar</span>
                 <span class="gecmis-havuz-ok">▼</span>
@@ -590,6 +590,22 @@
                 <div id="adminTurListesiGecmis"></div>
             </div>
         </div>
+
+        <!-- OPERATÖRE ÖZEL: TUR TAKSİT ORAN TABLOSU GÜNCELLEME VE İNDİRME ALANI -->
+        <div style="background: #fffdf8; border: 1px solid #fde68a; border-radius: 12px; padding: 22px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 16px; border-bottom: none; color: #92400e;">⚙️ Tur Taksit Oran Tablosu Yönetimi</h3>
+                <button onclick="turFiyatlariniDisariAktar()" class="btn-orange btn-small">💾 Güncel turfiyatlari.json İndir</button>
+            </div>
+            <p style="font-size: 12px; color: #78350f; margin-top: 0; margin-bottom: 15px;">
+                Banka komisyon oranları değiştiğinde buradan oranları (% olarak) güncelleyebilirsiniz. Güncelleme anında taksit hesaplama tablosuna yansır. İndirdiğiniz yeni dosyayı panel klasörüne atarak kalıcı hale getirebilirsiniz.
+            </p>
+            
+            <div id="taksitOranGuncellemeGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 10px;">
+                <!-- JavaScript dinamik kutuları buraya basar -->
+            </div>
+        </div>
+
     </div>
 </div>
 

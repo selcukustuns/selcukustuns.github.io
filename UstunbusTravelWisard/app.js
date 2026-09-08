@@ -1,19 +1,10 @@
-const OPERATOR_HESAPLARI = [
-    {
-        kullaniciAdi: "selcukustun",
-        sifreSha256: "3cb81a2ce0ef2ef78aa7cff1785532a24c568ae98c8c502b489bcda276805b22"
-    }
-];
+/* ============================================================
+   OPERATÖR ERİŞİMİ (Kullanıcı: selcukustun | Şifre: selcukustun1234)
+   ============================================================ */
+const OPERATOR_KULLANICI_ADI = "selcukustun";
+const OPERATOR_SIFRE = "selcukustun1234";
 
 let operatorOturumuAcik = false;
-
-async function metinSha256(metin) {
-    const veri = new TextEncoder().encode(metin);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", veri);
-    return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-}
 
 function panelSekmesiDegistir(sekme) {
     const loginCard = document.getElementById("operatorLoginCard");
@@ -34,28 +25,28 @@ function panelSekmesiDegistir(sekme) {
     const kdvTab = document.getElementById("tabKdv");
     const taksitTab = document.getElementById("tabTaksit");
 
-    personelTab.classList.remove("active");
-    operatorTab.classList.remove("active");
-    fileTab.classList.remove("active");
-    evrakTab.classList.remove("active");
+    if (personelTab) personelTab.classList.remove("active");
+    if (operatorTab) operatorTab.classList.remove("active");
+    if (fileTab) fileTab.classList.remove("active");
+    if (evrakTab) evrakTab.classList.remove("active");
     if (mesafeTab) mesafeTab.classList.remove("active");
     if (kdvTab) kdvTab.classList.remove("active");
     if (taksitTab) taksitTab.classList.remove("active");
 
-    loginCard.style.display = "none";
-    adminCard.style.display = "none";
-    fileCard.style.display = "none";
-    evrakCard.style.display = "none";
+    if (loginCard) loginCard.style.display = "none";
+    if (adminCard) adminCard.style.display = "none";
+    if (fileCard) fileCard.style.display = "none";
+    if (evrakCard) evrakCard.style.display = "none";
     if (mesafeCard) mesafeCard.style.display = "none";
     if (kdvCard) kdvCard.style.display = "none";
     if (taksitCard) taksitCard.style.display = "none";
-    personelCard.style.display = "none";
-    hizliMesajCard.style.display = "none";
+    if (personelCard) personelCard.style.display = "none";
+    if (hizliMesajCard) hizliMesajCard.style.display = "none";
 
     if (sekme === "personel") {
-        personelTab.classList.add("active");
-        personelCard.style.display = "block";
-        hizliMesajCard.style.display = "block";
+        if (personelTab) personelTab.classList.add("active");
+        if (personelCard) personelCard.style.display = "block";
+        if (hizliMesajCard) hizliMesajCard.style.display = "block";
         return;
     }
 
@@ -67,14 +58,14 @@ function panelSekmesiDegistir(sekme) {
     }
 
     if (sekme === "dosya") {
-        fileTab.classList.add("active");
-        fileCard.style.display = "block";
+        if (fileTab) fileTab.classList.add("active");
+        if (fileCard) fileCard.style.display = "block";
         return;
     }
 
     if (sekme === "evrak") {
-        evrakTab.classList.add("active");
-        evrakCard.style.display = "block";
+        if (evrakTab) evrakTab.classList.add("active");
+        if (evrakCard) evrakCard.style.display = "block";
         return;
     }
 
@@ -88,23 +79,26 @@ function panelSekmesiDegistir(sekme) {
     if (sekme === "kdv") {
         if (kdvTab) kdvTab.classList.add("active");
         if (kdvCard) kdvCard.style.display = "block";
-        document.getElementById("kdvTutar").focus();
+        const kdvInp = document.getElementById("kdvTutar");
+        if (kdvInp) kdvInp.focus();
         return;
     }
 
-    operatorTab.classList.add("active");
+    if (operatorTab) operatorTab.classList.add("active");
 
     if (operatorOturumuAcik) {
-        adminCard.style.display = "block";
+        if (adminCard) adminCard.style.display = "block";
+        taksitOranGuncellemeGridCiz();
     } else {
-        loginCard.style.display = "block";
-        document.getElementById("operatorUsername").focus();
+        if (loginCard) loginCard.style.display = "block";
+        const uInp = document.getElementById("operatorUsername");
+        if (uInp) uInp.focus();
     }
 }
 
-async function operatorGirisYap() {
-    const kullaniciAdi = document.getElementById("operatorUsername").value.trim();
-    const sifre = document.getElementById("operatorPassword").value;
+function operatorGirisYap() {
+    const kullaniciAdi = document.getElementById("operatorUsername").value.trim().toLowerCase();
+    const sifre = document.getElementById("operatorPassword").value.trim();
     const hata = document.getElementById("operatorLoginError");
 
     hata.style.display = "none";
@@ -116,22 +110,19 @@ async function operatorGirisYap() {
         return;
     }
 
-    const hesap = OPERATOR_HESAPLARI.find(h => h.kullaniciAdi === kullaniciAdi);
-    const sifreHash = await metinSha256(sifre);
-
-    if (!hesap || hesap.sifreSha256 !== sifreHash) {
+    if (kullaniciAdi === OPERATOR_KULLANICI_ADI && sifre === OPERATOR_SIFRE) {
+        operatorOturumuAcik = true;
+        document.getElementById("operatorLoginCard").style.display = "none";
+        document.getElementById("adminPanelCard").style.display = "block";
+        document.getElementById("operatorStatus").style.display = "inline-block";
+        document.getElementById("cikisYapBtnUst").style.display = "inline-flex";
+        taksitOranGuncellemeGridCiz();
+        alert("Operatör girişi başarılı. Tur Programı ve Yönetici Paneli açıldı.");
+    } else {
         hata.textContent = "Kullanıcı adı veya şifre hatalı.";
         hata.style.display = "block";
         document.getElementById("operatorPassword").value = "";
-        return;
     }
-
-    operatorOturumuAcik = true;
-    document.getElementById("operatorLoginCard").style.display = "none";
-    document.getElementById("adminPanelCard").style.display = "block";
-    document.getElementById("operatorStatus").style.display = "inline-block";
-    document.getElementById("cikisYapBtnUst").style.display = "inline-flex";
-    alert("Operatör girişi başarılı. Tur Programı Ekleme Paneli açıldı.");
 }
 
 function operatorCikisYap() {
@@ -145,9 +136,9 @@ function operatorCikisYap() {
 }
 
 /* ============================================================
-   TUR TAKSİT MOTORU & JSON FİYAT YÖNETİMİ
+   TUR TAKSİT MOTORU & JSON FİYAT/ORAN YÖNETİMİ
    ============================================================ */
-const TAKSIT_ORANLARI = [
+let TAKSIT_ORANLARI = [
     { taksit: 2, oran: 7.20 },
     { taksit: 3, oran: 9.15 },
     { taksit: 4, oran: 11.10 },
@@ -192,12 +183,29 @@ function turfiyatlariniOtomatikYukle() {
             return res.json();
         })
         .then(veri => {
-            SEZONLUK_TUR_FIYATLARI = veri;
+            turFiyatVerisiniUygula(veri);
             console.log("✅ turfiyatlari.json otomatik yüklendi");
         })
         .catch(() => {
-            console.warn("⚠️ turfiyatlari.json okunamadı, dahili liste devrede.");
+            console.warn("⚠️ turfiyatlari.json bulunamadı, dahili liste devrede.");
         });
+}
+
+function turFiyatVerisiniUygula(veri) {
+    if (veri.fiyatlar && typeof veri.fiyatlar === 'object') {
+        SEZONLUK_TUR_FIYATLARI = veri.fiyatlar;
+    } else if (typeof veri === 'object' && !veri.oranlar) {
+        SEZONLUK_TUR_FIYATLARI = veri;
+    }
+    
+    if (veri.oranlar && Array.isArray(veri.oranlar)) {
+        TAKSIT_ORANLARI = veri.oranlar;
+    }
+    
+    taksitArayuzunuHazirla();
+    if (operatorOturumuAcik) {
+        taksitOranGuncellemeGridCiz();
+    }
 }
 
 function turFiyatlariniYukle(event) {
@@ -208,8 +216,7 @@ function turFiyatlariniYukle(event) {
     reader.onload = function(e) {
         try {
             const veri = JSON.parse(e.target.result);
-            SEZONLUK_TUR_FIYATLARI = veri;
-            taksitArayuzunuHazirla();
+            turFiyatVerisiniUygula(veri);
             alert("turfiyatlari.json başarıyla yüklendi ve güncellendi!");
         } catch (err) {
             alert("Dosya okunamadı veya JSON formatı geçersiz.");
@@ -217,6 +224,48 @@ function turFiyatlariniYukle(event) {
     };
     reader.readAsText(file);
     event.target.value = "";
+}
+
+function turFiyatlariniDisariAktar() {
+    const paket = {
+        oranlar: TAKSIT_ORANLARI,
+        fiyatlar: SEZONLUK_TUR_FIYATLARI
+    };
+    const jsonStr = JSON.stringify(paket, null, 2);
+    dosyaIndir(jsonStr, "turfiyatlari.json", "application/json");
+}
+
+function taksitOranGuncellemeGridCiz() {
+    const container = document.getElementById("taksitOranGuncellemeGrid");
+    if (!container) return;
+    container.innerHTML = "";
+
+    TAKSIT_ORANLARI.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.style.background = "#ffffff";
+        div.style.border = "1px solid #cbd5e1";
+        div.style.borderRadius = "6px";
+        div.style.padding = "8px 10px";
+
+        div.innerHTML = `
+            <span style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:4px;">${item.taksit} Taksit:</span>
+            <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-weight:700; color:#64748b; font-size:13px;">%</span>
+                <input type="number" step="0.01" value="${item.oran}" 
+                    style="margin:0; padding:6px; font-size:13px; font-weight:700;" 
+                    oninput="taksitOraniDegisti(${index}, this.value)">
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function taksitOraniDegisti(index, yeniDeger) {
+    const val = parseFloat(yeniDeger);
+    if (!isNaN(val) && val >= 0) {
+        TAKSIT_ORANLARI[index].oran = val;
+        taksitHesapla();
+    }
 }
 
 function taksitModuDegistir(mod) {
@@ -238,6 +287,7 @@ function taksitTurTipiFiltrele(tip) {
 
 function taksitArayuzunuHazirla() {
     const bolgeSelect = document.getElementById('taksitBolgeSecim');
+    if (!bolgeSelect) return;
     bolgeSelect.innerHTML = "";
 
     let kaynakList = TUM_BOLGELER;
@@ -297,9 +347,11 @@ function taksitHesapla() {
     }
 
     const toplamBazTutar = kisiBasiFiyat * kisiSayisi;
-    document.getElementById('taksitBazTutarGosterge').innerText = paraFormatla(toplamBazTutar);
+    const bazGosterge = document.getElementById('taksitBazTutarGosterge');
+    if (bazGosterge) bazGosterge.innerText = paraFormatla(toplamBazTutar);
 
     const tabloGovdesi = document.getElementById('taksitTabloGovdesi');
+    if (!tabloGovdesi) return;
     tabloGovdesi.innerHTML = "";
 
     if (toplamBazTutar <= 0) {
@@ -1083,11 +1135,7 @@ function turListesiniOtomatikYukle() {
             turListesiniUygula(veri, "tur_listesi.json (fetch)");
         })
         .catch(err => {
-            console.warn(
-                "⚠️ tur_listesi.json fetch ile okunamadı (muhtemelen dosya çift tıklanarak açıldı). " +
-                "tur_listesi.js üzerinden yedek yöntem deneniyor.",
-                err
-            );
+            console.warn("⚠️ tur_listesi.json fetch ile okunamadı. tur_listesi.js deneniyor.", err);
             turListesiniScriptTagIleYukle();
         });
 }
@@ -1107,10 +1155,7 @@ function turListesiniScriptTagIleYukle() {
 }
 
 function otomatikTurYuklemeBasarisiz() {
-    console.warn(
-        "⚠️ Ne tur_listesi.json (fetch) ne de tur_listesi.js (script) otomatik yüklenebildi. " +
-        "Manuel yükleme alanını kullanabilirsiniz."
-    );
+    console.warn("⚠️ Otomatik tur listesi yüklenemedi — manuel JSON seçebilirsiniz.");
     const secici = document.getElementById("dosyaOku");
     if (secici) {
         secici.title = "Otomatik tur listesi yüklenemedi — manuel JSON seçebilirsiniz.";
@@ -1339,7 +1384,8 @@ function whatsappGonder() {
 
 function kopyalandiGoster(btnId = "btnKopyala") {
     const btn = document.getElementById(btnId);
-    if(btn.dataset.zamanlayici) clearTimeout(Number(btn.dataset.zamanlayici));
+    if (!btn) return;
+    if (btn.dataset.zamanlayici) clearTimeout(Number(btn.dataset.zamanlayici));
 
     const eskiMetin = btn.dataset.orijinalMetin || btn.innerText;
     btn.dataset.orijinalMetin = eskiMetin;
@@ -1511,11 +1557,11 @@ function duyuruKutuphanesiniOtomatikYukle() {
                         if (typeof TUR_DUYURUSU_JSON !== "undefined" && Array.isArray(TUR_DUYURUSU_JSON)) {
                             uygula(TUR_DUYURUSU_JSON, "turduyurusu.js (otomatik yedek)");
                         } else {
-                            console.warn("⚠️ Otomatik duyuru dosyası bulunamadı/okunamadı. Gerekirse üstteki 'Duyuru Kütüphanesini Okutun' alanından elle yükleyin.");
+                            console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
                         }
                     };
                     script.onerror = function() {
-                        console.warn("⚠️ Otomatik duyuru dosyası bulunamadı/okunamadı. Gerekirse üstteki 'Duyuru Kütüphanesini Okutun' alanından elle yükleyin.");
+                        console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
                     };
                     document.head.appendChild(script);
                 });
