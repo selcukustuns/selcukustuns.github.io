@@ -145,13 +145,32 @@ async function operatorGirisYap() {
     }
 }
 
-function operatorCikisYap() {
+async function operatorCikisYap() {
+    const btn = document.getElementById("cikisYapBtnUst");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Çıkış Yapılıyor...`;
+        
+        // Kısa bir çıkış animasyonu beklemesi
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        btn.className = "btn-red btn-small btn-danger-anim";
+        btn.innerHTML = `🔒 Oturum Kapatıldı`;
+        
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
+        btn.disabled = false;
+        btn.className = "btn-red btn-small";
+        btn.innerHTML = "🔒 Çıkış Yap";
+    }
+
     operatorOturumuAcik = false;
     document.getElementById("operatorUsername").value = "";
     document.getElementById("operatorPassword").value = "";
     document.getElementById("operatorLoginError").style.display = "none";
     document.getElementById("operatorStatus").style.display = "none";
     document.getElementById("cikisYapBtnUst").style.display = "none";
+    
     panelSekmesiDegistir("personel");
 }
 

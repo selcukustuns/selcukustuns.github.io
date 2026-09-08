@@ -735,3 +735,10 @@ button:hover {
     pointer-events: none;
     transform: scale(1.02);
 }
+
+
+.btn-danger-anim {
+    background-color: var(--danger) !important;
+    pointer-events: none;
+    transform: scale(1.02);
+}
