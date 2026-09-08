@@ -66,40 +66,54 @@ h2, h3 {
     transform: translateY(-1px);
 }
 
-#tabAll {
+/* ------------------------------------------------------------
+   SEKME BUTONLARI: ÇAĞRI PERSONELİ + TAKSİT TABLOSU RENK UYUMU
+   ------------------------------------------------------------ */
+/* Pasif Durumlar */
+#tabAll,
+#tabTaksitAll {
     color: #1f2937;
     background: #fff;
     border-color: #94a3b8;
 }
 
-#tabGunu {
+#tabGunu,
+#tabTaksitGunu {
     color: #1f2937;
     background: #fff;
     border-color: #f59e0b;
 }
 
-#tabKona {
+#tabKona,
+#tabTaksitKona {
     color: #1f2937;
     background: #fff;
     border-color: #22c55e;
 }
 
-#tabAll.active {
+/* Aktif Durumlar: Tüm Turlar Mavi, Günübirlik Turuncu, Konaklamalı Yeşil */
+#tabAll.active,
+#tabTaksitAll.active {
     background: #3498db;
     color: #fff;
     border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.35);
 }
 
-#tabGunu.active {
+#tabGunu.active,
+#tabTaksitGunu.active {
     background: #f59e0b;
     color: #fff;
     border-color: #f59e0b;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
 
-#tabKona.active {
+#tabKona.active,
+#tabTaksitKona.active {
     background: #22c55e;
     color: #fff;
     border-color: #22c55e;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.35);
 }
 
 label { 
@@ -623,4 +637,52 @@ button:hover {
     font-size: 22px;
     font-weight: 800;
     margin-top: 5px;
+}
+
+/* ============================================================
+   TUR TAKSİT TABLOSU STİLLERİ
+   ============================================================ */
+.taksit-tablosu {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.taksit-tablosu th {
+    background: var(--dark);
+    color: white;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    letter-spacing: 0.3px;
+}
+
+.taksit-tablosu th:first-child,
+.taksit-tablosu th:nth-child(2) {
+    text-align: left;
+}
+
+.taksit-tablosu td {
+    padding: 12px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: right;
+    font-weight: 600;
+}
+
+.taksit-tablosu td:first-child,
+.taksit-tablosu td:nth-child(2) {
+    text-align: left;
+}
+
+.taksit-tablosu tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.taksit-tablosu tbody tr:last-child td {
+    border-bottom: none;
 }

@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Google Places API (İşletme ve Canlı Mekan Arama Motoru) -->
+    <!-- Google Places API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBCNG51vJ3KWZAk55l3Qd_bYSdPICQKHUE&libraries=places&language=tr&region=TR"></script>
 </head>
 <body>
@@ -29,6 +29,7 @@
 <!-- ÜST SEKME BARI -->
 <div class="ust-panel-tabs">
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
+    <button id="tabTaksit" class="ust-panel-tab" onclick="panelSekmesiDegistir('taksit')">💳 Tur Taksit Tablosu</button>
     <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
@@ -37,11 +38,117 @@
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
 </div>
 
+<!-- TUR TAKSİT TABLOSU ALANI -->
+<div id="taksitTablosuCard" class="card" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
+    <h2>💳 Tur Taksit Hesaplama Tablosu</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
+        Sezondaki güncel fiyatlı turlarımızdan seçim yaparak veya manuel tutar girerek tüm taksit vade farklarını anında hesaplayın.
+    </p>
+
+    <!-- Mod Seçimi: Otomatik Tur / Manuel Tutar -->
+    <div class="kdv-yon-secici" style="margin-bottom:18px;">
+        <button type="button" id="btnTaksitModTur" class="kdv-yon-btn active" onclick="taksitModuDegistir('tur')">
+            🚌 Güncel Tur Listesinden Seç
+        </button>
+        <button type="button" id="btnTaksitModManuel" class="kdv-yon-btn" onclick="taksitModuDegistir('manuel')">
+            ✍️ Manuel Tutar Girişi
+        </button>
+    </div>
+
+    <!-- 1. MOD: OTOMATİK TUR SEÇİMİ BLOKU -->
+    <div id="taksitTurSecimBlok">
+        <div class="tab-container" style="margin-bottom: 12px;">
+            <button class="tab-btn active" id="tabTaksitAll" onclick="taksitTurTipiFiltrele('all')">Tüm Turlar</button>
+            <button class="tab-btn" id="tabTaksitGunu" onclick="taksitTurTipiFiltrele('gunubirlik')">☀️ Günübirlik</button>
+            <button class="tab-btn" id="tabTaksitKona" onclick="taksitTurTipiFiltrele('konaklamali')">🏨 Konaklamalı</button>
+        </div>
+
+        <div class="row-inputs">
+            <div>
+                <label for="taksitBolgeSecim">📍 Tur / Rota Seçimi (Sadece Fiyatı Tanımlı Olanlar):</label>
+                <select id="taksitBolgeSecim" onchange="taksitBolgeDegisti()"></select>
+            </div>
+            <div>
+                <label for="taksitSureSecim">⏱️ Süre / Gece Sayısı:</label>
+                <select id="taksitSureSecim" onchange="taksitSureDegisti()"></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MOD: MANUEL TUTAR GİRİŞ BLOKU -->
+    <div id="taksitManuelBlok" style="display:none;">
+        <label for="taksitManuelTutar">Kişi Başı Tur Tutarı (₺):</label>
+        <input type="number" id="taksitManuelTutar" placeholder="Örn: 7500" oninput="taksitHesapla()">
+    </div>
+
+    <!-- Ortak Kişi Sayısı Çarpanı ve Baz Fiyat Özeti -->
+    <div class="row-inputs" style="align-items: center; margin-top: 5px;">
+        <div>
+            <label for="taksitKisiSayisi">👥 Kişi Sayısı:</label>
+            <select id="taksitKisiSayisi" onchange="taksitHesapla()">
+                <option value="1">1 Kişi</option>
+                <option value="2">2 Kişi</option>
+                <option value="3">3 Kişi</option>
+                <option value="4">4 Kişi</option>
+                <option value="5">5 Kişi</option>
+                <option value="6">6 Kişi</option>
+                <option value="7">7 Kişi</option>
+                <option value="8">8 Kişi</option>
+                <option value="9">9 Kişi</option>
+                <option value="10">10 Kişi</option>
+            </select>
+        </div>
+        <div style="background: #f1f5f9; padding: 12px 16px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 8px;">
+            <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Nakit / Tek Çekim Baz Tutar</span>
+            <div id="taksitBazTutarGosterge" style="font-size: 20px; font-weight: 800; color: var(--primary);">0,00 ₺</div>
+        </div>
+    </div>
+
+    <!-- DİNAMİK TÜM TAKSİTLER TABLOSU -->
+    <div style="overflow-x: auto; margin-top: 20px;">
+        <table class="taksit-tablosu">
+            <thead>
+                <tr>
+                    <th>Taksit Sayısı</th>
+                    <th>Vade Oranı</th>
+                    <th>Aylık Taksit Tutarı</th>
+                    <th>Toplam Vade Farkı</th>
+                    <th>Karttan Çekilecek Tutar</th>
+                </tr>
+            </thead>
+            <tbody id="taksitTabloGovdesi">
+                <!-- JavaScript tarafından doldurulur -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MÜŞTERİ BİLGİLERİ VE WHATSAPP GÖNDERİM BARI -->
+    <div style="margin-top: 22px; background: #f0fdf4; padding: 16px 20px; border-radius: 10px; border: 1px solid #bbf7d0;">
+        <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px;">💬 Müşteriye WhatsApp Taksit Bilgisi Gönder</h4>
+        
+        <div class="row-inputs" style="max-width: 600px; margin-bottom: 12px;">
+            <div>
+                <label style="margin-top:0; color:#166534;" for="taksitMusteriAd">Müşteri Adı Soyadı (opsiyonel):</label>
+                <input type="text" id="taksitMusteriAd" placeholder="Müşteri Adı Soyadı" style="margin-bottom:0; background:#fff;">
+            </div>
+            <div>
+                <label style="margin-top:0; color:#166534;" for="taksitMusteriTel">Telefon:</label>
+                <input type="text" id="taksitMusteriTel" placeholder="Telefon (532...)" style="margin-bottom:0; background:#fff;">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button onclick="taksitWhatsappGonder()" class="btn-green" style="flex:1; min-width:220px;">💬 WhatsApp'tan Gönder</button>
+            <button onclick="taksitTablosuKopyala()" id="btnTaksitKopyala" class="btn-blue" style="flex:1; min-width:220px; transition: background-color 0.2s;">📋 Taksit Dökümünü Kopyala</button>
+        </div>
+    </div>
+</div>
+
 <!-- Dosya Yükleme Alanı -->
 <div id="fileUploadCard" class="card file-upload-card">
     <h2>📂 Dosya Yükleme</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px;">
-        Otomatik dosya yükleme başarısız olduğunda tur listesi ve duyuru kütüphanesini buradan manuel olarak yükleyebilirsiniz.
+        Otomatik dosya yükleme başarısız olduğunda sistem dosyalarını buradan manuel olarak yükleyebilirsiniz.
     </p>
 
     <div class="file-upload-box">
@@ -58,6 +165,14 @@
             Bölge ve süreye özel duyuru JSON dosyasını seçin.
         </div>
         <input type="file" id="duyuruDosyaOku" accept=".json" onchange="duyuruSablonlariniYukle(event)" style="margin:0; background:white; color:#333;">
+    </div>
+
+    <div class="file-upload-box">
+        <div class="file-upload-title">💳 Tur Fiyatları Tablosu</div>
+        <div style="font-size:13px; color:#64748b; margin-bottom:10px;">
+            <strong>turfiyatlari.json</strong> dosyasını seçin.
+        </div>
+        <input type="file" id="fiyatDosyaOku" accept=".json" onchange="turFiyatlariniYukle(event)" style="margin:0; background:white; color:#333;">
     </div>
 </div>
 
@@ -169,14 +284,13 @@
     <div id="haritaAlani" style="width:100%; height:400px; border-radius:8px; border:1px solid #cbd5e1; background:#eaedf1;"></div>
 </div>
 
-<!-- KDV Hesaplama Alanı (YENİ MODÜL) -->
+<!-- KDV Hesaplama Alanı -->
 <div id="kdvHesaplayiciCard" class="card" style="display:none; max-width: 850px; margin: 0 auto 20px auto;">
     <h2>🧮 Hızlı KDV Hesaplama Aracı</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
         Acenta, otel faturası veya bilet bedeli için KDV Dahil / KDV Hariç tutarları anında hesaplayın.
     </p>
 
-    <!-- İşlem Yönü Seçimi -->
     <label>İşlem Türü:</label>
     <div class="kdv-yon-secici">
         <button type="button" id="btnKdvDahilMod" class="kdv-yon-btn active" onclick="kdvModDegistir('dahil')">
@@ -195,7 +309,7 @@
         <div>
             <label>KDV Oranı (%):</label>
             <div class="kdv-oran-butonlar">
-                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(1, this)">%1 (Yemek/İçecek)</button>
+                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(1, this)">%1</button>
                 <button type="button" class="kdv-oran-btn active" onclick="kdvOranSec(10, this)">%10 (Otel/Konaklama)</button>
                 <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(20, this)">%20 (Hizmet/Genel)</button>
             </div>
@@ -203,7 +317,6 @@
         </div>
     </div>
 
-    <!-- Sonuç Paneli -->
     <div class="grid-3" style="margin-top: 15px;">
         <div class="kdv-sonuc-kutu">
             <span class="info-title">KDV Hariç Net Tutar</span>

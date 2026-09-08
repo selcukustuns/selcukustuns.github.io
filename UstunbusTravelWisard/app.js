@@ -1,10 +1,7 @@
-/* ============================================================
-   OPERATÖR ERİŞİMİ
-   ============================================================ */
 const OPERATOR_HESAPLARI = [
     {
         kullaniciAdi: "selcukustun",
-        sifreSha256: "d5f4d4a0f1d253da1b798f4f27e93e06dfef8b5f27e40c0c956f8ff5adb4e360"
+        sifreSha256: "3cb81a2ce0ef2ef78aa7cff1785532a24c568ae98c8c502b489bcda276805b22"
     }
 ];
 
@@ -24,7 +21,8 @@ function panelSekmesiDegistir(sekme) {
     const fileCard = document.getElementById("fileUploadCard");
     const evrakCard = document.getElementById("evrakYonetimiCard");
     const mesafeCard = document.getElementById("mesafeOlcerCard");
-    const kdvCard = document.getElementById("kdvHesaplayiciCard"); // KDV Kartı
+    const kdvCard = document.getElementById("kdvHesaplayiciCard");
+    const taksitCard = document.getElementById("taksitTablosuCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -33,7 +31,8 @@ function panelSekmesiDegistir(sekme) {
     const fileTab = document.getElementById("tabDosya");
     const evrakTab = document.getElementById("tabEvrak");
     const mesafeTab = document.getElementById("tabMesafe");
-    const kdvTab = document.getElementById("tabKdv"); // KDV Sekmesi
+    const kdvTab = document.getElementById("tabKdv");
+    const taksitTab = document.getElementById("tabTaksit");
 
     personelTab.classList.remove("active");
     operatorTab.classList.remove("active");
@@ -41,6 +40,7 @@ function panelSekmesiDegistir(sekme) {
     evrakTab.classList.remove("active");
     if (mesafeTab) mesafeTab.classList.remove("active");
     if (kdvTab) kdvTab.classList.remove("active");
+    if (taksitTab) taksitTab.classList.remove("active");
 
     loginCard.style.display = "none";
     adminCard.style.display = "none";
@@ -48,6 +48,7 @@ function panelSekmesiDegistir(sekme) {
     evrakCard.style.display = "none";
     if (mesafeCard) mesafeCard.style.display = "none";
     if (kdvCard) kdvCard.style.display = "none";
+    if (taksitCard) taksitCard.style.display = "none";
     personelCard.style.display = "none";
     hizliMesajCard.style.display = "none";
 
@@ -55,6 +56,13 @@ function panelSekmesiDegistir(sekme) {
         personelTab.classList.add("active");
         personelCard.style.display = "block";
         hizliMesajCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "taksit") {
+        if (taksitTab) taksitTab.classList.add("active");
+        if (taksitCard) taksitCard.style.display = "block";
+        taksitArayuzunuHazirla();
         return;
     }
 
@@ -137,9 +145,255 @@ function operatorCikisYap() {
 }
 
 /* ============================================================
+   TUR TAKSİT MOTORU & JSON FİYAT YÖNETİMİ
+   ============================================================ */
+const TAKSIT_ORANLARI = [
+    { taksit: 2, oran: 7.20 },
+    { taksit: 3, oran: 9.15 },
+    { taksit: 4, oran: 11.10 },
+    { taksit: 5, oran: 13.90 },
+    { taksit: 6, oran: 15.20 },
+    { taksit: 7, oran: 16.40 },
+    { taksit: 8, oran: 18.10 },
+    { taksit: 9, oran: 19.35 },
+    { taksit: 10, oran: 22.20 },
+    { taksit: 11, oran: 24.30 },
+    { taksit: 12, oran: 26.40 }
+];
+
+let SEZONLUK_TUR_FIYATLARI = {
+    "eskisehir": { "0": 2000 },
+    "kapadokya": { "0": 1000 },
+    "gaziantep": { "0": 1250 },
+    "ankara": { "0": 1750 },
+    "mut_yerkopru": { "0": 1000 },
+    "mardin_midyat": { "0": 2000 },
+    "konya": { "0": 1300 },
+    "dogu_karadeniz": { "2": 7000, "3": 10000, "4": 13000 },
+    "dogu_anadolu": { "3": 11500 },
+    "bati_karadeniz": { "1": 5250, "2": 8500 },
+    "kuzey_ege": { "1": 5750, "2": 8500 },
+    "kas_demre": { "1": 5500 },
+    "istanbul": { "2": 7300 },
+    "canakkale": { "1": 6500 },
+    "gap": { "1": 4750 },
+    "guney_ege": { "3": 14500 },
+    "tunceli_kemaliye": { "1": 5000 },
+    "bursa": { "1": 5750 }
+};
+
+let aktifTaksitModu = 'tur';
+let aktifTaksitTurTipi = 'all';
+
+function turfiyatlariniOtomatikYukle() {
+    fetch("turfiyatlari.json", { cache: "no-store" })
+        .then(res => {
+            if (!res.ok) throw new Error("turfiyatlari.json okunamadı");
+            return res.json();
+        })
+        .then(veri => {
+            SEZONLUK_TUR_FIYATLARI = veri;
+            console.log("✅ turfiyatlari.json otomatik yüklendi");
+        })
+        .catch(() => {
+            console.warn("⚠️ turfiyatlari.json okunamadı, dahili liste devrede.");
+        });
+}
+
+function turFiyatlariniYukle(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const veri = JSON.parse(e.target.result);
+            SEZONLUK_TUR_FIYATLARI = veri;
+            taksitArayuzunuHazirla();
+            alert("turfiyatlari.json başarıyla yüklendi ve güncellendi!");
+        } catch (err) {
+            alert("Dosya okunamadı veya JSON formatı geçersiz.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+}
+
+function taksitModuDegistir(mod) {
+    aktifTaksitModu = mod;
+    document.getElementById('btnTaksitModTur').classList.toggle('active', mod === 'tur');
+    document.getElementById('btnTaksitModManuel').classList.toggle('active', mod === 'manuel');
+    document.getElementById('taksitTurSecimBlok').style.display = (mod === 'tur') ? 'block' : 'none';
+    document.getElementById('taksitManuelBlok').style.display = (mod === 'manuel') ? 'block' : 'none';
+    taksitHesapla();
+}
+
+function taksitTurTipiFiltrele(tip) {
+    aktifTaksitTurTipi = tip;
+    document.getElementById('tabTaksitAll').classList.toggle('active', tip === 'all');
+    document.getElementById('tabTaksitGunu').classList.toggle('active', tip === 'gunubirlik');
+    document.getElementById('tabTaksitKona').classList.toggle('active', tip === 'konaklamali');
+    taksitArayuzunuHazirla();
+}
+
+function taksitArayuzunuHazirla() {
+    const bolgeSelect = document.getElementById('taksitBolgeSecim');
+    bolgeSelect.innerHTML = "";
+
+    let kaynakList = TUM_BOLGELER;
+    if (aktifTaksitTurTipi === 'gunubirlik') kaynakList = GUNUBIRLIK_BOLGELER;
+    if (aktifTaksitTurTipi === 'konaklamali') kaynakList = KONAKLAMALI_BOLGELER;
+
+    kaynakList.forEach(b => {
+        if (SEZONLUK_TUR_FIYATLARI[b.code] && Object.keys(SEZONLUK_TUR_FIYATLARI[b.code]).length > 0) {
+            const opt = document.createElement("option");
+            opt.value = b.code;
+            opt.text = b.name;
+            bolgeSelect.appendChild(opt);
+        }
+    });
+
+    if (bolgeSelect.options.length > 0) {
+        taksitBolgeDegisti();
+    } else {
+        document.getElementById('taksitSureSecim').innerHTML = '<option value="">Fiyat Tanımlı Tur Bulunamadı</option>';
+        taksitHesapla();
+    }
+}
+
+function taksitBolgeDegisti() {
+    const bolge = document.getElementById('taksitBolgeSecim').value;
+    const sureSelect = document.getElementById('taksitSureSecim');
+    sureSelect.innerHTML = "";
+
+    const fiyatObj = SEZONLUK_TUR_FIYATLARI[bolge];
+    if (fiyatObj) {
+        Object.keys(fiyatObj).forEach(gece => {
+            const opt = document.createElement("option");
+            opt.value = gece;
+            opt.text = duyuruSureEtiketiGetir(gece) + ` — (${paraFormatla(fiyatObj[gece])})`;
+            sureSelect.appendChild(opt);
+        });
+    }
+    taksitHesapla();
+}
+
+function taksitSureDegisti() {
+    taksitHesapla();
+}
+
+function taksitHesapla() {
+    let kisiBasiFiyat = 0;
+    const kisiSayisi = parseInt(document.getElementById('taksitKisiSayisi').value) || 1;
+
+    if (aktifTaksitModu === 'tur') {
+        const bolge = document.getElementById('taksitBolgeSecim').value;
+        const gece = document.getElementById('taksitSureSecim').value;
+        if (SEZONLUK_TUR_FIYATLARI[bolge] && SEZONLUK_TUR_FIYATLARI[bolge][gece]) {
+            kisiBasiFiyat = parseFloat(SEZONLUK_TUR_FIYATLARI[bolge][gece]);
+        }
+    } else {
+        kisiBasiFiyat = parseFloat(document.getElementById('taksitManuelTutar').value) || 0;
+    }
+
+    const toplamBazTutar = kisiBasiFiyat * kisiSayisi;
+    document.getElementById('taksitBazTutarGosterge').innerText = paraFormatla(toplamBazTutar);
+
+    const tabloGovdesi = document.getElementById('taksitTabloGovdesi');
+    tabloGovdesi.innerHTML = "";
+
+    if (toplamBazTutar <= 0) {
+        tabloGovdesi.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">Lütfen geçerli bir tur seçin veya tutar girin.</td></tr>`;
+        return;
+    }
+
+    TAKSIT_ORANLARI.forEach(item => {
+        const vadeFarki = toplamBazTutar * (item.oran / 100);
+        const toplamCekilecek = toplamBazTutar + vadeFarki;
+        const aylikTaksit = toplamCekilecek / item.taksit;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${item.taksit} Taksit</strong></td>
+            <td><span style="color:#64748b;">%${item.oran.toFixed(2)}</span></td>
+            <td style="color:var(--warning); font-weight:700;">${paraFormatla(aylikTaksit)}</td>
+            <td style="color:#ef4444;">+${paraFormatla(vadeFarki)}</td>
+            <td style="color:var(--success); font-weight:800; font-size:15px;">${paraFormatla(toplamCekilecek)}</td>
+        `;
+        tabloGovdesi.appendChild(tr);
+    });
+}
+
+function taksitMetniDerle(musteriAdi = "") {
+    const kisiSayisi = document.getElementById('taksitKisiSayisi').value;
+    const bazTutar = document.getElementById('taksitBazTutarGosterge').innerText;
+    let turAdi = "Özel Tutar";
+
+    if (aktifTaksitModu === 'tur') {
+        const bolgeSelect = document.getElementById('taksitBolgeSecim');
+        const sureSelect = document.getElementById('taksitSureSecim');
+        turAdi = `${bolgeSelect.options[bolgeSelect.selectedIndex]?.text} (${sureSelect.options[sureSelect.selectedIndex]?.text.split('—')[0].trim()})`;
+    }
+
+    let hitap = musteriAdi ? `Sayın *${musteriAdi}*,\n\n` : "";
+
+    let metin = `${hitap}🚌 *Üstünbus Turizm - Kredi Kartı Taksit Seçenekleri*\n\n` +
+                `📍 *Tur:* ${turAdi}\n` +
+                `👥 *Kişi Sayısı:* ${kisiSayisi} Kişi\n` +
+                `💵 *Nakit / Tek Çekim Tutar:* ${bazTutar}\n\n` +
+                `💳 *Taksit Dağılım Tablosu:*\n`;
+
+    let kisiBasiFiyat = 0;
+    if (aktifTaksitModu === 'tur') {
+        const bolge = document.getElementById('taksitBolgeSecim').value;
+        const gece = document.getElementById('taksitSureSecim').value;
+        kisiBasiFiyat = SEZONLUK_TUR_FIYATLARI[bolge]?.[gece] || 0;
+    } else {
+        kisiBasiFiyat = parseFloat(document.getElementById('taksitManuelTutar').value) || 0;
+    }
+    const toplamBazTutar = kisiBasiFiyat * parseInt(kisiSayisi);
+
+    TAKSIT_ORANLARI.forEach(item => {
+        const toplamCekilecek = toplamBazTutar * (1 + (item.oran / 100));
+        const aylik = toplamCekilecek / item.taksit;
+        metin += `• *${item.taksit} Taksit:* Aylık ${paraFormatla(aylik)} (Toplam: ${paraFormatla(toplamCekilecek)})\n`;
+    });
+
+    metin += `\nDetaylı bilgi ve rezervasyon için bize ulaşabilirsiniz! 🚀`;
+    return metin;
+}
+
+function taksitTablosuKopyala() {
+    const adInput = document.getElementById("taksitMusteriAd");
+    const musteriAdi = adInput ? adInput.value.trim() : "";
+    const metin = taksitMetniDerle(musteriAdi);
+
+    navigator.clipboard.writeText(metin).then(() => {
+        kopyalandiGoster('btnTaksitKopyala');
+    });
+}
+
+function taksitWhatsappGonder() {
+    const telInput = document.getElementById("taksitMusteriTel");
+    const adInput = document.getElementById("taksitMusteriAd");
+
+    const tel = telInput ? telInput.value.trim() : "";
+    const musteriAdi = adInput ? adInput.value.trim() : "";
+
+    if (!tel) {
+        alert("Lütfen müşterinin telefon numarasını girin!");
+        if (telInput) telInput.focus();
+        return;
+    }
+
+    const metin = taksitMetniDerle(musteriAdi);
+    whatsappAc(tel, metin);
+}
+
+/* ============================================================
    KDV HESAPLAMA MOTORU
    ============================================================ */
-let aktifKdvModu = 'dahil'; // 'dahil' veya 'haric'
+let aktifKdvModu = 'dahil';
 
 function kdvModDegistir(mod) {
     aktifKdvModu = mod;
@@ -183,12 +437,10 @@ function kdvHesapla() {
     let toplamTutar = 0;
 
     if (aktifKdvModu === 'dahil') {
-        // Tutar KDV Dahil ise: Net = Tutar / (1 + Oran/100)
         toplamTutar = tutar;
         netTutar = toplamTutar / (1 + (oran / 100));
         kdvTutari = toplamTutar - netTutar;
     } else {
-        // Tutar KDV Hariç ise: Toplam = Net * (1 + Oran/100)
         netTutar = tutar;
         kdvTutari = netTutar * (oran / 100);
         toplamTutar = netTutar + kdvTutari;
@@ -521,6 +773,7 @@ window.onload = function() {
 
     turListesiniOtomatikYukle();
     duyuruKutuphanesiniOtomatikYukle();
+    turfiyatlariniOtomatikYukle();
 };
 
 function bolgeListesiGetir(tip) {
