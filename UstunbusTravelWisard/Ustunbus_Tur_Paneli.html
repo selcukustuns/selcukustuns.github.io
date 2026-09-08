@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Üstünbus Turizm - Çağrı Personeli Paneli</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Harita ve Rota Çizimi İçin Leaflet Kütüphanesi -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         :root { 
             --primary: #3498db; 
@@ -74,7 +79,6 @@
             transform: translateY(-1px);
         }
 
-        /* Pasifken tüm buton yazıları siyah/koyu ve okunabilir. */
         #tabAll {
             color: #1f2937;
             background: #fff;
@@ -93,7 +97,6 @@
             border-color: #22c55e;
         }
 
-        /* Aktif butonlar: Tüm Turlar mavi, Günübirlik turuncu, Konaklamalı yeşil. */
         #tabAll.active {
             background: #3498db;
             color: #fff;
@@ -270,6 +273,7 @@
             padding: 8px; 
             border-radius: 10px; 
             box-shadow: 0 3px 10px rgba(0,0,0,0.05); 
+            flex-wrap: wrap;
         }
         
         .ust-panel-tab { 
@@ -338,7 +342,6 @@
             margin-bottom: 7px; 
         }
 
-        /* Evrak Yönetimi Kart Stilleri */
         .evrak-item {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -375,7 +378,6 @@
             line-height: 1.4; 
         }
 
-        /* Tur Programı Ekleme Paneli: üç bağımsız panel */
         .admin-panel-outer { 
             display: none; 
             grid-column: 1 / -1; 
@@ -423,8 +425,8 @@
         .admin-form-card textarea {
             text-align: left;
         }
-        @media (max-width: 992px) {
-            .admin-form-card { max-width: 100%; }
+        @media (max-width: 992px) { 
+            .admin-form-card { max-width: 100%; } 
         }
         
         .admin-pool-card {
@@ -445,7 +447,6 @@
             padding: 10px 0; 
         }
 
-        /* Geçmiş Havuzdaki Turlar: alt bağımsız panel */
         .admin-gecmis-card { 
             border: 1px solid #cbd5e1; 
             overflow: hidden; 
@@ -550,17 +551,18 @@
 <body>
 
 <div style="background: var(--dark); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-    <div style="font-size: 22px; font-weight: bold; letter-spacing: 0.5px;">🚌 Üstünbus Turizm Tur Programı Sistemi</div>
+    <div style="font-size: 22px; font-weight: bold; letter-spacing: 0.5px;">🚌 Üstünbus Turizm Çağrı Sistemi Paneli</div>
     <div style="display:flex; align-items:center; gap:10px;">
         <a class="instagram-btn" href="https://www.instagram.com/ustunbustravel/" target="_blank" rel="noopener noreferrer" aria-label="Üstünbus Turizm Instagram">📸 Instagram</a>
         <button id="cikisYapBtnUst" onclick="operatorCikisYap()" class="btn-red btn-small" style="display:none;">🔒 Çıkış Yap</button>
     </div>
 </div>
 
-<!-- ÜST SEKME BARI: Operatör yönetim alanı varsayılan olarak kapalıdır. -->
+<!-- ÜST SEKME BARI -->
 <div class="ust-panel-tabs">
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
     <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
+    <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
@@ -590,23 +592,20 @@
     </div>
 </div>
 
-<!-- Evrak Yönetimi alanı (Ana Link Korundu, Kategoriler Altına Eklendi) -->
+<!-- Evrak Yönetimi alanı -->
 <div id="evrakYonetimiCard" class="card" style="display:none; max-width: 800px; margin: 0 auto 20px auto;">
     <h2>🗂️ Evrak Yönetimi</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
         Tur evrakları, sözleşmeler ve dosyalar için ortak Drive alanına buradan ulaşabilirsiniz.
     </p>
     
-    <!-- ESKİ ANA LİNK -->
     <a href="https://drive.google.com/drive/folders/1irHZHkgesvcm25-PgWAjvPmxdta4tIwH?authuser=terasusturizm@gmail.com" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
         <button class="btn-blue" style="width:100%; margin-bottom: 25px;">📁 Ana Drive Klasörüne Ulaş</button>
     </a>
 
-    <!-- YENİ KATEGORİLER -->
     <h3 style="font-size: 16px; border: none; padding-bottom: 0; margin-bottom: 15px;">Kategori Bazlı Hızlı Erişim</h3>
     <div style="display: flex; flex-direction: column; gap: 14px;">
         
-        <!-- 1. ÖZ ÜSTÜNER ŞİRKET EVRAKLARI -->
         <div class="evrak-item">
             <div class="evrak-item-info">
                 <div class="evrak-item-title">🏢 Öz Üstüner Şirket Evrakları</div>
@@ -617,7 +616,6 @@
             </a>
         </div>
 
-        <!-- 2. TERASUS TURİZM ŞİRKET EVRAKLARI -->
         <div class="evrak-item">
             <div class="evrak-item-info">
                 <div class="evrak-item-title">🏛️ Terasus Turizm Şirket Evrakları</div>
@@ -628,7 +626,6 @@
             </a>
         </div>
 
-        <!-- 3. ARAÇ EVRAKLARI -->
         <div class="evrak-item">
             <div class="evrak-item-info">
                 <div class="evrak-item-title">🚐 Araç Evrakları</div>
@@ -639,7 +636,6 @@
             </a>
         </div>
 
-        <!-- 4. ŞOFÖR EVRAKLARI -->
         <div class="evrak-item">
             <div class="evrak-item-info">
                 <div class="evrak-item-title">🚌 Şoför Evrakları</div>
@@ -650,7 +646,6 @@
             </a>
         </div>
 
-        <!-- 5. REHBER EVRAKLARI -->
         <div class="evrak-item">
             <div class="evrak-item-info">
                 <div class="evrak-item-title">🧑‍🏫 Rehber Evrakları</div>
@@ -662,6 +657,49 @@
         </div>
 
     </div>
+</div>
+
+<!-- Mesafe Ölçer Alanı (Google Maps & Canlı Rota Önizleme) -->
+<div id="mesafeOlcerCard" class="card" style="display:none; max-width: 950px; margin: 0 auto 20px auto;">
+    <h2>🧭 Otobüs Rota ve Mesafe Ölçer</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
+        Kalkış ve varış noktalarını yazarak karayolu mesafesini, otobüs seyir süresini ve harita rotasını tek tıkla görebilirsiniz.
+    </p>
+
+    <div class="row-inputs">
+        <div>
+            <label for="rotaKalkis">🛫 Kalkış Noktası:</label>
+            <input type="text" id="rotaKalkis" placeholder="Örn: Tarsus" value="Tarsus">
+        </div>
+        <div>
+            <label for="rotaVaris">🛬 Varış Noktası / Hedef:</label>
+            <input type="text" id="rotaVaris" placeholder="Örn: Ankara" onkeydown="if(event.key==='Enter') rotaHesapla()">
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+        <button id="btnRotaHesapla" onclick="rotaHesapla()" class="btn-blue" style="flex:1; min-width:220px;">🔍 Mesafeyi ve Rotayı Hesapla</button>
+        <button onclick="googleMapsRotaAc()" class="btn-green" style="flex:1; min-width:220px;">🗺️ Google Haritalar'da Canlı Aç</button>
+    </div>
+
+    <div id="rotaSonucKutusu" style="display:none; margin-bottom:15px;">
+        <div class="grid-3">
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Karayolu Mesafesi</span>
+                <span id="sonucKm" style="font-size:22px; font-weight:bold; color:var(--primary);">-</span>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Otobüs Tahmini (Ort. 80 km/s)</span>
+                <span id="sonucSureOtobus" style="font-size:22px; font-weight:bold; color:var(--warning);">-</span>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Otomobil Tahmini</span>
+                <span id="sonucSureNormal" style="font-size:22px; font-weight:bold; color:var(--success);">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="haritaAlani" style="width:100%; height:400px; border-radius:8px; border:1px solid #cbd5e1; background:#eaedf1;"></div>
 </div>
 
 <!-- Operatör giriş alanı -->
@@ -681,11 +719,10 @@
 
 <div class="main-container">
     
-    <!-- SOL BLOK: ÇAĞRI PERSONELİ EKRANI (GELİŞMİŞ ÇOKLU FİLTRELEME) -->
+    <!-- SOL BLOK: ÇAĞRI PERSONELİ EKRANI -->
     <div id="personelPaneliCard" class="card">
         <h2>🗓️ Tur Programı Çağrı Personeli Paneli</h2>
         
-        <!-- GELİŞMİŞ SÜZGEÇ VE ARAMA PANELİ -->
         <div class="filtre-paneli">
             <span style="font-weight: bold; font-size: 13px; color: var(--dark); text-transform: uppercase; display:block; margin-bottom:10px;">🔍 Akıllı Arama Filtreleri</span>
             
@@ -698,9 +735,7 @@
             <div class="row-inputs">
                 <div>
                     <label>📍 Bölge / Destinasyon Seçimi:</label>
-                    <select id="filtreBolge" onchange="listeleriYenile();">
-                        <!-- JavaScript dinamik dolduracak (aktif sekmeye göre) -->
-                    </select>
+                    <select id="filtreBolge" onchange="listeleriYenile();"></select>
                 </div>
                 <div>
                     <label>📅 Belirli Tarih Aralığı:</label>
@@ -755,8 +790,8 @@
         </div>
     </div>
 
-    <!-- BAĞIMSIZ BÖLÜM: HIZLI MESAJ BARI (tur seçilmesine gerek yok, sabit/otomatik hızlı cevaplar) -->
-    <div id="hizliMesajBariCard" class="card" style="max-width: 1350px; margin: 20px auto 0 auto; background: #eff6ff; border: 1px solid #bfdbfe;">
+    <!-- SAĞ/ALT BAĞIMSIZ BÖLÜM: HIZLI MESAJ BARI -->
+    <div id="hizliMesajBariCard" class="card" style="max-width: 1350px; margin: 0 auto; background: #eff6ff; border: 1px solid #bfdbfe;">
         <h2>⚡ Hızlı Mesaj Barı</h2>
         <p style="font-size: 13px; color: #64748b; margin-top: -10px; margin-bottom: 20px;">Burası tur açmaya gerek olmayan, sabit ve otomatik hızlı cevaplar içindir.</p>
 
@@ -772,17 +807,15 @@
         </div>
 
         <div class="row-inputs">
-            <!-- SÜTUN 1: DURAK NOKTALARINI GÖNDER -->
             <div class="otel-grup">
                 <h3 style="font-size: 15px; border: none; padding-bottom: 0; margin-bottom: 8px;">📍 Durak Noktalarını Gönder</h3>
-                <p style="font-size: 12px; color: #718096; margin-top: 0;">Müşteri "durak noktanız / konumunuz nerede?" diye sorduğunda kullanılır. Süre/saat bilgisi içermez — sadece sabit Mersin, Tarsus, Adana duraklarının Google Maps konumlarını ve önemli durak duyurusunu gönderir. Tura özel değildir, her zaman aynıdır.</p>
+                <p style="font-size: 12px; color: #718096; margin-top: 0;">Müşteri "durak noktanız / konumunuz nerede?" diye sorduğunda kullanılır. Süre/saat bilgisi içermez — sadece sabit Mersin, Tarsus, Adana duraklarının Google Maps konumlarını ve önemli durak duyurusunu gönderir.</p>
                 <button onclick="duraklariGonder()" class="btn-blue" style="width: 100%;">📍 Durak Konumlarını Gönder</button>
             </div>
 
-            <!-- SÜTUN 2: BÖLGE + SÜREYE ÖZEL DUYURU GÖRÜNTÜLEYİCİ -->
             <div class="otel-grup">
                 <h3 style="font-size: 15px; border: none; padding-bottom: 0; margin-bottom: 8px;">📢 Bölgeye Özel Ek Duyurular</h3>
-                <p style="font-size: 12px; color: #718096; margin-top: 0;">Bölge + Süre kombinasyonunu seçin, o kombinasyona ait duyuru metni aşağıda görünsün. Metni kopyalayıp WhatsApp'a yapıştırabilirsiniz.</p>
+                <p style="font-size: 12px; color: #718096; margin-top: 0;">Bölge + Süre kombinasyonunu seçin, o kombinasyona ait duyuru metni aşağıda görünsün.</p>
 
                 <div class="row-inputs">
                     <div>
@@ -808,9 +841,7 @@
         </div>
 
         <div class="admin-split-grid">
-            <!-- SOL: BAĞIMSIZ PANEL — FORMATLI TUR EKLEME / DÜZENLEME FORMU -->
             <div class="admin-form-card">
-
                 <div class="row-inputs">
                     <div>
                         <label>Tur Tipi:</label>
@@ -821,9 +852,7 @@
                     </div>
                     <div>
                         <label>📍 Bölge / Rota Sınıflandırması:</label>
-                        <select id="yeniBolge">
-                            <!-- Seçili tur tipine göre JavaScript dolduracak -->
-                        </select>
+                        <select id="yeniBolge"></select>
                     </div>
                 </div>
 
@@ -892,9 +921,7 @@
                     </div>
                 </div>
 
-                <div id="dinamikOteller" class="otel-grup">
-                    <!-- JavaScript burayı dolduracak -->
-                </div>
+                <div id="dinamikOteller" class="otel-grup"></div>
 
                 <label>Detaylı Tur Programı Akışı:</label>
                 <textarea id="yeniProgram" rows="4" placeholder="1. Gün: Sabah saatlerinde varış..."></textarea>
@@ -908,10 +935,8 @@
                 <button onclick="veriyiDisariAktar()" class="btn-blue" style="width: 100%;">
                     💾 Tüm Listeyi Güncelle ve İndir
                 </button>
-
             </div>
             
-            <!-- SAĞ: BAĞIMSIZ PANEL — GÜNÜN TARİHİNE GÖRE SADECE GÜNCEL/GELECEK TURLARI GÖSTEREN HAVUZ LİSTESİ -->
             <div class="admin-pool-card">
                 <h3 style="color: var(--warning); border-color: var(--warning);">📋 Havuzdaki Mevcut Turlar</h3>
                 <p style="font-size: 12px; color: #718096; margin-top: -10px;">Bugünün tarihi baz alınır; başlangıç tarihi geçmişte kalan turlar burada listelenmez, aşağıdaki "Geçmiş Havuzdaki Turlar" bölümüne taşınır.</p>
@@ -919,7 +944,6 @@
             </div>
         </div>
 
-        <!-- ALT: BAĞIMSIZ PANEL — GEÇMİŞ HAVUZDAKİ TURLAR: tıklanmadan açılmayan akordeon liste -->
         <div id="gecmisHavuzBlok" class="gecmis-havuz-blok admin-gecmis-card">
             <div class="gecmis-havuz-baslik" onclick="gecmisHavuzuAcKapat()">
                 <span>🗄️ Geçmiş Havuzdaki Turlar</span>
@@ -943,9 +967,6 @@
 <script>
 /* ============================================================
    OPERATÖR ERİŞİMİ
-   Bu panelde tek bir operatör hesabı tanımlıdır.
-   Şifre doğrudan HTML içinde tutulmaz; SHA-256 özeti ile doğrulanır.
-   Not: Bu bir istemci tarafı erişim kontrolüdür; gerçek sunucu güvenliği değildir.
    ============================================================ */
 const OPERATOR_HESAPLARI = [
     {
@@ -969,22 +990,27 @@ function panelSekmesiDegistir(sekme) {
     const adminCard = document.getElementById("adminPanelCard");
     const fileCard = document.getElementById("fileUploadCard");
     const evrakCard = document.getElementById("evrakYonetimiCard");
+    const mesafeCard = document.getElementById("mesafeOlcerCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
+    
     const personelTab = document.getElementById("tabPersonel");
     const operatorTab = document.getElementById("tabOperator");
     const fileTab = document.getElementById("tabDosya");
     const evrakTab = document.getElementById("tabEvrak");
+    const mesafeTab = document.getElementById("tabMesafe");
 
     personelTab.classList.remove("active");
     operatorTab.classList.remove("active");
     fileTab.classList.remove("active");
     evrakTab.classList.remove("active");
+    if (mesafeTab) mesafeTab.classList.remove("active");
 
     loginCard.style.display = "none";
     adminCard.style.display = "none";
     fileCard.style.display = "none";
     evrakCard.style.display = "none";
+    if (mesafeCard) mesafeCard.style.display = "none";
     personelCard.style.display = "none";
     hizliMesajCard.style.display = "none";
 
@@ -1004,6 +1030,13 @@ function panelSekmesiDegistir(sekme) {
     if (sekme === "evrak") {
         evrakTab.classList.add("active");
         evrakCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "mesafe") {
+        if (mesafeTab) mesafeTab.classList.add("active");
+        if (mesafeCard) mesafeCard.style.display = "block";
+        haritayiIlklendir();
         return;
     }
 
@@ -1057,6 +1090,120 @@ function operatorCikisYap() {
     document.getElementById("operatorStatus").style.display = "none";
     document.getElementById("cikisYapBtnUst").style.display = "none";
     panelSekmesiDegistir("personel");
+}
+
+/* ============================================================
+   MESAFE ÖLÇER & HARİTA MOTORU
+   ============================================================ */
+let harita = null;
+let rotaKatmani = null;
+
+function haritayiIlklendir() {
+    setTimeout(() => {
+        if (!harita) {
+            harita = L.map('haritaAlani').setView([36.9167, 34.8953], 7); // Tarsus Merkezli
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap'
+            }).addTo(harita);
+        } else {
+            harita.invalidateSize();
+        }
+    }, 200);
+}
+
+async function koordinatBul(yerAdi) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(yerAdi + ", Türkiye")}&limit=1`;
+    const yanit = await fetch(url, { headers: { "Accept-Language": "tr" } });
+    const veri = await yanit.json();
+    if (!veri || veri.length === 0) return null;
+    return {
+        lat: parseFloat(veri[0].lat),
+        lon: parseFloat(veri[0].lon),
+        isim: veri[0].display_name
+    };
+}
+
+async function rotaHesapla() {
+    const baslangic = document.getElementById("rotaKalkis").value.trim();
+    const bitis = document.getElementById("rotaVaris").value.trim();
+    const btn = document.getElementById("btnRotaHesapla");
+
+    if (!baslangic || !bitis) {
+        alert("Lütfen hem kalkış hem de varış noktasını girin!");
+        return;
+    }
+
+    if (btn) btn.innerText = "Hesaplanıyor...";
+
+    try {
+        const k1 = await koordinatBul(baslangic);
+        const k2 = await koordinatBul(bitis);
+
+        if (!k1 || !k2) {
+            alert("Noktalardan biri haritada bulunamadı. Lütfen il/ilçe adını kontrol edin.");
+            if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
+            return;
+        }
+
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${k1.lon},${k1.lat};${k2.lon},${k2.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(osrmUrl);
+        const rotaVerisi = await res.json();
+
+        if (!rotaVerisi.routes || rotaVerisi.routes.length === 0) {
+            alert("Karayolu rotası oluşturulamadı.");
+            return;
+        }
+
+        const mesafeMetre = rotaVerisi.routes[0].distance;
+        const sureSaniye = rotaVerisi.routes[0].duration;
+
+        const km = (mesafeMetre / 1000).toFixed(1);
+        
+        const normalSaat = Math.floor(sureSaniye / 3600);
+        const normalDk = Math.round((sureSaniye % 3600) / 60);
+
+        // Ticari otobüs ortalaması (80 km/s baz alınarak mola payı dahil)
+        const otobusToplamSaat = (mesafeMetre / 1000) / 80;
+        const otobusSaat = Math.floor(otobusToplamSaat);
+        const otobusDk = Math.round((otobusToplamSaat - otobusSaat) * 60);
+
+        document.getElementById("sonucKm").innerText = `${km} km`;
+        document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
+        document.getElementById("sonucSureNormal").innerText = `~${normalSaat} sa ${normalDk} dk`;
+        document.getElementById("rotaSonucKutusu").style.display = "block";
+
+        if (rotaKatmani) harita.removeLayer(rotaKatmani);
+
+        const geojson = rotaVerisi.routes[0].geometry;
+        rotaKatmani = L.geoJSON(geojson, {
+            style: { color: "#3498db", weight: 5, opacity: 0.8 }
+        }).addTo(harita);
+
+        L.marker([k1.lat, k1.lon]).addTo(rotaKatmani).bindPopup(`🛫 Kalkış: ${baslangic}`).openPopup();
+        L.marker([k2.lat, k2.lon]).addTo(rotaKatmani).bindPopup(`🛬 Varış: ${bitis}`);
+
+        harita.fitBounds(rotaKatmani.getBounds(), { padding: [40, 40] });
+
+    } catch (err) {
+        console.error(err);
+        alert("Mesafe hesaplanırken bağlantı hatası oluştu.");
+    } finally {
+        if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
+    }
+}
+
+function googleMapsRotaAc() {
+    const baslangic = document.getElementById("rotaKalkis").value.trim();
+    const bitis = document.getElementById("rotaVaris").value.trim();
+
+    if (!baslangic || !bitis) {
+        alert("Lütfen önce kalkış ve varış noktalarını girin.");
+        return;
+    }
+
+    const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(baslangic)}&destination=${encodeURIComponent(bitis)}&travelmode=driving`;
+    window.open(gmapsUrl, "_blank");
 }
 
 /* ============================================================
@@ -1316,7 +1463,7 @@ function turdanRawCikar(tur) {
     });
 
     const donusMetin = tur.donusDetay || "";
-    const dSaatEslesme = donusMetin.match(/Saat:\s*(\d{1,2}:\d{2})/);
+    const dSaatEslesme = donusMetin.match(/Saat:\s*(\d{1,2}:\\d{2})/);
     const dSaat = dSaatEslesme ? dSaatEslesme[1] : "";
     
     const dNoktaEslesme = donusMetin.match(/Varış Yeri:\s*(.+)$/);
