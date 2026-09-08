@@ -709,3 +709,29 @@ button:hover {
 .taksit-tablosu tbody tr:last-child td {
     border-bottom: none;
 }
+
+/* ============================================================
+   GİRİŞ ANİMASYONU VE YEŞİL TİK STİLLERİ
+   ============================================================ */
+@keyframes buttonSpinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: buttonSpinner 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+.btn-success-anim {
+    background-color: var(--success) !important;
+    pointer-events: none;
+    transform: scale(1.02);
+}

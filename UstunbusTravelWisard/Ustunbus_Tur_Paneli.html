@@ -361,7 +361,7 @@
     </div>
 </div>
 
-<!-- 6. OPERATÖR GİRİŞ ALANI -->
+<!-- Operatör Giriş Alanı -->
 <div id="operatorLoginCard" class="card operator-login-card">
     <h2>🔐 Operatör Girişi</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px;">Tur programlarını eklemek, düzenlemek veya oranları güncellemek için operatör hesabınızla giriş yapın.</p>
@@ -372,7 +372,8 @@
     <label for="operatorPassword">Şifre:</label>
     <input type="password" id="operatorPassword" autocomplete="current-password" placeholder="Şifre" onkeydown="if(event.key==='Enter') operatorGirisYap()">
     
-    <button onclick="operatorGirisYap()" class="btn-orange" style="width:100%;">🔓 Giriş Yap</button>
+    <!-- Butona id="btnOperatorGiris" eklendi -->
+    <button id="btnOperatorGiris" onclick="operatorGirisYap()" class="btn-orange" style="width:100%; transition: all 0.3s ease;">🔓 Giriş Yap</button>
     <div id="operatorLoginError" style="display:none; margin-top:10px; padding:10px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:13px; font-weight:600;"></div>
 </div>
 

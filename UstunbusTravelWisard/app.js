@@ -96,10 +96,11 @@ function panelSekmesiDegistir(sekme) {
     }
 }
 
-function operatorGirisYap() {
+async function operatorGirisYap() {
     const kullaniciAdi = document.getElementById("operatorUsername").value.trim().toLowerCase();
     const sifre = document.getElementById("operatorPassword").value.trim();
     const hata = document.getElementById("operatorLoginError");
+    const btn = document.getElementById("btnOperatorGiris");
 
     hata.style.display = "none";
     hata.textContent = "";
@@ -110,15 +111,33 @@ function operatorGirisYap() {
         return;
     }
 
-    // Kesin ve sorunsuz operatör girişi kontrolü
     if (kullaniciAdi === OPERATOR_KULLANICI_ADI && sifre === OPERATOR_SIFRE) {
+        // 1. Adım: Butonu döndür ve devre dışı bırak
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Giriş Yapılıyor...`;
+
+        // 2. Adım: 1.5 saniye bekleme efekti
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // 3. Adım: Yeşil tik ve onay yazısı
+        btn.className = "btn-orange btn-success-anim";
+        btn.innerHTML = `✅ Giriş Onaylandı`;
+
+        // 4. Adım: Kısa bir bekleyişten sonra paneli aç
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         operatorOturumuAcik = true;
         document.getElementById("operatorLoginCard").style.display = "none";
         document.getElementById("adminPanelCard").style.display = "block";
         document.getElementById("operatorStatus").style.display = "inline-block";
         document.getElementById("cikisYapBtnUst").style.display = "inline-flex";
+        
+        // Butonu eski haline geri getir (ileride çıkış yapıp tekrar girerse diye)
+        btn.disabled = false;
+        btn.className = "btn-orange";
+        btn.innerHTML = "🔓 Giriş Yap";
+
         taksitOranGuncellemeGridCiz();
-        alert("Operatör girişi başarılı. Tur Programı ve Yönetici Paneli açıldı.");
     } else {
         hata.textContent = "Kullanıcı adı veya şifre hatalı.";
         hata.style.display = "block";
