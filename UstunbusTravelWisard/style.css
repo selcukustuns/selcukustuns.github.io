@@ -69,7 +69,6 @@ h2, h3 {
 /* ------------------------------------------------------------
    SEKME BUTONLARI: ÇAĞRI PERSONELİ + TAKSİT TABLOSU RENK UYUMU
    ------------------------------------------------------------ */
-/* Pasif Durumlar */
 #tabAll,
 #tabTaksitAll {
     color: #1f2937;
@@ -91,7 +90,6 @@ h2, h3 {
     border-color: #22c55e;
 }
 
-/* Aktif Durumlar: Tüm Turlar Mavi, Günübirlik Turuncu, Konaklamalı Yeşil */
 #tabAll.active,
 #tabTaksitAll.active {
     background: #3498db;
@@ -548,23 +546,48 @@ button:hover {
     opacity: 0.78;
 }
 
-/* Google Places Autocomplete Menüsü */
-.pac-container {
-    z-index: 99999 !important;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+/* ============================================================
+   OTOMATİK TAMAMLAMA AÇILIR LİSTESİ
+   ============================================================ */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
     border: 1px solid #cbd5e1;
-    font-family: inherit;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 1050;
+    display: none;
 }
 
-.pac-item {
-    padding: 8px 12px;
-    cursor: pointer;
+.autocomplete-item {
+    padding: 10px 14px;
     font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    line-height: 1.35;
+    text-align: left;
 }
 
-.pac-item:hover {
-    background-color: #f1f5f9;
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background-color: #eff6ff;
+    color: var(--primary);
+}
+
+.autocomplete-item strong {
+    color: var(--dark);
+    display: block;
+    margin-bottom: 2px;
 }
 
 /* ============================================================

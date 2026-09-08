@@ -110,6 +110,7 @@ function operatorGirisYap() {
         return;
     }
 
+    // Kesin ve sorunsuz operatör girişi kontrolü
     if (kullaniciAdi === OPERATOR_KULLANICI_ADI && sifre === OPERATOR_SIFRE) {
         operatorOturumuAcik = true;
         document.getElementById("operatorLoginCard").style.display = "none";
@@ -526,184 +527,202 @@ function kdvSifirla() {
 }
 
 /* ============================================================
-   GOOGLE PLACES + LEAFLET / OSRM HİBRİT HARİTA MOTORU
+   CANLI ÖNERİLİ MESAFE MOTORU & OTOBÜS SÜRE HESABI + GOOGLE IFRAME
    ============================================================ */
-let harita = null;
-let rotaKatmani = null;
+let secilenKalkisVerisi = { lat: 36.9167, lon: 34.8953, isim: "Tarsus" };
+let secilenVarisVerisi = null;
+
+const OZEL_ACENTA_DURAKLARI = [
+    { baslik: "Üstünbus Turizm - Şehitler Tepesi Ofis", detay: "Tarsus / Mersin", lat: 36.9248, lon: 34.8985 },
+    { baslik: "Üstünbus Turizm - Kleopatra Kapısı", detay: "Tarsus / Mersin", lat: 36.9141, lon: 34.8912 },
+    { baslik: "Vipol AVM", detay: "Mersin Kalkış Noktası", lat: 36.7820, lon: 34.5510 },
+    { baslik: "Forum AVM", detay: "Mersin Kalkış Noktası", lat: 36.7990, lon: 34.6070 },
+    { baslik: "Duygu Kafe", detay: "Adana Barajyolu Kalkış Noktası", lat: 37.0210, lon: 35.3190 }
+];
 
 function haritayiIlklendir() {
-    setTimeout(() => {
-        if (!harita) {
-            harita = L.map('haritaAlani').setView([36.9167, 34.8953], 7);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '© OpenStreetMap'
-            }).addTo(harita);
-            
-            googleAutocompleteBagla('rotaKalkis');
-            googleAutocompleteBagla('rotaVaris');
+    otomatikTamamlaAyarla('rotaKalkis', 'kalkisOneriler', (secilen) => {
+        secilenKalkisVerisi = secilen;
+    });
 
-            const kalkisInp = document.getElementById('rotaKalkis');
-            if (kalkisInp && kalkisInp.value === "Tarsus") {
-                kalkisInp.dataset.lat = "36.9167";
-                kalkisInp.dataset.lon = "34.8953";
-            }
-        } else {
-            harita.invalidateSize();
-        }
-    }, 250);
+    otomatikTamamlaAyarla('rotaVaris', 'varisOneriler', (secilen) => {
+        secilenVarisVerisi = secilen;
+        rotaHesapla();
+    });
 }
 
-function googleAutocompleteBagla(inputId) {
+function otomatikTamamlaAyarla(inputId, dropdownId, secimGeriBildirimi) {
     const input = document.getElementById(inputId);
-    if (!input) return;
+    const dropdown = document.getElementById(dropdownId);
+    if (!input || !dropdown) return;
+    let beklemeZamani = null;
 
-    input.addEventListener('input', () => {
-        delete input.dataset.lat;
-        delete input.dataset.lon;
-    });
+    input.addEventListener("input", function() {
+        const sorgu = input.value.trim();
+        clearTimeout(beklemeZamani);
 
-    if (!window.google || !google.maps || !google.maps.places) {
-        console.warn("Google Maps Places API henüz yüklenmedi.");
-        return;
-    }
-
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-        componentRestrictions: { country: "tr" },
-        fields: ["geometry", "name", "formatted_address"]
-    });
-
-    autocomplete.addListener("place_changed", function () {
-        const place = autocomplete.getPlace();
-
-        if (!place || !place.geometry || !place.geometry.location) {
+        if (sorgu.length < 2) {
+            dropdown.innerHTML = "";
+            dropdown.style.display = "none";
             return;
         }
 
-        input.dataset.lat = place.geometry.location.lat();
-        input.dataset.lon = place.geometry.location.lng();
+        beklemeZamani = setTimeout(async () => {
+            dropdown.innerHTML = "";
+            
+            // 1. Önce özel acenta duraklarını listele
+            const ozelEslenenler = OZEL_ACENTA_DURAKLARI.filter(yer => 
+                yer.baslik.toLocaleLowerCase('tr').includes(sorgu.toLocaleLowerCase('tr'))
+            );
+
+            ozelEslenenler.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "autocomplete-item";
+                div.style.background = "#fffbeb";
+                div.innerHTML = `<strong>🏢 ${item.baslik}</strong><span style="font-size:11px; color:#92400e;">${item.detay}</span>`;
+                div.onclick = function() {
+                    input.value = item.baslik;
+                    dropdown.innerHTML = "";
+                    dropdown.style.display = "none";
+                    secimGeriBildirimi({ lat: item.lat, lon: item.lon, isim: item.baslik });
+                };
+                dropdown.appendChild(div);
+            });
+
+            // 2. OpenStreetMap Türkiye Haritasında il/ilçe/mahalle ara
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=6&q=${encodeURIComponent(sorgu)}`;
+                const yanit = await fetch(url, { headers: { "Accept-Language": "tr" } });
+                const sonuclar = await yanit.json();
+
+                if (sonuclar && sonuclar.length > 0) {
+                    sonuclar.forEach(item => {
+                        const parcalar = item.display_name.split(",");
+                        const anaBaslik = parcalar[0];
+                        const detayAdres = parcalar.slice(1, 4).join(",");
+
+                        const div = document.createElement("div");
+                        div.className = "autocomplete-item";
+                        div.innerHTML = `<strong>📍 ${anaBaslik}</strong><span style="font-size:11px; color:#64748b;">${detayAdres}</span>`;
+
+                        div.onclick = function() {
+                            input.value = anaBaslik + " " + detayAdres;
+                            dropdown.innerHTML = "";
+                            dropdown.style.display = "none";
+                            secimGeriBildirimi({
+                                lat: parseFloat(item.lat),
+                                lon: parseFloat(item.lon),
+                                isim: input.value
+                            });
+                        };
+                        dropdown.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                console.error("Öneri alınamadı:", err);
+            }
+
+            if (dropdown.children.length > 0) {
+                dropdown.style.display = "block";
+            } else {
+                dropdown.style.display = "none";
+            }
+        }, 250);
+    });
+
+    document.addEventListener("click", function(e) {
+        if (e.target !== input && e.target !== dropdown) {
+            dropdown.style.display = "none";
+        }
     });
 }
 
-async function koordinatCozucu(inputEl) {
-    if (inputEl.dataset.lat && inputEl.dataset.lon) {
-        return {
-            lat: parseFloat(inputEl.dataset.lat),
-            lon: parseFloat(inputEl.dataset.lon)
-        };
-    }
-
-    const adres = inputEl.value.trim();
-    if (!adres) return null;
-
-    if (window.google && google.maps && google.maps.Geocoder) {
-        const geocoder = new google.maps.Geocoder();
-        const gResult = await new Promise((resolve) => {
-            geocoder.geocode({ address: adres, componentRestrictions: { country: 'TR' } }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    resolve({
-                        lat: results[0].geometry.location.lat(),
-                        lon: results[0].geometry.location.lng()
-                    });
-                } else {
-                    resolve(null);
-                }
-            });
-        });
-
-        if (gResult) {
-            inputEl.dataset.lat = gResult.lat;
-            inputEl.dataset.lon = gResult.lon;
-            return gResult;
-        }
-    }
+async function tekilKonumBul(adres) {
+    const ozel = OZEL_ACENTA_DURAKLARI.find(y => y.baslik.toLocaleLowerCase('tr').includes(adres.toLocaleLowerCase('tr')));
+    if (ozel) return { lat: ozel.lat, lon: ozel.lon };
 
     try {
         const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=1&q=${encodeURIComponent(adres)}`;
         const res = await fetch(url, { headers: { "Accept-Language": "tr" } });
         const data = await res.json();
         if (data && data.length > 0) {
-            const osmResult = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
-            inputEl.dataset.lat = osmResult.lat;
-            inputEl.dataset.lon = osmResult.lon;
-            return osmResult;
+            return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
         }
     } catch (e) {
-        console.error("OSM Geocode hatası:", e);
+        console.error(e);
     }
-
     return null;
 }
 
 async function rotaHesapla() {
     const kalkisInp = document.getElementById("rotaKalkis");
     const varisInp = document.getElementById("rotaVaris");
+    const iframe = document.getElementById("gmapsIframe");
     const btn = document.getElementById("btnRotaHesapla");
 
-    if (!kalkisInp.value.trim() || !varisInp.value.trim()) {
-        alert("Lütfen hem kalkış hem de varış noktasını girin!");
+    const baslangic = kalkisInp ? kalkisInp.value.trim() : "Tarsus, Mersin";
+    const bitis = varisInp ? varisInp.value.trim() : "";
+
+    // Eğer hedef boşsa haritayı doğrudan Tarsus/Mersin merkezli göster
+    if (!bitis) {
+        if (iframe) iframe.src = `https://maps.google.com/maps?q=Tarsus,+Mersin&output=embed`;
+        const sonucKutusu = document.getElementById("rotaSonucKutusu");
+        if (sonucKutusu) sonucKutusu.style.display = "none";
         return;
     }
 
     if (btn) btn.innerText = "Hesaplanıyor...";
 
+    // 1. Resmi Google Maps Yol Tarifini Iframe'e yükle
+    const embedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(baslangic)}&daddr=${encodeURIComponent(bitis)}&output=embed`;
+    if (iframe) iframe.src = embedUrl;
+
+    // 2. Kilometre ve Otobüs Süresini Arka Planda Hesapla
     try {
-        const k1 = await koordinatCozucu(kalkisInp);
-        const k2 = await koordinatCozucu(varisInp);
+        const k1 = (secilenKalkisVerisi && secilenKalkisVerisi.isim.includes(baslangic)) 
+            ? secilenKalkisVerisi 
+            : await tekilKonumBul(baslangic);
 
-        if (!k1) {
-            alert(`Kalkış noktası ("${kalkisInp.value}") bulunamadı. Lütfen açılan Google önerilerinden seçin.`);
-            return;
+        const k2 = (secilenVarisVerisi && secilenVarisVerisi.isim.includes(bitis)) 
+            ? secilenVarisVerisi 
+            : await tekilKonumBul(bitis);
+
+        if (k1 && k2) {
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${k1.lon},${k1.lat};${k2.lon},${k2.lat}?overview=false`;
+            const yanit = await fetch(osrmUrl);
+            const rotaData = await yanit.json();
+
+            if (rotaData.routes && rotaData.routes.length > 0) {
+                const metre = rotaData.routes[0].distance;
+                const saniye = rotaData.routes[0].duration;
+
+                const km = (metre / 1000).toFixed(0);
+
+                const otomobilSaat = Math.floor(saniye / 3600);
+                const otomobilDk = Math.round((saniye % 3600) / 60);
+
+                const otobusToplamSaat = (metre / 1000) / 80;
+                const otobusSaat = Math.floor(otobusToplamSaat);
+                const otobusDk = Math.round((otobusToplamSaat - otobusSaat) * 60);
+
+                document.getElementById("sonucKm").innerText = `${km} km`;
+                document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
+                document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
+                document.getElementById("rotaSonucKutusu").style.display = "block";
+            }
         }
-
-        if (!k2) {
-            alert(`Varış noktası ("${varisInp.value}") bulunamadı. Lütfen açılan Google önerilerinden seçin.`);
-            return;
-        }
-
-        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${k1.lon},${k1.lat};${k2.lon},${k2.lat}?overview=full&geometries=geojson`;
-        const res = await fetch(osrmUrl);
-        const rotaVerisi = await res.json();
-
-        if (!rotaVerisi.routes || rotaVerisi.routes.length === 0) {
-            alert("İki nokta arasında karayolu rotası oluşturulamadı.");
-            return;
-        }
-
-        const mesafeMetre = rotaVerisi.routes[0].distance;
-        const sureSaniye = rotaVerisi.routes[0].duration;
-
-        const km = (mesafeMetre / 1000).toFixed(1);
-        
-        const normalSaat = Math.floor(sureSaniye / 3600);
-        const normalDk = Math.round((sureSaniye % 3600) / 60);
-
-        const otobusToplamSaat = (mesafeMetre / 1000) / 80;
-        const otobusSaat = Math.floor(otobusToplamSaat);
-        const otobusDk = Math.round((otobusToplamSaat - otobusSaat) * 60);
-
-        document.getElementById("sonucKm").innerText = `${km} km`;
-        document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
-        document.getElementById("sonucSureNormal").innerText = `~${normalSaat} sa ${normalDk} dk`;
-        document.getElementById("rotaSonucKutusu").style.display = "block";
-
-        if (rotaKatmani) harita.removeLayer(rotaKatmani);
-
-        const geojson = rotaVerisi.routes[0].geometry;
-        rotaKatmani = L.geoJSON(geojson, {
-            style: { color: "#3498db", weight: 5, opacity: 0.8 }
-        }).addTo(harita);
-
-        L.marker([k1.lat, k1.lon]).addTo(rotaKatmani).bindPopup(`🛫 Kalkış: ${kalkisInp.value}`).openPopup();
-        L.marker([k2.lat, k2.lon]).addTo(rotaKatmani).bindPopup(`🛬 Varış: ${varisInp.value}`);
-
-        harita.fitBounds(rotaKatmani.getBounds(), { padding: [40, 40] });
-
     } catch (err) {
-        console.error(err);
-        alert("Mesafe hesaplanırken sunucu bağlantı hatası oluştu.");
+        console.warn("KM süre hesabı alınamadı ancak harita güncellendi:", err);
     } finally {
         if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
+    }
+}
+function hizliHedefSec(hedefAdi) {
+    const varisInp = document.getElementById("rotaVaris");
+    if (varisInp) {
+        varisInp.value = hedefAdi;
+        secilenVarisVerisi = null;
+        rotaHesapla();
     }
 }
 
@@ -721,7 +740,145 @@ function googleMapsRotaAc() {
 }
 
 /* ============================================================
-   BÖLGE / DESTİNASYON LİSTELERİ
+   BÖLGEYE ÖZEL DUYURU KÜTÜPHANESİ
+   ============================================================ */
+let duyuruSablonlari = [];
+
+const DUYURU_SURE_SECENEKLERI = [
+    { gece: 0, label: "☀️ Günübirlik" },
+    { gece: 1, label: "1 Gece 2 Gün" },
+    { gece: 2, label: "2 Gece 3 Gün" },
+    { gece: 3, label: "3 Gece 4 Gün" },
+    { gece: 4, label: "4 Gece 5 Gün" },
+    { gece: 5, label: "5 Gece 6 Gün" },
+    { gece: 6, label: "6 Gece 7 Gün" },
+    { gece: 7, label: "7 Gece 8 Gün" }
+];
+
+const BOLGE_SURE_KISITLAMALARI = {
+    guney_ege: [3],                    
+    kuzey_ege: [1, 2],                 
+    dogu_karadeniz: [2, 3, 4],         
+    kas_demre: [1],                    
+    bati_karadeniz: [1, 2],            
+    dogu_anadolu: [3],                 
+    gap: [1],                          
+    canakkale: [1, 2],                 
+    tunceli_kemaliye: [1],             
+    bursa: [1],                        
+    istanbul: [2],                     
+    kaplica: [2, 3, 4],                
+    isparta: [1],                      
+    tokat_amasya: [1]                  
+};
+
+function duyuruSureEtiketiGetir(gece) {
+    const s = DUYURU_SURE_SECENEKLERI.find(x => x.gece === Number(gece));
+    return s ? s.label : `${gece} Gece`;
+}
+
+function bolgeIcinIzinliGeceler(bolgeKod) {
+    if (BOLGE_SURE_KISITLAMALARI[bolgeKod]) return BOLGE_SURE_KISITLAMALARI[bolgeKod];
+    if (GUNUBIRLIK_BOLGELER.some(b => b.code === bolgeKod)) return [0];
+    return [1, 2, 3, 4, 5, 6, 7];
+}
+
+function duyuruSecimKutulariniOlustur() {
+    const bolgeSelect = document.getElementById("duyuruBolge");
+    bolgeSelect.innerHTML = "";
+    TUM_BOLGELER.forEach(b => {
+        const opt = document.createElement("option");
+        opt.value = b.code;
+        opt.text = b.name;
+        bolgeSelect.appendChild(opt);
+    });
+
+    duyuruSureListesiniOlustur();
+}
+
+function duyuruSureListesiniOlustur() {
+    const bolge = document.getElementById("duyuruBolge").value;
+    const sureSelect = document.getElementById("duyuruSure");
+    const oncekiDeger = sureSelect.value;
+    sureSelect.innerHTML = "";
+
+    bolgeIcinIzinliGeceler(bolge).forEach(gece => {
+        const opt = document.createElement("option");
+        opt.value = gece;
+        opt.text = duyuruSureEtiketiGetir(gece);
+        sureSelect.appendChild(opt);
+    });
+
+    const mevcutDegerler = Array.from(sureSelect.options).map(o => o.value);
+    if (mevcutDegerler.includes(oncekiDeger)) sureSelect.value = oncekiDeger;
+}
+
+function duyuruBolgeDegisti() {
+    duyuruSureListesiniOlustur();
+    duyuruSablonuGetir();
+}
+
+function duyuruSablonuGetir() {
+    const bolge = document.getElementById("duyuruBolge").value;
+    const gece = Number(document.getElementById("duyuruSure").value);
+    const kayit = duyuruSablonlari.find(d => d.bolge === bolge && d.gece === gece);
+    document.getElementById("ekDuyuruMetni").value = kayit ? kayit.metin : "";
+}
+
+function duyuruKutuphanesiniOtomatikYukle() {
+    function uygula(veri, kaynak) {
+        if (!Array.isArray(veri)) throw new Error("Geçersiz format: dizi bekleniyor");
+        duyuruSablonlari = veri;
+        duyuruSablonuGetir();
+        console.log(`✅ Duyuru kütüphanesi otomatik yüklendi (${duyuruSablonlari.length} kayıt) — ${kaynak}`);
+    }
+
+    fetch("turduyurusu.json")
+        .then(res => { if (!res.ok) throw new Error("turduyurusu.json bulunamadı"); return res.json(); })
+        .then(veri => uygula(veri, "turduyurusu.json (fetch)"))
+        .catch(() => {
+            fetch("turduyurusu.txt")
+                .then(res => { if (!res.ok) throw new Error("turduyurusu.txt bulunamadı"); return res.text(); })
+                .then(metin => uygula(JSON.parse(metin), "turduyurusu.txt (fetch)"))
+                .catch(() => {
+                    const script = document.createElement("script");
+                    script.src = "turduyurusu.js";
+                    script.onload = function() {
+                        if (typeof TUR_DUYURUSU_JSON !== "undefined" && Array.isArray(TUR_DUYURUSU_JSON)) {
+                            uygula(TUR_DUYURUSU_JSON, "turduyurusu.js (otomatik yedek)");
+                        } else {
+                            console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
+                        }
+                    };
+                    script.onerror = function() {
+                        console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
+                    };
+                    document.head.appendChild(script);
+                });
+        });
+}
+
+function duyuruSablonlariniYukle(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const veri = JSON.parse(e.target.result);
+            if(!Array.isArray(veri)) throw new Error("Geçersiz format");
+            duyuruSablonlari = veri;
+            duyuruSablonuGetir();
+            alert(`Duyuru kütüphanesi yüklendi! (${duyuruSablonlari.length} kayıt)`);
+        } catch(err) {
+            alert("Dosya okunamadı, geçerli bir duyuru JSON dosyası seçin.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+}
+
+/* ============================================================
+   TUR LİSTESİ VE PERSONEL YÖNETİMİ
    ============================================================ */
 const KONAKLAMALI_BOLGELER = [
     { code: "dogu_karadeniz", name: "🌲 Doğu Karadeniz" },
@@ -1447,144 +1604,6 @@ function duraklariGonder() {
 
     const msg = `Merhaba ${ad},\n\n${durakKonumlariMesajiOlustur()}`;
     whatsappAc(tel, msg);
-}
-
-/* ============================================================
-   BÖLGEYE ÖZEL DUYURU KÜTÜPHANESİ
-   ============================================================ */
-let duyuruSablonlari = [];
-
-const DUYURU_SURE_SECENEKLERI = [
-    { gece: 0, label: "☀️ Günübirlik" },
-    { gece: 1, label: "1 Gece 2 Gün" },
-    { gece: 2, label: "2 Gece 3 Gün" },
-    { gece: 3, label: "3 Gece 4 Gün" },
-    { gece: 4, label: "4 Gece 5 Gün" },
-    { gece: 5, label: "5 Gece 6 Gün" },
-    { gece: 6, label: "6 Gece 7 Gün" },
-    { gece: 7, label: "7 Gece 8 Gün" }
-];
-
-const BOLGE_SURE_KISITLAMALARI = {
-    guney_ege: [3],                    
-    kuzey_ege: [1, 2],                 
-    dogu_karadeniz: [2, 3, 4],         
-    kas_demre: [1],                    
-    bati_karadeniz: [1, 2],            
-    dogu_anadolu: [3],                 
-    gap: [1],                          
-    canakkale: [1, 2],                 
-    tunceli_kemaliye: [1],             
-    bursa: [1],                        
-    istanbul: [2],                     
-    kaplica: [2, 3, 4],                
-    isparta: [1],                      
-    tokat_amasya: [1]                  
-};
-
-function duyuruSureEtiketiGetir(gece) {
-    const s = DUYURU_SURE_SECENEKLERI.find(x => x.gece === Number(gece));
-    return s ? s.label : `${gece} Gece`;
-}
-
-function bolgeIcinIzinliGeceler(bolgeKod) {
-    if (BOLGE_SURE_KISITLAMALARI[bolgeKod]) return BOLGE_SURE_KISITLAMALARI[bolgeKod];
-    if (GUNUBIRLIK_BOLGELER.some(b => b.code === bolgeKod)) return [0];
-    return [1, 2, 3, 4, 5, 6, 7];
-}
-
-function duyuruSecimKutulariniOlustur() {
-    const bolgeSelect = document.getElementById("duyuruBolge");
-    bolgeSelect.innerHTML = "";
-    TUM_BOLGELER.forEach(b => {
-        const opt = document.createElement("option");
-        opt.value = b.code;
-        opt.text = b.name;
-        bolgeSelect.appendChild(opt);
-    });
-
-    duyuruSureListesiniOlustur();
-}
-
-function duyuruSureListesiniOlustur() {
-    const bolge = document.getElementById("duyuruBolge").value;
-    const sureSelect = document.getElementById("duyuruSure");
-    const oncekiDeger = sureSelect.value;
-    sureSelect.innerHTML = "";
-
-    bolgeIcinIzinliGeceler(bolge).forEach(gece => {
-        const opt = document.createElement("option");
-        opt.value = gece;
-        opt.text = duyuruSureEtiketiGetir(gece);
-        sureSelect.appendChild(opt);
-    });
-
-    const mevcutDegerler = Array.from(sureSelect.options).map(o => o.value);
-    if (mevcutDegerler.includes(oncekiDeger)) sureSelect.value = oncekiDeger;
-}
-
-function duyuruBolgeDegisti() {
-    duyuruSureListesiniOlustur();
-    duyuruSablonuGetir();
-}
-
-function duyuruSablonuGetir() {
-    const bolge = document.getElementById("duyuruBolge").value;
-    const gece = Number(document.getElementById("duyuruSure").value);
-    const kayit = duyuruSablonlari.find(d => d.bolge === bolge && d.gece === gece);
-    document.getElementById("ekDuyuruMetni").value = kayit ? kayit.metin : "";
-}
-
-function duyuruKutuphanesiniOtomatikYukle() {
-    function uygula(veri, kaynak) {
-        if (!Array.isArray(veri)) throw new Error("Geçersiz format: dizi bekleniyor");
-        duyuruSablonlari = veri;
-        duyuruSablonuGetir();
-        console.log(`✅ Duyuru kütüphanesi otomatik yüklendi (${duyuruSablonlari.length} kayıt) — ${kaynak}`);
-    }
-
-    fetch("turduyurusu.json")
-        .then(res => { if (!res.ok) throw new Error("turduyurusu.json bulunamadı"); return res.json(); })
-        .then(veri => uygula(veri, "turduyurusu.json (fetch)"))
-        .catch(() => {
-            fetch("turduyurusu.txt")
-                .then(res => { if (!res.ok) throw new Error("turduyurusu.txt bulunamadı"); return res.text(); })
-                .then(metin => uygula(JSON.parse(metin), "turduyurusu.txt (fetch)"))
-                .catch(() => {
-                    const script = document.createElement("script");
-                    script.src = "turduyurusu.js";
-                    script.onload = function() {
-                        if (typeof TUR_DUYURUSU_JSON !== "undefined" && Array.isArray(TUR_DUYURUSU_JSON)) {
-                            uygula(TUR_DUYURUSU_JSON, "turduyurusu.js (otomatik yedek)");
-                        } else {
-                            console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
-                        }
-                    };
-                    script.onerror = function() {
-                        console.warn("⚠️ Otomatik duyuru dosyası bulunamadı.");
-                    };
-                    document.head.appendChild(script);
-                });
-        });
-}
-
-function duyuruSablonlariniYukle(event) {
-    const file = event.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const veri = JSON.parse(e.target.result);
-            if(!Array.isArray(veri)) throw new Error("Geçersiz format");
-            duyuruSablonlari = veri;
-            duyuruSablonuGetir();
-            alert(`Duyuru kütüphanesi yüklendi! (${duyuruSablonlari.length} kayıt)`);
-        } catch(err) {
-            alert("Dosya okunamadı, geçerli bir duyuru JSON dosyası seçin.");
-        }
-    };
-    reader.readAsText(file);
-    event.target.value = "";
 }
 
 function formuTemizle() {

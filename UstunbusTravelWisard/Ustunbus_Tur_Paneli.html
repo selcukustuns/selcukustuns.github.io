@@ -5,19 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Üstünbus Turizm - Çağrı Personeli Paneli</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    
-    <!-- Dış Tasarım Dosyası -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- Leaflet Harita Kütüphanesi -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Google Places API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBCNG51vJ3KWZAk55l3Qd_bYSdPICQKHUE&libraries=places&language=tr&region=TR"></script>
 </head>
 <body>
 
+<!-- ÜST BAŞLIK BARI -->
 <div style="background: var(--dark); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
     <div style="font-size: 22px; font-weight: bold; letter-spacing: 0.5px;">🚌 Üstünbus Turizm Çağrı Sistemi Paneli</div>
     <div style="display:flex; align-items:center; gap:10px;">
@@ -38,7 +30,7 @@
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
 </div>
 
-<!-- TUR TAKSİT TABLOSU ALANI (Sadece Personel Hesaplama & WhatsApp Gönderimi) -->
+<!-- 1. TUR TAKSİT TABLOSU KARTI -->
 <div id="taksitTablosuCard" class="card" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
     <h2>💳 Tur Taksit Hesaplama Tablosu</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
@@ -55,7 +47,7 @@
         </button>
     </div>
 
-    <!-- 1. MOD: OTOMATİK TUR SEÇİMİ BLOKU -->
+    <!-- Otomatik Tur Seçimi -->
     <div id="taksitTurSecimBlok">
         <div class="tab-container" style="margin-bottom: 12px;">
             <button class="tab-btn active" id="tabTaksitAll" onclick="taksitTurTipiFiltrele('all')">Tüm Turlar</button>
@@ -75,13 +67,13 @@
         </div>
     </div>
 
-    <!-- 2. MOD: MANUEL TUTAR GİRİŞ BLOKU -->
+    <!-- Manuel Tutar Girişi -->
     <div id="taksitManuelBlok" style="display:none;">
         <label for="taksitManuelTutar">Kişi Başı Tur Tutarı (₺):</label>
         <input type="number" id="taksitManuelTutar" placeholder="Örn: 7500" oninput="taksitHesapla()">
     </div>
 
-    <!-- Ortak Kişi Sayısı Çarpanı ve Baz Fiyat Özeti -->
+    <!-- Kişi Sayısı Çarpanı ve Baz Tutar Özeti -->
     <div class="row-inputs" style="align-items: center; margin-top: 5px;">
         <div>
             <label for="taksitKisiSayisi">👥 Kişi Sayısı:</label>
@@ -104,7 +96,7 @@
         </div>
     </div>
 
-    <!-- DİNAMİK TÜM TAKSİTLER TABLOSU -->
+    <!-- Tüm Taksitler Tablosu (2'den 12'ye) -->
     <div style="overflow-x: auto; margin-top: 20px;">
         <table class="taksit-tablosu">
             <thead>
@@ -116,13 +108,11 @@
                     <th>Karttan Çekilecek Tutar</th>
                 </tr>
             </thead>
-            <tbody id="taksitTabloGovdesi">
-                <!-- JavaScript tarafından doldurulur -->
-            </tbody>
+            <tbody id="taksitTabloGovdesi"></tbody>
         </table>
     </div>
 
-    <!-- MÜŞTERİ BİLGİLERİ VE WHATSAPP GÖNDERİM BARI -->
+    <!-- Müşteri İletişim ve WhatsApp Gönderim Barı -->
     <div style="margin-top: 22px; background: #f0fdf4; padding: 16px 20px; border-radius: 10px; border: 1px solid #bbf7d0;">
         <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px;">💬 Müşteriye WhatsApp Taksit Bilgisi Gönder</h4>
         
@@ -139,12 +129,142 @@
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button onclick="taksitWhatsappGonder()" class="btn-green" style="flex:1; min-width:220px;">💬 WhatsApp'tan Gönder</button>
-            <button onclick="taksitTablosuKopyala()" id="btnTaksitKopyala" class="btn-blue" style="flex:1; min-width:220px; transition: background-color 0.2s;">📋 Taksit Dökümünü Kopyala</button>
+            <button onclick="taksitTablosuKopyala()" id="btnTaksitKopyala" class="btn-blue" style="flex:1; min-width:220px;">📋 Taksit Dökümünü Kopyala</button>
         </div>
     </div>
 </div>
 
-<!-- Dosya Yükleme Alanı -->
+<!-- MESAFE ÖLÇER ALANI (Tarsus/Mersin Merkezli Başlangıç) -->
+<div id="mesafeOlcerCard" class="card" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
+    <h2>🧭 Google Haritalar Rota ve Otobüs Mesafe Ölçer</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
+        Kalkış ve varış noktalarını yazarken açılan listeden seçim yapın. Otobüs seyir süresi, kilometre ve resmi Google güzergahı anında hesaplanır.
+    </p>
+
+    <div class="row-inputs">
+        <div>
+            <label for="rotaKalkis">🛫 Kalkış Noktası:</label>
+            <div style="position: relative;">
+                <input type="text" id="rotaKalkis" placeholder="Örn: Tarsus veya Üstünbus" value="Tarsus, Mersin" autocomplete="off">
+                <div id="kalkisOneriler" class="autocomplete-dropdown"></div>
+            </div>
+        </div>
+        <div>
+            <label for="rotaVaris">🛬 Varış Noktası / Hedef:</label>
+            <div style="position: relative;">
+                <input type="text" id="rotaVaris" placeholder="Örn: Ankara Kızılay veya Kapadokya" autocomplete="off" onkeydown="if(event.key==='Enter') rotaHesapla()">
+                <div id="varisOneriler" class="autocomplete-dropdown"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hızlı Popüler Rota Seçiciler -->
+    <div style="margin-bottom: 15px;">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b; display: block; margin-bottom: 6px;">⚡ Popüler Hedef Kısayolları:</span>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Kapadokya Göreme')">🎈 Kapadokya</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Eskişehir Odunpazarı')">🚤 Eskişehir</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Gaziantep Şahinbey')">🥙 Gaziantep</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Ankara Kızılay')">🏛️ Ankara</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Trabzon Meydan')">🌲 Trabzon / Rize</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Mardin Midyat')">🏘️ Mardin Midyat</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('Kaş Antalya')">🏖️ Kaş - Demre</button>
+            <button type="button" class="btn-small" style="background:#e2e8f0; color:#334155;" onclick="hizliHedefSec('İstanbul Kadıköy')">🌉 İstanbul</button>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+        <button id="btnRotaHesapla" onclick="rotaHesapla()" class="btn-blue" style="flex:1; min-width:220px;">🔍 Mesafeyi ve Rotayı Hesapla</button>
+        <button onclick="googleMapsRotaAc()" class="btn-green" style="flex:1; min-width:220px;">🗺️ Google Haritalar Uygulamasında Aç</button>
+    </div>
+
+    <!-- Sonuç Kartları: KM, Otobüs Süresi, Otomobil Süresi -->
+    <div id="rotaSonucKutusu" style="display:none; margin-bottom:15px;">
+        <div class="grid-3">
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Karayolu Mesafesi</span>
+                <span id="sonucKm" style="font-size:22px; font-weight:bold; color:var(--primary);">-</span>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Otobüs Tahmini (Ort. 80 km/s)</span>
+                <span id="sonucSureOtobus" style="font-size:22px; font-weight:bold; color:var(--warning);">-</span>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
+                <span class="info-title">Otomobil Tahmini</span>
+                <span id="sonucSureNormal" style="font-size:22px; font-weight:bold; color:var(--success);">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gömülü Resmi Google Maps Iframe (Tarsus/Mersin Merkezli Başlangıç) -->
+    <div id="haritaKapsayici" style="width: 100%; height: 480px; border-radius: 10px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); background:#f8fafc;">
+        <iframe id="gmapsIframe" 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            allowfullscreen 
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://maps.google.com/maps?q=Tarsus,+Mersin&output=embed">
+        </iframe>
+    </div>
+</div>
+
+<!-- 3. KDV HESAPLAMA ALANI -->
+<div id="kdvHesaplayiciCard" class="card" style="display:none; max-width: 850px; margin: 0 auto 20px auto;">
+    <h2>🧮 Hızlı KDV Hesaplama Aracı</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
+        Acenta, otel faturası veya bilet bedeli için KDV Dahil / KDV Hariç tutarları anında hesaplayın.
+    </p>
+
+    <label>İşlem Türü:</label>
+    <div class="kdv-yon-secici">
+        <button type="button" id="btnKdvDahilMod" class="kdv-yon-btn active" onclick="kdvModDegistir('dahil')">
+            💳 KDV Dahil'den Hariç Hesapla
+        </button>
+        <button type="button" id="btnKdvHaricMod" class="kdv-yon-btn" onclick="kdvModDegistir('haric')">
+            🧾 KDV Hariç'ten Dahil Hesapla
+        </button>
+    </div>
+
+    <div class="row-inputs">
+        <div>
+            <label id="lblKdvTutar" for="kdvTutar">Tutar (₺):</label>
+            <input type="number" id="kdvTutar" placeholder="Örn: 10000" oninput="kdvHesapla()" step="any">
+        </div>
+        <div>
+            <label>KDV Oranı (%):</label>
+            <div class="kdv-oran-butonlar">
+                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(1, this)">%1</button>
+                <button type="button" class="kdv-oran-btn active" onclick="kdvOranSec(10, this)">%10 (Otel/Konaklama)</button>
+                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(20, this)">%20 (Hizmet/Genel)</button>
+            </div>
+            <input type="hidden" id="kdvSeciliOran" value="10">
+        </div>
+    </div>
+
+    <div class="grid-3" style="margin-top: 15px;">
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">KDV Hariç Net Tutar</span>
+            <span id="resNetTutar" class="kdv-deger" style="color:var(--dark);">0,00 ₺</span>
+        </div>
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">Hesaplanan KDV Tutarı</span>
+            <span id="resKdvTutari" class="kdv-deger" style="color:var(--warning);">0,00 ₺</span>
+        </div>
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">KDV Dahil Toplam Tutar</span>
+            <span id="resToplamTutar" class="kdv-deger" style="color:var(--success);">0,00 ₺</span>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; display:flex; gap:10px;">
+        <button onclick="kdvOzetiKopyala()" id="btnKdvKopyala" class="btn-blue" style="flex:1;">📋 Hesaplama Özetini Kopyala</button>
+        <button onclick="kdvSifirla()" class="btn-small" style="background:#94a3b8; color:white;">Temizle</button>
+    </div>
+</div>
+
+<!-- 4. DOSYA YÜKLEME ALANI -->
 <div id="fileUploadCard" class="card file-upload-card">
     <h2>📂 Dosya Yükleme</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px;">
@@ -176,7 +296,7 @@
     </div>
 </div>
 
-<!-- Evrak Yönetimi Alanı -->
+<!-- 5. EVRAK YÖNETİMİ ALANI -->
 <div id="evrakYonetimiCard" class="card" style="display:none; max-width: 800px; margin: 0 auto 20px auto;">
     <h2>🗂️ Evrak Yönetimi</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
@@ -241,107 +361,10 @@
     </div>
 </div>
 
-<!-- Mesafe Ölçer Alanı -->
-<div id="mesafeOlcerCard" class="card" style="display:none; max-width: 950px; margin: 0 auto 20px auto;">
-    <h2>🧭 Otobüs Rota ve Mesafe Ölçer</h2>
-    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
-        Kalkış ve varış kutularına yazarken açılan Google Haritalar listesinden işletme veya konumu seçin. Karayolu mesafesi ve otobüs varış süresi otomatik hesaplanır.
-    </p>
-
-    <div class="row-inputs">
-        <div>
-            <label for="rotaKalkis">🛫 Kalkış Noktası (İşletme, İlçe veya Durak):</label>
-            <input type="text" id="rotaKalkis" placeholder="Örn: Üstünbus Turizm veya Tarsus" value="Tarsus" autocomplete="off">
-        </div>
-        <div>
-            <label for="rotaVaris">🛬 Varış Noktası / Hedef:</label>
-            <input type="text" id="rotaVaris" placeholder="Örn: Bahçelievler Ankara veya Otel Adı" autocomplete="off" onkeydown="if(event.key==='Enter') rotaHesapla()">
-        </div>
-    </div>
-
-    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-        <button id="btnRotaHesapla" onclick="rotaHesapla()" class="btn-blue" style="flex:1; min-width:220px;">🔍 Mesafeyi ve Rotayı Hesapla</button>
-        <button onclick="googleMapsRotaAc()" class="btn-green" style="flex:1; min-width:220px;">🗺️ Google Haritalar'da Canlı Aç</button>
-    </div>
-
-    <div id="rotaSonucKutusu" style="display:none; margin-bottom:15px;">
-        <div class="grid-3">
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
-                <span class="info-title">Karayolu Mesafesi</span>
-                <span id="sonucKm" style="font-size:22px; font-weight:bold; color:var(--primary);">-</span>
-            </div>
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
-                <span class="info-title">Otobüs Tahmini (Ort. 80 km/s)</span>
-                <span id="sonucSureOtobus" style="font-size:22px; font-weight:bold; color:var(--warning);">-</span>
-            </div>
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
-                <span class="info-title">Otomobil Tahmini</span>
-                <span id="sonucSureNormal" style="font-size:22px; font-weight:bold; color:var(--success);">-</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="haritaAlani" style="width:100%; height:400px; border-radius:8px; border:1px solid #cbd5e1; background:#eaedf1;"></div>
-</div>
-
-<!-- KDV Hesaplama Alanı -->
-<div id="kdvHesaplayiciCard" class="card" style="display:none; max-width: 850px; margin: 0 auto 20px auto;">
-    <h2>🧮 Hızlı KDV Hesaplama Aracı</h2>
-    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
-        Acenta, otel faturası veya bilet bedeli için KDV Dahil / KDV Hariç tutarları anında hesaplayın.
-    </p>
-
-    <label>İşlem Türü:</label>
-    <div class="kdv-yon-secici">
-        <button type="button" id="btnKdvDahilMod" class="kdv-yon-btn active" onclick="kdvModDegistir('dahil')">
-            💳 KDV Dahil'den Hariç Hesapla
-        </button>
-        <button type="button" id="btnKdvHaricMod" class="kdv-yon-btn" onclick="kdvModDegistir('haric')">
-            🧾 KDV Hariç'ten Dahil Hesapla
-        </button>
-    </div>
-
-    <div class="row-inputs">
-        <div>
-            <label id="lblKdvTutar" for="kdvTutar">Tutar (₺):</label>
-            <input type="number" id="kdvTutar" placeholder="Örn: 10000" oninput="kdvHesapla()" step="any">
-        </div>
-        <div>
-            <label>KDV Oranı (%):</label>
-            <div class="kdv-oran-butonlar">
-                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(1, this)">%1</button>
-                <button type="button" class="kdv-oran-btn active" onclick="kdvOranSec(10, this)">%10 (Otel/Konaklama)</button>
-                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(20, this)">%20 (Hizmet/Genel)</button>
-            </div>
-            <input type="hidden" id="kdvSeciliOran" value="10">
-        </div>
-    </div>
-
-    <div class="grid-3" style="margin-top: 15px;">
-        <div class="kdv-sonuc-kutu">
-            <span class="info-title">KDV Hariç Net Tutar</span>
-            <span id="resNetTutar" class="kdv-deger" style="color:var(--dark);">0,00 ₺</span>
-        </div>
-        <div class="kdv-sonuc-kutu">
-            <span class="info-title">Hesaplanan KDV Tutarı</span>
-            <span id="resKdvTutari" class="kdv-deger" style="color:var(--warning);">0,00 ₺</span>
-        </div>
-        <div class="kdv-sonuc-kutu">
-            <span class="info-title">KDV Dahil Toplam Tutar</span>
-            <span id="resToplamTutar" class="kdv-deger" style="color:var(--success);">0,00 ₺</span>
-        </div>
-    </div>
-
-    <div style="margin-top: 20px; display:flex; gap:10px;">
-        <button onclick="kdvOzetiKopyala()" id="btnKdvKopyala" class="btn-blue" style="flex:1;">📋 Hesaplama Özetini Kopyala</button>
-        <button onclick="kdvSifirla()" class="btn-small" style="background:#94a3b8; color:white;">Temizle</button>
-    </div>
-</div>
-
-<!-- Operatör Giriş Alanı -->
+<!-- 6. OPERATÖR GİRİŞ ALANI -->
 <div id="operatorLoginCard" class="card operator-login-card">
     <h2>🔐 Operatör Girişi</h2>
-    <p style="font-size:13px; color:#64748b; margin-top:-10px;">Tur programlarını eklemek, düzenlemek veya silmek için operatör hesabınızla giriş yapın.</p>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px;">Tur programlarını eklemek, düzenlemek veya oranları güncellemek için operatör hesabınızla giriş yapın.</p>
     
     <label for="operatorUsername">Kullanıcı Adı:</label>
     <input type="text" id="operatorUsername" autocomplete="username" placeholder="Kullanıcı adı">
@@ -470,7 +493,7 @@
         </div>
     </div>
 
-    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI EKLEME PANELİ (OPERATÖR GİRİŞİ YAPILINCA AÇILAN ALAN) -->
+    <!-- SAĞ BLOK: YÖNETİCİ TUR PROGRAMI VE ORAN YÖNETİM PANELİ -->
     <div id="adminPanelCard" class="admin-panel-outer">
         <div class="admin-panel-header">
             <h2 style="margin-bottom:0; flex:1;">🔐 Tur Programı ve Yönetici Paneli</h2>
@@ -591,7 +614,7 @@
             </div>
         </div>
 
-        <!-- OPERATÖRE ÖZEL: TUR TAKSİT ORAN TABLOSU GÜNCELLEME VE İNDİRME ALANI -->
+        <!-- OPERATÖRE ÖZEL: TUR TAKSİT ORAN TABLOSU YÖNETİMİ VE İNDİRME ALANI -->
         <div style="background: #fffdf8; border: 1px solid #fde68a; border-radius: 12px; padding: 22px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                 <h3 style="margin: 0; font-size: 16px; border-bottom: none; color: #92400e;">⚙️ Tur Taksit Oran Tablosu Yönetimi</h3>
@@ -601,9 +624,7 @@
                 Banka komisyon oranları değiştiğinde buradan oranları (% olarak) güncelleyebilirsiniz. Güncelleme anında taksit hesaplama tablosuna yansır. İndirdiğiniz yeni dosyayı panel klasörüne atarak kalıcı hale getirebilirsiniz.
             </p>
             
-            <div id="taksitOranGuncellemeGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 10px;">
-                <!-- JavaScript dinamik kutuları buraya basar -->
-            </div>
+            <div id="taksitOranGuncellemeGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 10px;"></div>
         </div>
 
     </div>
@@ -616,7 +637,6 @@
     </p>
 </footer>
 
-<!-- Ana JavaScript Dosyası -->
 <script src="app.js"></script>
 </body>
 </html>
