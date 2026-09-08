@@ -24,6 +24,7 @@ function panelSekmesiDegistir(sekme) {
     const fileCard = document.getElementById("fileUploadCard");
     const evrakCard = document.getElementById("evrakYonetimiCard");
     const mesafeCard = document.getElementById("mesafeOlcerCard");
+    const kdvCard = document.getElementById("kdvHesaplayiciCard"); // KDV Kartı
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -32,18 +33,21 @@ function panelSekmesiDegistir(sekme) {
     const fileTab = document.getElementById("tabDosya");
     const evrakTab = document.getElementById("tabEvrak");
     const mesafeTab = document.getElementById("tabMesafe");
+    const kdvTab = document.getElementById("tabKdv"); // KDV Sekmesi
 
     personelTab.classList.remove("active");
     operatorTab.classList.remove("active");
     fileTab.classList.remove("active");
     evrakTab.classList.remove("active");
     if (mesafeTab) mesafeTab.classList.remove("active");
+    if (kdvTab) kdvTab.classList.remove("active");
 
     loginCard.style.display = "none";
     adminCard.style.display = "none";
     fileCard.style.display = "none";
     evrakCard.style.display = "none";
     if (mesafeCard) mesafeCard.style.display = "none";
+    if (kdvCard) kdvCard.style.display = "none";
     personelCard.style.display = "none";
     hizliMesajCard.style.display = "none";
 
@@ -70,6 +74,13 @@ function panelSekmesiDegistir(sekme) {
         if (mesafeTab) mesafeTab.classList.add("active");
         if (mesafeCard) mesafeCard.style.display = "block";
         haritayiIlklendir();
+        return;
+    }
+
+    if (sekme === "kdv") {
+        if (kdvTab) kdvTab.classList.add("active");
+        if (kdvCard) kdvCard.style.display = "block";
+        document.getElementById("kdvTutar").focus();
         return;
     }
 
@@ -126,6 +137,91 @@ function operatorCikisYap() {
 }
 
 /* ============================================================
+   KDV HESAPLAMA MOTORU
+   ============================================================ */
+let aktifKdvModu = 'dahil'; // 'dahil' veya 'haric'
+
+function kdvModDegistir(mod) {
+    aktifKdvModu = mod;
+    document.getElementById('btnKdvDahilMod').classList.toggle('active', mod === 'dahil');
+    document.getElementById('btnKdvHaricMod').classList.toggle('active', mod === 'haric');
+
+    const lbl = document.getElementById('lblKdvTutar');
+    if (mod === 'dahil') {
+        lbl.innerText = "KDV Dahil Toplam Tutar (₺):";
+    } else {
+        lbl.innerText = "KDV Hariç Net Tutar (₺):";
+    }
+    kdvHesapla();
+}
+
+function kdvOranSec(oran, btn) {
+    document.getElementById('kdvSeciliOran').value = oran;
+    document.querySelectorAll('.kdv-oran-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    kdvHesapla();
+}
+
+function paraFormatla(sayi) {
+    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(sayi) + " ₺";
+}
+
+function kdvHesapla() {
+    const tutarInput = document.getElementById('kdvTutar').value;
+    const tutar = parseFloat(tutarInput);
+    const oran = parseFloat(document.getElementById('kdvSeciliOran').value);
+
+    if (isNaN(tutar) || tutar <= 0) {
+        document.getElementById('resNetTutar').innerText = "0,00 ₺";
+        document.getElementById('resKdvTutari').innerText = "0,00 ₺";
+        document.getElementById('resToplamTutar').innerText = "0,00 ₺";
+        return;
+    }
+
+    let netTutar = 0;
+    let kdvTutari = 0;
+    let toplamTutar = 0;
+
+    if (aktifKdvModu === 'dahil') {
+        // Tutar KDV Dahil ise: Net = Tutar / (1 + Oran/100)
+        toplamTutar = tutar;
+        netTutar = toplamTutar / (1 + (oran / 100));
+        kdvTutari = toplamTutar - netTutar;
+    } else {
+        // Tutar KDV Hariç ise: Toplam = Net * (1 + Oran/100)
+        netTutar = tutar;
+        kdvTutari = netTutar * (oran / 100);
+        toplamTutar = netTutar + kdvTutari;
+    }
+
+    document.getElementById('resNetTutar').innerText = paraFormatla(netTutar);
+    document.getElementById('resKdvTutari').innerText = paraFormatla(kdvTutari);
+    document.getElementById('resToplamTutar').innerText = paraFormatla(toplamTutar);
+}
+
+function kdvOzetiKopyala() {
+    const net = document.getElementById('resNetTutar').innerText;
+    const kdv = document.getElementById('resKdvTutari').innerText;
+    const toplam = document.getElementById('resToplamTutar').innerText;
+    const oran = document.getElementById('kdvSeciliOran').value;
+
+    const metin = `*Üstünbus Turizm - KDV Hesaplama Dökümü*\n` +
+                  `• KDV Oranı: %${oran}\n` +
+                  `• KDV Hariç Tutar: ${net}\n` +
+                  `• KDV Tutarı: ${kdv}\n` +
+                  `• KDV Dahil Toplam: ${toplam}`;
+
+    navigator.clipboard.writeText(metin).then(() => {
+        kopyalandiGoster('btnKdvKopyala');
+    });
+}
+
+function kdvSifirla() {
+    document.getElementById('kdvTutar').value = "";
+    kdvHesapla();
+}
+
+/* ============================================================
    GOOGLE PLACES + LEAFLET / OSRM HİBRİT HARİTA MOTORU
    ============================================================ */
 let harita = null;
@@ -140,11 +236,9 @@ function haritayiIlklendir() {
                 attribution: '© OpenStreetMap'
             }).addTo(harita);
             
-            // Google Autocomplete bağla
             googleAutocompleteBagla('rotaKalkis');
             googleAutocompleteBagla('rotaVaris');
 
-            // Varsayılan Tarsus koordinatını mühürle
             const kalkisInp = document.getElementById('rotaKalkis');
             if (kalkisInp && kalkisInp.value === "Tarsus") {
                 kalkisInp.dataset.lat = "36.9167";
@@ -156,12 +250,10 @@ function haritayiIlklendir() {
     }, 250);
 }
 
-// Google Autocomplete'i input alanına bağlayan ve koordinatı elemente mühürleyen fonksiyon
 function googleAutocompleteBagla(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
 
-    // Kullanıcı elle harf değiştirdiğinde eski seçili koordinatı sıfırla
     input.addEventListener('input', () => {
         delete input.dataset.lat;
         delete input.dataset.lon;
@@ -184,15 +276,12 @@ function googleAutocompleteBagla(inputId) {
             return;
         }
 
-        // Koordinatları doğrudan HTML inputunun dataset özelliğine kaydet
         input.dataset.lat = place.geometry.location.lat();
         input.dataset.lon = place.geometry.location.lng();
     });
 }
 
-// Eğer kullanıcı listeden tıklamadan doğrudan yazı yazıp butona bastıysa Google Geocoder ile çöz
 async function koordinatCozucu(inputEl) {
-    // 1. Önce input üzerine mühürlenmiş koordinat var mı bak
     if (inputEl.dataset.lat && inputEl.dataset.lon) {
         return {
             lat: parseFloat(inputEl.dataset.lat),
@@ -203,7 +292,6 @@ async function koordinatCozucu(inputEl) {
     const adres = inputEl.value.trim();
     if (!adres) return null;
 
-    // 2. Google Geocoder ile çözmeyi dene
     if (window.google && google.maps && google.maps.Geocoder) {
         const geocoder = new google.maps.Geocoder();
         const gResult = await new Promise((resolve) => {
@@ -226,7 +314,6 @@ async function koordinatCozucu(inputEl) {
         }
     }
 
-    // 3. Yedek OSM Geocoder
     try {
         const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=1&q=${encodeURIComponent(adres)}`;
         const res = await fetch(url, { headers: { "Accept-Language": "tr" } });
@@ -257,7 +344,6 @@ async function rotaHesapla() {
     if (btn) btn.innerText = "Hesaplanıyor...";
 
     try {
-        // Koordinatları doğrudan çöz
         const k1 = await koordinatCozucu(kalkisInp);
         const k2 = await koordinatCozucu(varisInp);
 
@@ -271,7 +357,6 @@ async function rotaHesapla() {
             return;
         }
 
-        // OSRM Gerçek Karayolu Sürüş Rotası
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${k1.lon},${k1.lat};${k2.lon},${k2.lat}?overview=full&geometries=geojson`;
         const res = await fetch(osrmUrl);
         const rotaVerisi = await res.json();
@@ -289,7 +374,6 @@ async function rotaHesapla() {
         const normalSaat = Math.floor(sureSaniye / 3600);
         const normalDk = Math.round((sureSaniye % 3600) / 60);
 
-        // Otobüs süresi: Ort. 80 km/s hız baz alınır
         const otobusToplamSaat = (mesafeMetre / 1000) / 80;
         const otobusSaat = Math.floor(otobusToplamSaat);
         const otobusDk = Math.round((otobusToplamSaat - otobusSaat) * 60);

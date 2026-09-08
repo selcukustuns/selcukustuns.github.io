@@ -31,6 +31,7 @@
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
     <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
+    <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
@@ -125,7 +126,7 @@
     </div>
 </div>
 
-<!-- Mesafe Ölçer Alanı (Google Canlı Arama Destekli) -->
+<!-- Mesafe Ölçer Alanı -->
 <div id="mesafeOlcerCard" class="card" style="display:none; max-width: 950px; margin: 0 auto 20px auto;">
     <h2>🧭 Otobüs Rota ve Mesafe Ölçer</h2>
     <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 15px;">
@@ -166,6 +167,62 @@
     </div>
 
     <div id="haritaAlani" style="width:100%; height:400px; border-radius:8px; border:1px solid #cbd5e1; background:#eaedf1;"></div>
+</div>
+
+<!-- KDV Hesaplama Alanı (YENİ MODÜL) -->
+<div id="kdvHesaplayiciCard" class="card" style="display:none; max-width: 850px; margin: 0 auto 20px auto;">
+    <h2>🧮 Hızlı KDV Hesaplama Aracı</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom: 20px;">
+        Acenta, otel faturası veya bilet bedeli için KDV Dahil / KDV Hariç tutarları anında hesaplayın.
+    </p>
+
+    <!-- İşlem Yönü Seçimi -->
+    <label>İşlem Türü:</label>
+    <div class="kdv-yon-secici">
+        <button type="button" id="btnKdvDahilMod" class="kdv-yon-btn active" onclick="kdvModDegistir('dahil')">
+            💳 KDV Dahil'den Hariç Hesapla
+        </button>
+        <button type="button" id="btnKdvHaricMod" class="kdv-yon-btn" onclick="kdvModDegistir('haric')">
+            🧾 KDV Hariç'ten Dahil Hesapla
+        </button>
+    </div>
+
+    <div class="row-inputs">
+        <div>
+            <label id="lblKdvTutar" for="kdvTutar">Tutar (₺):</label>
+            <input type="number" id="kdvTutar" placeholder="Örn: 10000" oninput="kdvHesapla()" step="any">
+        </div>
+        <div>
+            <label>KDV Oranı (%):</label>
+            <div class="kdv-oran-butonlar">
+                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(1, this)">%1 (Yemek/İçecek)</button>
+                <button type="button" class="kdv-oran-btn active" onclick="kdvOranSec(10, this)">%10 (Otel/Konaklama)</button>
+                <button type="button" class="kdv-oran-btn" onclick="kdvOranSec(20, this)">%20 (Hizmet/Genel)</button>
+            </div>
+            <input type="hidden" id="kdvSeciliOran" value="10">
+        </div>
+    </div>
+
+    <!-- Sonuç Paneli -->
+    <div class="grid-3" style="margin-top: 15px;">
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">KDV Hariç Net Tutar</span>
+            <span id="resNetTutar" class="kdv-deger" style="color:var(--dark);">0,00 ₺</span>
+        </div>
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">Hesaplanan KDV Tutarı</span>
+            <span id="resKdvTutari" class="kdv-deger" style="color:var(--warning);">0,00 ₺</span>
+        </div>
+        <div class="kdv-sonuc-kutu">
+            <span class="info-title">KDV Dahil Toplam Tutar</span>
+            <span id="resToplamTutar" class="kdv-deger" style="color:var(--success);">0,00 ₺</span>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; display:flex; gap:10px;">
+        <button onclick="kdvOzetiKopyala()" id="btnKdvKopyala" class="btn-blue" style="flex:1;">📋 Hesaplama Özetini Kopyala</button>
+        <button onclick="kdvSifirla()" class="btn-small" style="background:#94a3b8; color:white;">Temizle</button>
+    </div>
 </div>
 
 <!-- Operatör Giriş Alanı -->
