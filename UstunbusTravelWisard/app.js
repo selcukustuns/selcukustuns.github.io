@@ -131,10 +131,6 @@ function operatorCikisYap() {
 let harita = null;
 let rotaKatmani = null;
 
-// Google Maps'ten gelen seçilmiş kesin koordinatlar
-let secilenKalkisNoktasi = { lat: 36.9167, lon: 34.8953, isim: "Tarsus, Mersin" };
-let secilenVarisNoktasi = null;
-
 function haritayiIlklendir() {
     setTimeout(() => {
         if (!harita) {
@@ -144,25 +140,35 @@ function haritayiIlklendir() {
                 attribution: '© OpenStreetMap'
             }).addTo(harita);
             
-            // Google Places Autocomplete motorunu inputlara bağla
-            googleAutocompleteBagla('rotaKalkis', (secilen) => {
-                secilenKalkisNoktasi = secilen;
-            });
+            // Google Autocomplete bağla
+            googleAutocompleteBagla('rotaKalkis');
+            googleAutocompleteBagla('rotaVaris');
 
-            googleAutocompleteBagla('rotaVaris', (secilen) => {
-                secilenVarisNoktasi = secilen;
-            });
+            // Varsayılan Tarsus koordinatını mühürle
+            const kalkisInp = document.getElementById('rotaKalkis');
+            if (kalkisInp && kalkisInp.value === "Tarsus") {
+                kalkisInp.dataset.lat = "36.9167";
+                kalkisInp.dataset.lon = "34.8953";
+            }
         } else {
             harita.invalidateSize();
         }
-    }, 200);
+    }, 250);
 }
 
-// Google Places Autocomplete Fonksiyonu
-function googleAutocompleteBagla(inputId, secimGeriBildirimi) {
+// Google Autocomplete'i input alanına bağlayan ve koordinatı elemente mühürleyen fonksiyon
+function googleAutocompleteBagla(inputId) {
     const input = document.getElementById(inputId);
+    if (!input) return;
+
+    // Kullanıcı elle harf değiştirdiğinde eski seçili koordinatı sıfırla
+    input.addEventListener('input', () => {
+        delete input.dataset.lat;
+        delete input.dataset.lon;
+    });
+
     if (!window.google || !google.maps || !google.maps.places) {
-        console.warn("Google Maps Places API henüz yüklenmedi veya anahtar kısıtlaması var.");
+        console.warn("Google Maps Places API henüz yüklenmedi.");
         return;
     }
 
@@ -174,40 +180,76 @@ function googleAutocompleteBagla(inputId, secimGeriBildirimi) {
     autocomplete.addListener("place_changed", function () {
         const place = autocomplete.getPlace();
 
-        if (!place.geometry || !place.geometry.location) {
-            alert("Seçilen mekanın harita konumu alınamadı. Lütfen listeden tekrar seçin.");
+        if (!place || !place.geometry || !place.geometry.location) {
             return;
         }
 
-        const konumVerisi = {
-            lat: place.geometry.location.lat(),
-            lon: place.geometry.location.lng(),
-            isim: place.name || input.value
-        };
-
-        secimGeriBildirimi(konumVerisi);
+        // Koordinatları doğrudan HTML inputunun dataset özelliğine kaydet
+        input.dataset.lat = place.geometry.location.lat();
+        input.dataset.lon = place.geometry.location.lng();
     });
 }
 
-// Kullanıcı listeden seçmeden doğrudan Enter'a basarsa yedek arama motoru
-async function koordinatBulYedek(yerAdi) {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=1&q=${encodeURIComponent(yerAdi)}`;
-    const yanit = await fetch(url, { headers: { "Accept-Language": "tr" } });
-    const veri = await yanit.json();
-    if (!veri || veri.length === 0) return null;
-    return {
-        lat: parseFloat(veri[0].lat),
-        lon: parseFloat(veri[0].lon),
-        isim: veri[0].display_name
-    };
+// Eğer kullanıcı listeden tıklamadan doğrudan yazı yazıp butona bastıysa Google Geocoder ile çöz
+async function koordinatCozucu(inputEl) {
+    // 1. Önce input üzerine mühürlenmiş koordinat var mı bak
+    if (inputEl.dataset.lat && inputEl.dataset.lon) {
+        return {
+            lat: parseFloat(inputEl.dataset.lat),
+            lon: parseFloat(inputEl.dataset.lon)
+        };
+    }
+
+    const adres = inputEl.value.trim();
+    if (!adres) return null;
+
+    // 2. Google Geocoder ile çözmeyi dene
+    if (window.google && google.maps && google.maps.Geocoder) {
+        const geocoder = new google.maps.Geocoder();
+        const gResult = await new Promise((resolve) => {
+            geocoder.geocode({ address: adres, componentRestrictions: { country: 'TR' } }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    resolve({
+                        lat: results[0].geometry.location.lat(),
+                        lon: results[0].geometry.location.lng()
+                    });
+                } else {
+                    resolve(null);
+                }
+            });
+        });
+
+        if (gResult) {
+            inputEl.dataset.lat = gResult.lat;
+            inputEl.dataset.lon = gResult.lon;
+            return gResult;
+        }
+    }
+
+    // 3. Yedek OSM Geocoder
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=1&q=${encodeURIComponent(adres)}`;
+        const res = await fetch(url, { headers: { "Accept-Language": "tr" } });
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const osmResult = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+            inputEl.dataset.lat = osmResult.lat;
+            inputEl.dataset.lon = osmResult.lon;
+            return osmResult;
+        }
+    } catch (e) {
+        console.error("OSM Geocode hatası:", e);
+    }
+
+    return null;
 }
 
 async function rotaHesapla() {
-    const baslangicMetin = document.getElementById("rotaKalkis").value.trim();
-    const bitisMetin = document.getElementById("rotaVaris").value.trim();
+    const kalkisInp = document.getElementById("rotaKalkis");
+    const varisInp = document.getElementById("rotaVaris");
     const btn = document.getElementById("btnRotaHesapla");
 
-    if (!baslangicMetin || !bitisMetin) {
+    if (!kalkisInp.value.trim() || !varisInp.value.trim()) {
         alert("Lütfen hem kalkış hem de varış noktasını girin!");
         return;
     }
@@ -215,17 +257,17 @@ async function rotaHesapla() {
     if (btn) btn.innerText = "Hesaplanıyor...";
 
     try {
-        const k1 = (secilenKalkisNoktasi && secilenKalkisNoktasi.isim.includes(baslangicMetin))
-            ? secilenKalkisNoktasi
-            : await koordinatBulYedek(baslangicMetin);
+        // Koordinatları doğrudan çöz
+        const k1 = await koordinatCozucu(kalkisInp);
+        const k2 = await koordinatCozucu(varisInp);
 
-        const k2 = (secilenVarisNoktasi && secilenVarisNoktasi.isim.includes(bitisMetin))
-            ? secilenVarisNoktasi
-            : await koordinatBulYedek(bitisMetin);
+        if (!k1) {
+            alert(`Kalkış noktası ("${kalkisInp.value}") bulunamadı. Lütfen açılan Google önerilerinden seçin.`);
+            return;
+        }
 
-        if (!k1 || !k2) {
-            alert("Noktalardan biri haritada tespit edilemedi. Lütfen açılan Google öneri listesinden seçin.");
-            if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
+        if (!k2) {
+            alert(`Varış noktası ("${varisInp.value}") bulunamadı. Lütfen açılan Google önerilerinden seçin.`);
             return;
         }
 
@@ -235,7 +277,7 @@ async function rotaHesapla() {
         const rotaVerisi = await res.json();
 
         if (!rotaVerisi.routes || rotaVerisi.routes.length === 0) {
-            alert("Karayolu rotası oluşturulamadı.");
+            alert("İki nokta arasında karayolu rotası oluşturulamadı.");
             return;
         }
 
@@ -247,7 +289,7 @@ async function rotaHesapla() {
         const normalSaat = Math.floor(sureSaniye / 3600);
         const normalDk = Math.round((sureSaniye % 3600) / 60);
 
-        // Ticari otobüs süresi: Ort. 80 km/s seyir hızı baz alınır
+        // Otobüs süresi: Ort. 80 km/s hız baz alınır
         const otobusToplamSaat = (mesafeMetre / 1000) / 80;
         const otobusSaat = Math.floor(otobusToplamSaat);
         const otobusDk = Math.round((otobusToplamSaat - otobusSaat) * 60);
@@ -264,14 +306,14 @@ async function rotaHesapla() {
             style: { color: "#3498db", weight: 5, opacity: 0.8 }
         }).addTo(harita);
 
-        L.marker([k1.lat, k1.lon]).addTo(rotaKatmani).bindPopup(`🛫 Kalkış: ${baslangicMetin}`).openPopup();
-        L.marker([k2.lat, k2.lon]).addTo(rotaKatmani).bindPopup(`🛬 Varış: ${bitisMetin}`);
+        L.marker([k1.lat, k1.lon]).addTo(rotaKatmani).bindPopup(`🛫 Kalkış: ${kalkisInp.value}`).openPopup();
+        L.marker([k2.lat, k2.lon]).addTo(rotaKatmani).bindPopup(`🛬 Varış: ${varisInp.value}`);
 
         harita.fitBounds(rotaKatmani.getBounds(), { padding: [40, 40] });
 
     } catch (err) {
         console.error(err);
-        alert("Mesafe hesaplanırken bağlantı hatası oluştu.");
+        alert("Mesafe hesaplanırken sunucu bağlantı hatası oluştu.");
     } finally {
         if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
     }
