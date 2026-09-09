@@ -37,7 +37,6 @@
         Sezondaki güncel fiyatlı turlarımızdan seçim yaparak veya manuel tutar girerek tüm taksit vade farklarını anında hesaplayın.
     </p>
 
-    <!-- Mod Seçimi: Otomatik Tur / Manuel Tutar -->
     <div class="kdv-yon-secici" style="margin-bottom:18px;">
         <button type="button" id="btnTaksitModTur" class="kdv-yon-btn active" onclick="taksitModuDegistir('tur')">
             🚌 Güncel Tur Listesinden Seç
@@ -47,7 +46,6 @@
         </button>
     </div>
 
-    <!-- Otomatik Tur Seçimi -->
     <div id="taksitTurSecimBlok">
         <div class="tab-container" style="margin-bottom: 12px;">
             <button class="tab-btn active" id="tabTaksitAll" onclick="taksitTurTipiFiltrele('all')">Tüm Turlar</button>
@@ -67,13 +65,11 @@
         </div>
     </div>
 
-    <!-- Manuel Tutar Girişi -->
     <div id="taksitManuelBlok" style="display:none;">
         <label for="taksitManuelTutar">Kişi Başı Tur Tutarı (₺):</label>
         <input type="number" id="taksitManuelTutar" placeholder="Örn: 7500" oninput="taksitHesapla()">
     </div>
 
-    <!-- Kişi Sayısı Çarpanı ve Baz Tutar Özeti -->
     <div class="row-inputs" style="align-items: center; margin-top: 5px;">
         <div>
             <label for="taksitKisiSayisi">👥 Kişi Sayısı:</label>
@@ -96,7 +92,6 @@
         </div>
     </div>
 
-    <!-- Tüm Taksitler Tablosu (2'den 12'ye) -->
     <div style="overflow-x: auto; margin-top: 20px;">
         <table class="taksit-tablosu">
             <thead>
@@ -112,7 +107,6 @@
         </table>
     </div>
 
-    <!-- Müşteri İletişim ve WhatsApp Gönderim Barı -->
     <div style="margin-top: 22px; background: #f0fdf4; padding: 16px 20px; border-radius: 10px; border: 1px solid #bbf7d0;">
         <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px;">💬 Müşteriye WhatsApp Taksit Bilgisi Gönder</h4>
         
@@ -195,21 +189,29 @@
             </div>
         </div>
 
-        <!-- ⛽ OTOBÜS YAKIT MALİYETİ KUTUSU (100 km'de 30 Litre - Motorin) -->
+        <!-- ⛽ OTOBÜS YAKIT MALİYETİ VE İNDİRİM HESAPLAMA KUTUSU -->
         <div id="rotaYakitMaliyetiKutusu" style="margin-top: 12px; background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; display: none;">
-            <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px;">⛽ Otobüs Yakıt Maliyeti (100 km'de 30 Litre - Motorin)</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Güncel Motorin Fiyatı</span>
-                    <span id="aktifMotorinFiyati" style="font-size: 14px; font-weight: bold; color: var(--dark);">-</span>
+            <h4 style="margin: 0 0 10px 0; color: #166534; font-size: 14px;">⛽ Otobüs Mazot / Yakıt Maliyeti (100 km'de 30 Litre)</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #d1fae5;">
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Güncel Normal Fiyat</span>
+                    <span id="normalLitreFiyati" style="font-size: 15px; font-weight: bold; color: var(--dark);">-</span>
                 </div>
-                <div>
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #d1fae5;">
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Tahmini İndirimli Fiyat (%5.25)</span>
+                    <span id="indirimliLitreFiyati" style="font-size: 15px; font-weight: bold; color: var(--success);">-</span>
+                </div>
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #d1fae5;">
                     <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Toplam Tüketim (~30L / 100km)</span>
-                    <span id="toplamLitre" style="font-size: 14px; font-weight: bold; color: var(--warning);">-</span>
+                    <span id="toplamLitre" style="font-size: 15px; font-weight: bold; color: var(--warning);">-</span>
                 </div>
-                <div>
-                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Toplam Yakıt Maliyeti</span>
-                    <span id="toplamYakitMaliyeti" style="font-size: 18px; font-weight: 800; color: var(--success);">-</span>
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #d1fae5;">
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Normal Toplam Maliyet</span>
+                    <span id="normalToplamMaliyet" style="font-size: 16px; font-weight: 800; color: var(--dark);">-</span>
+                </div>
+                <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #d1fae5; grid-column: span 2;">
+                    <span style="font-size: 11px; color: #166534; display: block; text-transform: uppercase; font-weight: bold;">🎯 İndirimli Toplam Maliyet (%5.25 İndirimli)</span>
+                    <span id="indirimliToplamMaliyet" style="font-size: 20px; font-weight: 800; color: var(--success);">-</span>
                 </div>
             </div>
         </div>
@@ -391,7 +393,6 @@
     <label for="operatorPassword">Şifre:</label>
     <input type="password" id="operatorPassword" autocomplete="current-password" placeholder="Şifre" onkeydown="if(event.key==='Enter') operatorGirisYap()">
     
-    <!-- Butona id="btnOperatorGiris" eklendi -->
     <button id="btnOperatorGiris" onclick="operatorGirisYap()" class="btn-orange" style="width:100%; transition: all 0.3s ease;">🔓 Giriş Yap</button>
     <div id="operatorLoginError" style="display:none; margin-top:10px; padding:10px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:13px; font-weight:600;"></div>
 </div>

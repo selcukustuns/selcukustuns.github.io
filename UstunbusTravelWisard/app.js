@@ -684,7 +684,9 @@ async function tekilKonumBul(adres) {
     return null;
 }
 
-// ⛽ OTOBÜS YAKIT MALİYETİ HESAPLAMA MOTORU (100km / 30 Litre - Motorin)
+// ============================================================
+//   OTOBÜS YAKIT MALİYETİ VE %5.25 İNDİRİM HESAPLAMA MOTORU
+// ============================================================
 async function motorinMaliyetiniHesapla(km) {
     const kutu = document.getElementById("rotaYakitMaliyetiKutusu");
     if (!kutu) return;
@@ -696,29 +698,38 @@ async function motorinMaliyetiniHesapla(km) {
 
         let hedefBolge = null;
         if (Array.isArray(data)) {
-            hedefBolge = data.find(d => d.name && d.name.toUpperCase().includes("TARSUS"));
+            hedefBolge = data.find(d => d.districtName && d.districtName.toLocaleUpperCase('tr-TR').includes("TARSUS"));
             if (!hedefBolge && data.length > 0) hedefBolge = data[0];
-        } else if (data && data.fuel) {
-            hedefBolge = data;
         }
 
-        if (hedefBolge && hedefBolge.fuel && Array.isArray(hedefBolge.fuel)) {
-            const motorinObj = hedefBolge.fuel.find(f => 
-                f.name && (f.name.toUpperCase().includes("MOTORİN") || f.name.toUpperCase().includes("DIESEL"))
+        if (hedefBolge && hedefBolge.prices && Array.isArray(hedefBolge.prices)) {
+            // Opet ürün kodları (A121: Motorin UltraForce, A128: Motorin EcoForce) veya Türkçe karakter duyarlı arama[cite: 5]
+            const motorinObj = hedefBolge.prices.find(f => 
+                f.productCode === "A121" || f.productCode === "A128" || 
+                (f.productName && f.productName.toLocaleUpperCase('tr-TR').includes("MOTORIN"))
             );
 
-            if (motorinObj && motorinObj.price !== null && motorinObj.price !== undefined) {
-                const litreFiyati = parseFloat(motorinObj.price);
-                const toplamLitre = (km / 100) * 30; // 100 km'de 30 litre
-                const toplamMaliyet = toplamLitre * litreFiyati;
+            if (motorinObj && motorinObj.amount !== null && motorinObj.amount !== undefined) {
+                const normalLitreFiyati = parseFloat(motorinObj.amount);
+                
+                // %5.25 İndirimli Litre Fiyatı
+                const indirimOrani = 0.0525;
+                const indirimliLitreFiyati = normalLitreFiyati * (1 - indirimOrani);
 
-                const fiyatEl = document.getElementById("aktifMotorinFiyati");
-                const litreEl = document.getElementById("toplamLitre");
-                const maliyetEl = document.getElementById("toplamYakitMaliyeti");
+                // Toplam Litre Tüketimi (100 km'de 30 Litre)
+                const toplamLitre = (km / 100) * 30; 
 
-                if (fiyatEl) fiyatEl.innerText = paraFormatla(litreFiyati);
-                if (litreEl) litreEl.innerText = toplamLitre.toFixed(1) + " Litre";
-                if (maliyetEl) maliyetEl.innerText = paraFormatla(toplamMaliyet);
+                // Maliyetler
+                const normalMaliyet = toplamLitre * normalLitreFiyati;
+                const indirimliMaliyet = toplamLitre * indirimliLitreFiyati;
+
+                // Alanlara yazdır
+                document.getElementById("normalLitreFiyati").innerText = paraFormatla(normalLitreFiyati) + " / Lt";
+                document.getElementById("indirimliLitreFiyati").innerText = paraFormatla(indirimliLitreFiyati) + " / Lt";
+                document.getElementById("toplamLitre").innerText = toplamLitre.toFixed(1) + " Litre";
+                document.getElementById("normalToplamMaliyet").innerText = paraFormatla(normalMaliyet);
+                document.getElementById("indirimliToplamMaliyet").innerText = paraFormatla(indirimliMaliyet);
+                
                 kutu.style.display = "block";
                 return;
             }
@@ -783,7 +794,7 @@ async function rotaHesapla() {
                 document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
                 document.getElementById("rotaSonucKutusu").style.display = "block";
 
-                // ⛽ Rota hesaplandığı an prices.json üzerinden motorin maliyetini tetikle
+                // ⛽ Rota hesaplandığı an yakıt maliyeti ve indirim hesaplamasını tetikle
                 await motorinMaliyetiniHesapla(parseFloat(km));
             }
         }
