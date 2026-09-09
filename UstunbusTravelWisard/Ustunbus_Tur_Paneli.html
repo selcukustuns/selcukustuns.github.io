@@ -178,7 +178,7 @@
         <button onclick="googleMapsRotaAc()" class="btn-green" style="flex:1; min-width:220px;">🗺️ Google Haritalar Uygulamasında Aç</button>
     </div>
 
-    <!-- Sonuç Kartları: KM, Otobüs Süresi, Otomobil Süresi -->
+    <!-- Sonuç Kartları: KM, Otobüs Süresi, Otomobil Süresi ve Yakıt Maliyeti -->
     <div id="rotaSonucKutusu" style="display:none; margin-bottom:15px;">
         <div class="grid-3">
             <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
@@ -192,6 +192,25 @@
             <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align:center;">
                 <span class="info-title">Otomobil Tahmini</span>
                 <span id="sonucSureNormal" style="font-size:22px; font-weight:bold; color:var(--success);">-</span>
+            </div>
+        </div>
+
+        <!-- ⛽ OTOBÜS YAKIT MALİYETİ KUTUSU (100 km'de 30 Litre - Motorin) -->
+        <div id="rotaYakitMaliyetiKutusu" style="margin-top: 12px; background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; display: none;">
+            <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px;">⛽ Otobüs Yakıt Maliyeti (100 km'de 30 Litre - Motorin)</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Güncel Motorin Fiyatı</span>
+                    <span id="aktifMotorinFiyati" style="font-size: 14px; font-weight: bold; color: var(--dark);">-</span>
+                </div>
+                <div>
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Toplam Tüketim (~30L / 100km)</span>
+                    <span id="toplamLitre" style="font-size: 14px; font-weight: bold; color: var(--warning);">-</span>
+                </div>
+                <div>
+                    <span style="font-size: 11px; color: #64748b; display: block; text-transform: uppercase;">Toplam Yakıt Maliyeti</span>
+                    <span id="toplamYakitMaliyeti" style="font-size: 18px; font-weight: 800; color: var(--success);">-</span>
+                </div>
             </div>
         </div>
     </div>

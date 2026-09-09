@@ -112,18 +112,14 @@ async function operatorGirisYap() {
     }
 
     if (kullaniciAdi === OPERATOR_KULLANICI_ADI && sifre === OPERATOR_SIFRE) {
-        // 1. Adım: Butonu döndür ve devre dışı bırak
         btn.disabled = true;
         btn.innerHTML = `<span class="spinner"></span> Giriş Yapılıyor...`;
 
-        // 2. Adım: 1.5 saniye bekleme efekti
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // 3. Adım: Yeşil tik ve onay yazısı
         btn.className = "btn-orange btn-success-anim";
         btn.innerHTML = `✅ Giriş Onaylandı`;
 
-        // 4. Adım: Kısa bir bekleyişten sonra paneli aç
         await new Promise(resolve => setTimeout(resolve, 800));
 
         operatorOturumuAcik = true;
@@ -132,7 +128,6 @@ async function operatorGirisYap() {
         document.getElementById("operatorStatus").style.display = "inline-block";
         document.getElementById("cikisYapBtnUst").style.display = "inline-flex";
         
-        // Butonu eski haline geri getir (ileride çıkış yapıp tekrar girerse diye)
         btn.disabled = false;
         btn.className = "btn-orange";
         btn.innerHTML = "🔓 Giriş Yap";
@@ -151,7 +146,6 @@ async function operatorCikisYap() {
         btn.disabled = true;
         btn.innerHTML = `<span class="spinner"></span> Çıkış Yapılıyor...`;
         
-        // Kısa bir çıkış animasyonu beklemesi
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         btn.className = "btn-red btn-small btn-danger-anim";
@@ -565,7 +559,7 @@ function kdvSifirla() {
 }
 
 /* ============================================================
-   CANLI ÖNERİLİ MESAFE MOTORU & OTOBÜS SÜRE HESABI + GOOGLE IFRAME
+   CANLI ÖNERİLİ MESAFE MOTORU & OTOBÜS SÜRE HESABI + YAKIT MALİYETİ
    ============================================================ */
 let secilenKalkisVerisi = { lat: 36.9167, lon: 34.8953, isim: "Tarsus" };
 let secilenVarisVerisi = null;
@@ -608,7 +602,6 @@ function otomatikTamamlaAyarla(inputId, dropdownId, secimGeriBildirimi) {
         beklemeZamani = setTimeout(async () => {
             dropdown.innerHTML = "";
             
-            // 1. Önce özel acenta duraklarını listele
             const ozelEslenenler = OZEL_ACENTA_DURAKLARI.filter(yer => 
                 yer.baslik.toLocaleLowerCase('tr').includes(sorgu.toLocaleLowerCase('tr'))
             );
@@ -627,7 +620,6 @@ function otomatikTamamlaAyarla(inputId, dropdownId, secimGeriBildirimi) {
                 dropdown.appendChild(div);
             });
 
-            // 2. OpenStreetMap Türkiye Haritasında il/ilçe/mahalle ara
             try {
                 const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=tr&limit=6&q=${encodeURIComponent(sorgu)}`;
                 const yanit = await fetch(url, { headers: { "Accept-Language": "tr" } });
@@ -692,6 +684,52 @@ async function tekilKonumBul(adres) {
     return null;
 }
 
+// ⛽ OTOBÜS YAKIT MALİYETİ HESAPLAMA MOTORU (100km / 30 Litre - Motorin)
+async function motorinMaliyetiniHesapla(km) {
+    const kutu = document.getElementById("rotaYakitMaliyetiKutusu");
+    if (!kutu) return;
+
+    try {
+        const res = await fetch("prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("prices.json okunamadı");
+        const data = await res.json();
+
+        let hedefBolge = null;
+        if (Array.isArray(data)) {
+            hedefBolge = data.find(d => d.name && d.name.toUpperCase().includes("TARSUS"));
+            if (!hedefBolge && data.length > 0) hedefBolge = data[0];
+        } else if (data && data.fuel) {
+            hedefBolge = data;
+        }
+
+        if (hedefBolge && hedefBolge.fuel && Array.isArray(hedefBolge.fuel)) {
+            const motorinObj = hedefBolge.fuel.find(f => 
+                f.name && (f.name.toUpperCase().includes("MOTORİN") || f.name.toUpperCase().includes("DIESEL"))
+            );
+
+            if (motorinObj && motorinObj.price !== null && motorinObj.price !== undefined) {
+                const litreFiyati = parseFloat(motorinObj.price);
+                const toplamLitre = (km / 100) * 30; // 100 km'de 30 litre
+                const toplamMaliyet = toplamLitre * litreFiyati;
+
+                const fiyatEl = document.getElementById("aktifMotorinFiyati");
+                const litreEl = document.getElementById("toplamLitre");
+                const maliyetEl = document.getElementById("toplamYakitMaliyeti");
+
+                if (fiyatEl) fiyatEl.innerText = paraFormatla(litreFiyati);
+                if (litreEl) litreEl.innerText = toplamLitre.toFixed(1) + " Litre";
+                if (maliyetEl) maliyetEl.innerText = paraFormatla(toplamMaliyet);
+                kutu.style.display = "block";
+                return;
+            }
+        }
+        kutu.style.display = "none";
+    } catch (err) {
+        console.warn("Motorin maliyeti hesaplanamadı:", err);
+        kutu.style.display = "none";
+    }
+}
+
 async function rotaHesapla() {
     const kalkisInp = document.getElementById("rotaKalkis");
     const varisInp = document.getElementById("rotaVaris");
@@ -701,7 +739,6 @@ async function rotaHesapla() {
     const baslangic = kalkisInp ? kalkisInp.value.trim() : "Tarsus, Mersin";
     const bitis = varisInp ? varisInp.value.trim() : "";
 
-    // Eğer hedef boşsa haritayı doğrudan Tarsus/Mersin merkezli göster
     if (!bitis) {
         if (iframe) iframe.src = `https://maps.google.com/maps?q=Tarsus,+Mersin&output=embed`;
         const sonucKutusu = document.getElementById("rotaSonucKutusu");
@@ -711,11 +748,9 @@ async function rotaHesapla() {
 
     if (btn) btn.innerText = "Hesaplanıyor...";
 
-    // 1. Resmi Google Maps Yol Tarifini Iframe'e yükle
     const embedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(baslangic)}&daddr=${encodeURIComponent(bitis)}&output=embed`;
     if (iframe) iframe.src = embedUrl;
 
-    // 2. Kilometre ve Otobüs Süresini Arka Planda Hesapla
     try {
         const k1 = (secilenKalkisVerisi && secilenKalkisVerisi.isim.includes(baslangic)) 
             ? secilenKalkisVerisi 
@@ -747,6 +782,9 @@ async function rotaHesapla() {
                 document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
                 document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
                 document.getElementById("rotaSonucKutusu").style.display = "block";
+
+                // ⛽ Rota hesaplandığı an prices.json üzerinden motorin maliyetini tetikle
+                await motorinMaliyetiniHesapla(parseFloat(km));
             }
         }
     } catch (err) {
@@ -755,6 +793,7 @@ async function rotaHesapla() {
         if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
     }
 }
+
 function hizliHedefSec(hedefAdi) {
     const varisInp = document.getElementById("rotaVaris");
     if (varisInp) {
