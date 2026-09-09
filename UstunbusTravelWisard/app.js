@@ -73,6 +73,7 @@ function panelSekmesiDegistir(sekme) {
         if (mesafeTab) mesafeTab.classList.add("active");
         if (mesafeCard) mesafeCard.style.display = "block";
         haritayiIlklendir();
+        canliFiyatlariGoster(); // Sekme açıldığında canlı fiyatları yükle
         return;
     }
 
@@ -559,7 +560,7 @@ function kdvSifirla() {
 }
 
 /* ============================================================
-   CANLI ÖNERİLİ MESAFE MOTORU & OTOBÜS SÜRE HESABI + YAKIT MALİYETİ
+   CANLI ÖNERİLİ MESAFE MOTORU & OTOBÜS SÜRE HESABI + CANLI FİYAT WİDGETİ
    ============================================================ */
 let secilenKalkisVerisi = { lat: 36.9167, lon: 34.8953, isim: "Tarsus" };
 let secilenVarisVerisi = null;
@@ -581,6 +582,70 @@ function haritayiIlklendir() {
         secilenVarisVerisi = secilen;
         rotaHesapla();
     });
+    
+    canliFiyatlariGoster();
+}
+
+// ⚡ SORGUDAN ÖNCE ANLIK OPET FİYATLARINI WİDGET (Mini İkonlu & Logolu Başlık)
+async function canliFiyatlariGoster() {
+    const konteyner = document.getElementById("canliFiyatlarIcerik");
+    if (!konteyner) return;
+
+    try {
+        const res = await fetch("prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("prices.json okunamadı");
+        const data = await res.json();
+
+        let hedefBolge = null;
+        if (Array.isArray(data)) {
+            hedefBolge = data.find(d => d.districtName && d.districtName.toLocaleUpperCase('tr-TR').includes("TARSUS"));
+            if (!hedefBolge && data.length > 0) hedefBolge = data[0];
+        }
+
+        if (hedefBolge && hedefBolge.prices && Array.isArray(hedefBolge.prices)) {
+            // Başlığı Mersin/Tarsus [Logo] Pompa Fiyatları olarak güncelleyelim
+            const widgetCard = document.getElementById("canliFiyatlarWidget");
+            if (widgetCard) {
+                const h4 = widgetCard.querySelector("h4");
+                if (h4) {
+                    h4.innerHTML = `⛽ Mersin/Tarsus <img src="opetlogo.png" alt="Opet Logo" style="width: 48px; height: 48px; object-fit: contain; vertical-align: middle; margin: 0 4px;"> Pompa Fiyatları`;
+                }
+            }
+
+            let html = "";
+            hedefBolge.prices.forEach(p => {
+                let imgFile = "";
+                let displayName = p.productName;
+
+                const nameUp = p.productName.toLocaleUpperCase('tr-TR');
+                
+                if (nameUp.includes("BENZİN") || nameUp.includes("KURS")) {
+                    imgFile = "opetbenzin.png";
+                    displayName = "Kurşunsuz Benzin 95 Oktan";
+                } else if (nameUp.includes("ECOFORCE")) {
+                    imgFile = "opetecoforce.webp";
+                    displayName = "Motorin EcoForce";
+                } else if (nameUp.includes("ULTRAFORCE")) {
+                    imgFile = "opetdizelultra.webp";
+                    displayName = "Motorin UltraForce";
+                }
+
+                html += `
+                    <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; flex: 1; min-width: 160px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
+                        ${imgFile ? `<img src="${imgFile}" alt="${displayName}" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 6px;">` : ''}
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.2; margin-bottom: 4px;">${displayName}</span>
+                        <strong style="color: var(--dark); font-size: 16px; display: block;">${paraFormatla(p.amount)}</strong>
+                    </div>
+                `;
+            });
+            konteyner.innerHTML = html;
+        } else {
+            konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">Fiyat verisi bulunamadı.</span>`;
+        }
+    } catch (err) {
+        konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">prices.json yüklenemedi.</span>`;
+        console.warn("Canlı fiyat yükleme hatası:", err);
+    }
 }
 
 function otomatikTamamlaAyarla(inputId, dropdownId, secimGeriBildirimi) {
@@ -684,9 +749,7 @@ async function tekilKonumBul(adres) {
     return null;
 }
 
-// ============================================================
-//   OTOBÜS YAKIT MALİYETİ VE %5.25 İNDİRİM HESAPLAMA MOTORU
-// ============================================================
+// ⛽ OTOBÜS YAKIT MALİYETİ VE %5.25 İNDİRİM HESAPLAMA MOTORU
 async function motorinMaliyetiniHesapla(km) {
     const kutu = document.getElementById("rotaYakitMaliyetiKutusu");
     if (!kutu) return;
@@ -703,7 +766,6 @@ async function motorinMaliyetiniHesapla(km) {
         }
 
         if (hedefBolge && hedefBolge.prices && Array.isArray(hedefBolge.prices)) {
-            // Opet ürün kodları (A121: Motorin UltraForce, A128: Motorin EcoForce) veya Türkçe karakter duyarlı arama[cite: 5]
             const motorinObj = hedefBolge.prices.find(f => 
                 f.productCode === "A121" || f.productCode === "A128" || 
                 (f.productName && f.productName.toLocaleUpperCase('tr-TR').includes("MOTORIN"))
@@ -746,18 +808,22 @@ async function rotaHesapla() {
     const varisInp = document.getElementById("rotaVaris");
     const iframe = document.getElementById("gmapsIframe");
     const btn = document.getElementById("btnRotaHesapla");
+    const yukleniyorGosterge = document.getElementById("rotaYukleniyorGosterge");
+    const sonucKutusu = document.getElementById("rotaSonucKutusu");
 
     const baslangic = kalkisInp ? kalkisInp.value.trim() : "Tarsus, Mersin";
     const bitis = varisInp ? varisInp.value.trim() : "";
 
     if (!bitis) {
         if (iframe) iframe.src = `https://maps.google.com/maps?q=Tarsus,+Mersin&output=embed`;
-        const sonucKutusu = document.getElementById("rotaSonucKutusu");
         if (sonucKutusu) sonucKutusu.style.display = "none";
+        if (yukleniyorGosterge) yukleniyorGosterge.style.display = "none";
         return;
     }
 
     if (btn) btn.innerText = "Hesaplanıyor...";
+    if (yukleniyorGosterge) yukleniyorGosterge.style.display = "block";
+    if (sonucKutusu) sonucKutusu.style.display = "none";
 
     const embedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(baslangic)}&daddr=${encodeURIComponent(bitis)}&output=embed`;
     if (iframe) iframe.src = embedUrl;
@@ -792,15 +858,16 @@ async function rotaHesapla() {
                 document.getElementById("sonucKm").innerText = `${km} km`;
                 document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
                 document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
-                document.getElementById("rotaSonucKutusu").style.display = "block";
 
-                // ⛽ Rota hesaplandığı an yakıt maliyeti ve indirim hesaplamasını tetikle
+                // Yakıt maliyeti hesaplamasını tetikle
                 await motorinMaliyetiniHesapla(parseFloat(km));
             }
         }
     } catch (err) {
         console.warn("KM süre hesabı alınamadı ancak harita güncellendi:", err);
     } finally {
+        if (yukleniyorGosterge) yukleniyorGosterge.style.display = "none";
+        if (sonucKutusu) sonucKutusu.style.display = "block";
         if (btn) btn.innerText = "🔍 Mesafeyi ve Rotayı Hesapla";
     }
 }

@@ -172,6 +172,20 @@
         <button onclick="googleMapsRotaAc()" class="btn-green" style="flex:1; min-width:220px;">🗺️ Google Haritalar Uygulamasında Aç</button>
     </div>
 
+    <!-- ⛽ ANLIK GÜNCEL AKARYAKIT FİYATLARI WİDGETİ (Sorgu Öncesi Görünür) -->
+    <div id="canliFiyatlarWidget" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+        <h4 style="margin: 0 0 10px 0; color: var(--dark); font-size: 14px;">⚡ Tarsus Güncel Opet Pompa Fiyatları</h4>
+        <div id="canliFiyatlarIcerik" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <span style="color: #64748b; font-size: 13px;">Fiyatlar yükleniyor...</span>
+        </div>
+    </div>
+
+    <!-- ⏳ ROTA HESAPLAMA YÜKLENİYOR ANİMASYONU -->
+    <div id="rotaYukleniyorGosterge" style="display: none; text-align: center; padding: 25px; background: #f8fafc; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+        <span class="spinner" style="width: 28px; height: 28px; border-width: 3px; border-top-color: var(--primary);"></span>
+        <div style="margin-top: 8px; font-weight: 700; color: var(--dark); font-size: 14px;">Rota ve yakıt maliyetleri hesaplanıyor, lütfen bekleyin...</div>
+    </div>
+
     <!-- Sonuç Kartları: KM, Otobüs Süresi, Otomobil Süresi ve Yakıt Maliyeti -->
     <div id="rotaSonucKutusu" style="display:none; margin-bottom:15px;">
         <div class="grid-3">
