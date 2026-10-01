@@ -14,6 +14,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeCard = document.getElementById("mesafeOlcerCard");
     const kdvCard = document.getElementById("kdvHesaplayiciCard");
     const taksitCard = document.getElementById("taksitTablosuCard");
+    const uetdsCard = document.getElementById("uetdsCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -24,6 +25,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeTab = document.getElementById("tabMesafe");
     const kdvTab = document.getElementById("tabKdv");
     const taksitTab = document.getElementById("tabTaksit");
+    const uetdsTab = document.getElementById("tabUetds");
 
     if (personelTab) personelTab.classList.remove("active");
     if (operatorTab) operatorTab.classList.remove("active");
@@ -32,6 +34,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeTab) mesafeTab.classList.remove("active");
     if (kdvTab) kdvTab.classList.remove("active");
     if (taksitTab) taksitTab.classList.remove("active");
+    if (uetdsTab) uetdsTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
     if (adminCard) adminCard.style.display = "none";
@@ -40,6 +43,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeCard) mesafeCard.style.display = "none";
     if (kdvCard) kdvCard.style.display = "none";
     if (taksitCard) taksitCard.style.display = "none";
+    if (uetdsCard) uetdsCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
 
@@ -54,6 +58,13 @@ function panelSekmesiDegistir(sekme) {
         if (taksitTab) taksitTab.classList.add("active");
         if (taksitCard) taksitCard.style.display = "block";
         taksitArayuzunuHazirla();
+        return;
+    }
+
+    if (sekme === "uetds") {
+        if (uetdsTab) uetdsTab.classList.add("active");
+        if (uetdsCard) uetdsCard.style.display = "block";
+        uetdsInit();
         return;
     }
 
@@ -1782,3 +1793,263 @@ function formuTemizle() {
     
     otelAlanlariniOlustur();
 }
+
+// --- U-ETDS ENTEGRASYONU VE ŞOFÖR HAVUZU ---
+const UETDS_API_URL = "";
+
+const UETDS_SOFORLER = [
+    { id: "ahmet_beyduz", ad: "Ahmet Beydüz" },
+    { id: "turgay_kosar", ad: "Turgay Koşar" },
+    { id: "mehmet_goze", ad: "Mehmet Göze" },
+    { id: "veis_eren", ad: "Veis Eren" },
+    { id: "emin_ustun", ad: "Emin Üstün" },
+    { id: "selcuk_ustun", ad: "Selçuk Üstün" },
+    { id: "ali_hasan_otsekin", ad: "Ali Hasan Otsekin" },
+    { id: "cengiz_erbektas", ad: "Cengiz Erbektaş" }
+];
+
+const UETDS_ARACLAR = {
+    "33EU101": { sofor1: "mehmet_goze", sofor2: "veis_eren" },
+    "33AZA008": { sofor1: "ali_hasan_otsekin", sofor2: "cengiz_erbektas" },
+    "33EU288": { sofor1: "ahmet_beyduz", sofor2: "turgay_kosar" },
+};
+
+let uetdsYuklenenYolcular = [];
+
+function uetdsInit() {
+    const aracSelect = document.getElementById("uetdsAracSecim");
+    if (aracSelect && aracSelect.dataset.hazir !== "true") {
+        const manuelSecenek = aracSelect.querySelector('option[value="diger"]');
+        Object.keys(UETDS_ARACLAR).forEach(plaka => {
+            const etiket = plaka.replace(/^(\d{2})([A-Z]+)(\d+)$/, "$1 $2 $3");
+            aracSelect.add(new Option(etiket, plaka), manuelSecenek);
+        });
+        aracSelect.dataset.hazir = "true";
+    }
+
+    ["uetdsSofor1Secim", "uetdsSofor2Secim"].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select || select.dataset.hazir === "true") return;
+
+        const placeholder = new Option("-- Şoför Seçin --", "");
+        select.add(placeholder);
+        UETDS_SOFORLER.forEach(sofor => select.add(new Option(sofor.ad, sofor.id)));
+        select.add(new Option("✍️ Manuel T.C. Girişi", "manuel"));
+        select.dataset.hazir = "true";
+    });
+}
+
+function uetdsAracDegisti(plaka) {
+    const manuelPlaka = document.getElementById("uetdsManuelPlaka");
+    const manuelMi = plaka === "diger";
+    manuelPlaka.style.display = manuelMi ? "block" : "none";
+    if (manuelMi) {
+        document.getElementById("uetdsSofor1Secim").value = "";
+        document.getElementById("uetdsSofor2Secim").value = "";
+        uetdsSoforDegisti(1, "");
+        uetdsSoforDegisti(2, "");
+        manuelPlaka.focus();
+        return;
+    }
+    manuelPlaka.value = "";
+
+    const soforler = UETDS_ARACLAR[plaka];
+    if (!soforler) return;
+    document.getElementById("uetdsSofor1Secim").value = soforler.sofor1;
+    document.getElementById("uetdsSofor2Secim").value = soforler.sofor2;
+    uetdsSoforDegisti(1, soforler.sofor1);
+    uetdsSoforDegisti(2, soforler.sofor2);
+}
+
+function uetdsSoforDegisti(no, val) {
+    const manuelInput = document.getElementById(no === 1 ? "uetdsSofor1ManuelTc" : "uetdsSofor2ManuelTc");
+    const manuelMi = val === "manuel";
+    manuelInput.style.display = manuelMi ? "block" : "none";
+    if (manuelMi) {
+        manuelInput.focus();
+    } else {
+        manuelInput.value = "";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", uetdsInit);
+
+function uetdsBaslikNormallestir(deger) {
+    return String(deger || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("tr-TR")
+        .replace(/ı/g, "i")
+        .replace(/[^a-z0-9]/g, "");
+}
+
+function uetdsHucreDegeri(satir, basliklar) {
+    const anahtarlar = Object.keys(satir);
+    for (const baslik of basliklar) {
+        const aranan = uetdsBaslikNormallestir(baslik);
+        const anahtar = anahtarlar.find(k => uetdsBaslikNormallestir(k) === aranan);
+        if (anahtar && satir[anahtar] !== undefined && satir[anahtar] !== null) {
+            return String(satir[anahtar]).trim();
+        }
+    }
+    return "";
+}
+
+function uetdsCinsiyetNormallestir(deger) {
+    const cinsiyet = uetdsBaslikNormallestir(deger);
+    if (["k", "kadin", "f", "female"].includes(cinsiyet)) return "K";
+    if (["e", "erkek", "m", "male"].includes(cinsiyet)) return "E";
+    return "";
+}
+
+function uetdsExcelOku(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const alan = document.getElementById("uetdsYolcuAlan");
+    const sonuc = document.getElementById("uetdsBildirimSonuc");
+    uetdsYuklenenYolcular = [];
+    alan.style.display = "none";
+    sonuc.style.display = "none";
+    document.getElementById("uetdsYolcuGovde").replaceChildren();
+    document.getElementById("btnUetdsGonder").disabled = true;
+
+    if (typeof XLSX === "undefined") {
+        uetdsSonucGoster("Excel okuma kütüphanesi yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenileyin.", false);
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const workbook = XLSX.read(evt.target.result, { type: "array" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+            if (rows.length === 0) throw new Error("Excel sayfasında okunabilir yolcu satırı bulunamadı.");
+
+            uetdsYuklenenYolcular = rows.map((row, index) => {
+                const tc = uetdsHucreDegeri(row, ["T.C. / Pasaport No", "TC Kimlik", "T.C.", "TC", "Pasaport No", "Pasaport"]);
+                const adSoyad = uetdsHucreDegeri(row, ["Ad Soyad", "Yolcu Adı Soyadı", "Yolcu Adı", "Adı Soyadı"]) ||
+                    [uetdsHucreDegeri(row, ["Ad", "İsim"]), uetdsHucreDegeri(row, ["Soyad", "Soyadı"])].filter(Boolean).join(" ");
+                const cinsiyet = uetdsCinsiyetNormallestir(uetdsHucreDegeri(row, ["Cinsiyet", "Gender"]));
+                const yolcu = {
+                    koltukNo: uetdsHucreDegeri(row, ["Koltuk", "Koltuk No"]) || String(index + 1),
+                    tcKimlikPasaportNo: tc,
+                    adiSoyadi: adSoyad,
+                    cinsiyet,
+                    telefon: uetdsHucreDegeri(row, ["Telefon", "GSM", "Tel"])
+                };
+
+                const errors = [];
+                if (!yolcu.tcKimlikPasaportNo) errors.push("Kimlik/pasaport no eksik");
+                if (!yolcu.adiSoyadi) errors.push("Ad soyad eksik");
+                if (!yolcu.cinsiyet) errors.push("Cinsiyet E/K olmalı");
+                yolcu.hatalar = errors;
+                return yolcu;
+            });
+
+            const kimlikler = new Set();
+            uetdsYuklenenYolcular.forEach(yolcu => {
+                const kimlik = yolcu.tcKimlikPasaportNo.toLocaleUpperCase("tr-TR");
+                if (kimlik && kimlikler.has(kimlik)) yolcu.hatalar.push("Kimlik/pasaport no tekrarlı");
+                if (kimlik) kimlikler.add(kimlik);
+            });
+
+            const tbody = document.getElementById("uetdsYolcuGovde");
+            uetdsYuklenenYolcular.forEach(yolcu => {
+                const tr = document.createElement("tr");
+                [yolcu.koltukNo, yolcu.tcKimlikPasaportNo, yolcu.adiSoyadi,
+                    yolcu.cinsiyet === "K" ? "Kadın" : yolcu.cinsiyet === "E" ? "Erkek" : "",
+                    yolcu.telefon, yolcu.hatalar.length ? `❌ ${yolcu.hatalar.join("; ")}` : "✅ Gerekli alanlar uygun"]
+                    .forEach((deger, index) => {
+                        const td = document.createElement("td");
+                        td.textContent = deger;
+                        if (index === 5 && !yolcu.hatalar.length) td.style.color = "#15803d";
+                        if (index === 5 && yolcu.hatalar.length) td.style.color = "#b91c1c";
+                        tr.appendChild(td);
+                    });
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("uetdsYolcuSayi").textContent = String(uetdsYuklenenYolcular.length);
+            alan.style.display = "block";
+            document.getElementById("btnUetdsGonder").disabled = !UETDS_API_URL || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
+            if (uetdsYuklenenYolcular.some(y => y.hatalar.length > 0)) {
+                uetdsSonucGoster("Hatalı satırları Excel'de düzeltip dosyayı yeniden yükleyin. Liste tamamen geçerli olmadan gönderim yapılamaz.", false);
+            }
+        } catch (error) {
+            uetdsSonucGoster(error.message || "Excel dosyası okunamadı.", false);
+        }
+    };
+    reader.onerror = () => uetdsSonucGoster("Dosya okunurken bir hata oluştu.", false);
+    reader.readAsArrayBuffer(file);
+}
+
+function uetdsSonucGoster(mesaj, basarili) {
+    const sonuc = document.getElementById("uetdsBildirimSonuc");
+    sonuc.style.display = "block";
+    sonuc.style.background = basarili ? "#dcfce7" : "#fee2e2";
+    sonuc.style.border = basarili ? "1px solid #86efac" : "1px solid #fca5a5";
+    sonuc.style.color = basarili ? "#15803d" : "#b91c1c";
+    sonuc.textContent = mesaj;
+}
+
+async function uetdsBildirimiGonder() {
+    if (!UETDS_API_URL) {
+        return uetdsSonucGoster("U-ETDS SOAP backend adresi yapılandırılmadı; hiçbir veri gönderilmedi.", false);
+    }
+
+    const aracSecim = document.getElementById("uetdsAracSecim").value;
+    const plaka = aracSecim === "diger" ? document.getElementById("uetdsManuelPlaka").value.trim() : aracSecim;
+    const sofor1Id = document.getElementById("uetdsSofor1Secim").value;
+    const sofor2Id = document.getElementById("uetdsSofor2Secim").value;
+    const sofor1ManuelTc = document.getElementById("uetdsSofor1ManuelTc").value.trim();
+    const sofor2ManuelTc = document.getElementById("uetdsSofor2ManuelTc").value.trim();
+    const kalkisZaman = document.getElementById("uetdsKalkisZaman").value;
+    const varisZaman = document.getElementById("uetdsVarisZaman").value;
+
+    if (!plaka) return uetdsSonucGoster("Lütfen araç plakasını seçin veya girin.", false);
+    if (!sofor1Id || (sofor1Id === "manuel" && !sofor1ManuelTc)) return uetdsSonucGoster("Lütfen 1. kaptanı seçin veya T.C. kimlik numarasını girin.", false);
+    if (sofor1Id === "manuel" && !/^\d{11}$/.test(sofor1ManuelTc)) return uetdsSonucGoster("1. kaptan T.C. kimlik numarası 11 haneli olmalı.", false);
+    if (sofor2Id === "manuel" && !/^\d{11}$/.test(sofor2ManuelTc)) return uetdsSonucGoster("2. kaptan T.C. kimlik numarası 11 haneli olmalı.", false);
+    if (!kalkisZaman || !varisZaman) return uetdsSonucGoster("Lütfen kalkış ve tahmini varış tarih/saatini girin.", false);
+    if (new Date(varisZaman) <= new Date(kalkisZaman)) return uetdsSonucGoster("Tahmini varış zamanı kalkış zamanından sonra olmalı.", false);
+    if (!uetdsYuklenenYolcular.length || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0)) return uetdsSonucGoster("Gönderim için hatasız yolcu listesi yükleyin.", false);
+
+    const btn = document.getElementById("btnUetdsGonder");
+    btn.disabled = true;
+    btn.textContent = "Bildirim yapılıyor, lütfen bekleyin...";
+
+    try {
+        const payload = {
+            plaka,
+            sofor1_id: sofor1Id === "manuel" ? "" : sofor1Id,
+            sofor2_id: sofor2Id === "manuel" ? "" : sofor2Id,
+            manuel_sofor1_tc: sofor1ManuelTc,
+            manuel_sofor2_tc: sofor2ManuelTc,
+            kalkisZaman,
+            varisZaman,
+            yolcular: uetdsYuklenenYolcular.map(({ hatalar, ...yolcu }) => yolcu)
+        };
+        const response = await fetch(UETDS_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || `Sunucu hatası (${response.status}).`);
+
+        const ref = data.seferRefNo ? ` Referans: ${data.seferRefNo}` : "";
+        uetdsSonucGoster(`${data.message || "Sunucu bildirimi kabul etti."}${ref}`, true);
+    } catch (error) {
+        uetdsSonucGoster(`Bildirim gönderilemedi: ${error.message}`, false);
+    } finally {
+        btn.textContent = "🚀 U-ETDS Sistemine Gönder ve Seferi Kaydet";
+        btn.disabled = !UETDS_API_URL || uetdsYuklenenYolcular.length === 0 || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const excelInput = document.getElementById("uetdsExcelInput");
+    if (excelInput) excelInput.addEventListener("change", uetdsExcelOku);
+});

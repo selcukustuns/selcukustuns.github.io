@@ -22,6 +22,7 @@
 <div class="ust-panel-tabs">
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
     <button id="tabTaksit" class="ust-panel-tab" onclick="panelSekmesiDegistir('taksit')">💳 Tur Taksit Tablosu</button>
+    <button id="tabUetds" class="ust-panel-tab" onclick="panelSekmesiDegistir('uetds')">🚌 U-ETDS Bildirimi</button>
     <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
@@ -329,6 +330,78 @@
         </div>
         <input type="file" id="fiyatDosyaOku" accept=".json" onchange="turFiyatlariniYukle(event)" style="margin:0; background:white; color:#333;">
     </div>
+</div>
+
+<div id="uetdsCard" class="card" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
+    <h2>🚌 U-ETDS Sefer ve Yolcu Bildirimi</h2>
+    <p style="font-size:13px; color:#64748b; margin-top:-10px; margin-bottom:20px;">
+        Aracı seçin, sefer saatlerini belirleyin ve yolcu Excel dosyasını yükleyerek bildirimi hazırlayın.
+    </p>
+    <p style="font-size:13px; color:#9a3412; background:#fff7ed; border:1px solid #fed7aa; padding:10px 12px; border-radius:6px;">
+        U-ETDS SOAP backend'i henüz yapılandırılmadı. Bu panel şu an bildirim göndermez; gerçek yolcu verisiyle denemeyin.
+    </p>
+
+    <h3 style="font-size:16px; border:none; padding-bottom:0; margin-bottom:12px;">🚐 Araç ve Kaptan Bilgileri</h3>
+    <div class="row-inputs">
+        <div>
+            <label for="uetdsAracSecim">Plaka / Araç:</label>
+            <select id="uetdsAracSecim" onchange="uetdsAracDegisti(this.value)">
+                <option value="">-- Araç Seçin --</option>
+                <option value="diger">Diğer / Manuel plaka</option>
+            </select>
+            <input type="text" id="uetdsManuelPlaka" placeholder="Araç plakasını girin" autocomplete="off" style="display:none;">
+        </div>
+        <div>
+            <label for="uetdsSofor1Secim">1. Kaptan (Şoför):</label>
+            <select id="uetdsSofor1Secim" onchange="uetdsSoforDegisti(1, this.value)"></select>
+            <input type="password" id="uetdsSofor1ManuelTc" inputmode="numeric" autocomplete="off" maxlength="11" placeholder="1. kaptan T.C. kimlik numarası" style="display:none;">
+        </div>
+        <div>
+            <label for="uetdsSofor2Secim">2. Kaptan (Yedek Şoför, opsiyonel):</label>
+            <select id="uetdsSofor2Secim" onchange="uetdsSoforDegisti(2, this.value)"></select>
+            <input type="password" id="uetdsSofor2ManuelTc" inputmode="numeric" autocomplete="off" maxlength="11" placeholder="2. kaptan T.C. kimlik numarası" style="display:none;">
+        </div>
+        <div>
+            <label for="uetdsKalkisZaman">Kalkış Tarih ve Saati:</label>
+            <input type="datetime-local" id="uetdsKalkisZaman">
+        </div>
+        <div>
+            <label for="uetdsVarisZaman">Tahmini Varış Tarih ve Saati:</label>
+            <input type="datetime-local" id="uetdsVarisZaman">
+        </div>
+    </div>
+
+    <div class="file-upload-box">
+        <div class="file-upload-title">📊 Yolcu Listesi Excel Dosyasını Seçin</div>
+        <p style="font-size:13px; color:#64748b; margin:0 0 10px;">
+            Koltuk, T.C. / Pasaport No, Ad Soyad, Telefon ve Cinsiyet sütunları okunur. Dosya bu tarayıcıda işlenir.
+        </p>
+        <input type="file" id="uetdsExcelInput" accept=".xlsx,.xls" style="margin:0; background:white; color:#333;">
+    </div>
+
+    <div id="uetdsYolcuAlan" style="display:none; margin-top:18px;">
+        <h3 style="font-size:16px; border:none; padding-bottom:0; margin-bottom:10px;">Okunan Yolcular: <span id="uetdsYolcuSayi">0</span> Kişi</h3>
+        <div style="overflow-x:auto;">
+            <table class="taksit-tablosu" style="min-width:720px;">
+                <thead>
+                    <tr>
+                        <th>Koltuk</th>
+                        <th>Kimlik / Pasaport No</th>
+                        <th>Adı Soyadı</th>
+                        <th>Cinsiyet</th>
+                        <th>Telefon</th>
+                        <th>Doğrulama</th>
+                    </tr>
+                </thead>
+                <tbody id="uetdsYolcuGovde"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="uetdsBildirimSonuc" role="status" aria-live="polite" style="display:none; margin-top:15px; padding:12px; border-radius:6px;"></div>
+    <button id="btnUetdsGonder" onclick="uetdsBildirimiGonder()" class="btn-green" style="width:100%; margin-top:16px;" disabled>
+        🚀 U-ETDS Sistemine Gönder ve Seferi Kaydet
+    </button>
 </div>
 
 <!-- 5. EVRAK YÖNETİMİ ALANI -->
@@ -672,6 +745,7 @@
     </p>
 </footer>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
