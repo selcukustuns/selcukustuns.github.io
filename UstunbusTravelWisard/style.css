@@ -15,6 +15,205 @@ body {
     color: #333; 
 }
 
+#ibanBilgisiCard {
+    width: 100%;
+}
+
+.iban-payment-card {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 36px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    color: #111;
+}
+
+.iban-payment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.iban-payment-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.iban-brand-logo {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 22px;
+}
+
+.iban-payment-title {
+    margin: 0 0 6px;
+    border: 0;
+    padding: 0;
+    color: #111;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.iban-company-label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.iban-copy-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    max-width: 580px;
+    margin-bottom: 12px;
+    padding: 8px 12px 8px 18px;
+    border: 2px solid #111;
+    border-radius: 40px;
+    background: #fff;
+}
+
+.iban-company-name {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+}
+
+.iban-number-box {
+    margin-bottom: 20px;
+}
+
+.iban-number {
+    font-size: 18px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.iban-copy-button {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 20px;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.iban-copy-button:hover {
+    background: #333;
+}
+
+.iban-copy-button.copied {
+    background: #16a34a;
+}
+
+.iban-qr-area {
+    display: flex;
+    flex: 0 0 220px;
+    align-items: center;
+    justify-content: center;
+}
+
+.iban-qr-image {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.iban-payment-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.iban-payment-note {
+    margin: 0;
+    color: #111;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.iban-whatsapp-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.iban-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #111;
+    font-size: 22px;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.iban-whatsapp-icon {
+    width: 34px;
+    height: 34px;
+    fill: #25d366;
+}
+
+@media (max-width: 768px) {
+    .iban-payment-card {
+        padding: 24px;
+    }
+
+    .iban-payment-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .iban-brand-logo {
+        max-width: 250px;
+    }
+
+    .iban-copy-box {
+        flex-direction: column;
+        border-radius: 16px;
+        padding: 14px;
+        text-align: center;
+    }
+
+    .iban-company-name {
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    .iban-number {
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    .iban-qr-area {
+        order: 2;
+        flex-basis: auto;
+        margin: 8px 0;
+    }
+
+    .iban-whatsapp-link {
+        font-size: 19px;
+    }
+}
+
 .main-container { 
     max-width: 1350px; 
     margin: 0 auto; 

@@ -3,338 +3,417 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Üstünbus - Ödeme ve Banka IBAN Bilgileri</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Üstünbus Turizm - Resmi Sözleşmeler ve Hukuki Metinler</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Montserrat', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background-color: #f1f5f9;
+      background: linear-gradient(135deg, #3f519b 0%, #3e9a3b 50%, #f5ad0b 100%);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 25px 20px;
     }
 
-    .card {
-      background-color: #ffffff;
+    .top-navbar {
       width: 100%;
-      max-width: 950px;
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 40px;
-    }
-
-    /* Üst Bölüm: Logolar ve QR */
-    .top-section {
+      max-width: 680px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 20px;
+      justify-content: space-between;
+      padding-bottom: 20px;
     }
 
-    .left-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .brand-logo {
-      max-width: 320px;
-      width: 100%;
+    .logo-ustunbus {
+      max-width: 220px;
+      width: 60%;
       height: auto;
       object-fit: contain;
-      margin-bottom: 22px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
     }
 
-    .section-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: #000000;
-      margin-bottom: 6px;
-    }
-
-    .company-label {
-      font-size: 16px;
+    .back-btn {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
       font-weight: 700;
-      color: #000000;
-      margin-bottom: 8px;
-    }
-
-    /* Genel Kopyalama Butonu */
-    .copy-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      padding: 7px 15px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 16px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.3);
       transition: background 0.2s;
-      flex-shrink: 0;
     }
 
-    .copy-btn:hover {
-      background-color: #333;
+    .back-btn:hover {
+      background: rgba(0, 0, 0, 0.45);
     }
 
-    /* Şirket Adı Kutusu (IBAN stili) */
-    .company-box {
-      border: 3px solid #000000;
-      border-radius: 50px;
-      padding: 8px 16px 8px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+    .container {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       width: 100%;
-      max-width: 580px;
-      margin-bottom: 12px;
-      background-color: #ffffff;
-    }
-
-    .company-name {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: #000000;
-      white-space: nowrap;
+      max-width: 680px;
+      border-radius: 18px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
       overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    /* IBAN Kutusu */
-    .iban-box {
-      border: 3px solid #000000;
-      border-radius: 50px;
-      padding: 8px 16px 8px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      width: 100%;
-      max-width: 580px;
-      margin-bottom: 20px;
-      background-color: #ffffff;
+    .card-header {
+      background: #102a43;
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      font-size: 15px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.15);
     }
 
-    .iban-text {
-      font-size: 18.5px;
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      color: #000000;
-      white-space: nowrap;
+    .content {
+      padding: 25px 24px;
+      min-height: 400px;
     }
 
-    /* Sağ Bölüm: QR / Akbank */
-    .right-content {
+    /* Loader Alanı */
+    .loader-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 220px;
-      flex-shrink: 0;
+      min-height: 340px;
     }
 
-    .qr-image {
-      width: 220px;
-      height: auto;
-      object-fit: contain;
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid #ffffff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
     }
 
-    /* Bilgilendirme ve Uyarı Metinleri */
-    .info-list {
-      margin-top: 15px;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hidden { display: none !important; }
+
+    /* Rozet Alanı */
+    .badge-wrapper {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      justify-content: center;
+      margin-bottom: 20px;
     }
 
-    .info-item {
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.45;
-      color: #000000;
-    }
-
-    /* WhatsApp Satırı */
-    .whatsapp-row {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #000000;
-      margin: 6px 0;
-    }
-
-    .whatsapp-link {
+    .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      color: #000000;
-      text-decoration: none;
-      font-size: 23px;
-      font-weight: 900;
+      padding: 9px 22px;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 13.5px;
+      opacity: 0;
+      transform: scale(0.4);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: #10b981;
+      color: #ffffff;
+      border: 1.5px solid #a7f3d0;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.55);
     }
 
-    .whatsapp-icon {
-      width: 34px;
-      height: 34px;
-      fill: #25D366;
+    .status-badge.show-popup {
+      opacity: 1;
+      transform: scale(1);
     }
 
-    /* Link Alanı */
-    .contract-link {
-      color: #1e3a8a;
-      word-break: break-all;
-      text-decoration: underline;
-      font-size: 15px;
+    /* Kategori ve Sözleşme Akordiyon Öğeleri */
+    .category-title {
+      font-size: 12.5px;
+      color: #ffffff;
+      text-transform: uppercase;
       font-weight: 800;
-      display: inline-block;
-      margin-top: 6px;
-      cursor: pointer;
+      letter-spacing: 1px;
+      margin: 18px 0 10px 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
-    /* Mobil Uyumluluk */
-    @media (max-width: 768px) {
-      .card {
-        padding: 24px;
-      }
+    .contract-item {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s ease, transform 0.35s ease, box-shadow 0.2s ease;
+    }
 
-      .top-section {
-        flex-direction: column;
-        align-items: center;
-      }
+    .contract-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-      .company-box,
-      .iban-box {
-        flex-direction: column;
-        border-radius: 20px;
-        text-align: center;
-        gap: 10px;
-        padding: 14px;
-      }
+    .contract-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
 
-      .company-name {
-        white-space: normal;
-        font-size: 14px;
-      }
+    .contract-header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
 
-      .iban-text {
-        font-size: 15.5px;
-        white-space: normal;
-        word-break: break-word;
-      }
+    .contract-title-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #102a43;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-      .right-content {
-        order: 2;
-        margin: 15px 0;
-      }
+    .toggle-icon {
+      font-size: 13px;
+      font-weight: 900;
+      color: #102a43;
+      transition: transform 0.2s;
+    }
 
-      .left-content {
-        order: 1;
-        width: 100%;
-      }
+    .contract-item.active .toggle-icon {
+      transform: rotate(180deg);
+    }
 
-      .brand-logo {
-        max-width: 250px;
-      }
+    .contract-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease;
+      background: #ffffff;
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.6;
+      padding: 0 18px;
+      border-top: 1px solid transparent;
+    }
 
-      .whatsapp-link {
-        font-size: 19px;
-      }
+    .contract-item.active .contract-body {
+      max-height: 350px;
+      overflow-y: auto;
+      padding: 14px 18px 18px 18px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer {
+      background: rgba(0, 0, 0, 0.15);
+      text-align: center;
+      padding: 16px 20px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      line-height: 1.6;
+    }
+
+    .bottom-logo-container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    .logo-turkiyesenin-outside {
+      max-width: 180px;
+      width: 50%;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="top-section">
-      <!-- Sol Taraf -->
-      <div class="left-content">
-        <img src="ustunbuslogo.png" alt="Üstünbus Turizm ve Seyahat Acentası" class="brand-logo">
+  <header class="top-navbar">
+    <img src="ustunbuswhite.png" alt="Üstünbus Turizm Logo" class="logo-ustunbus">
+    <a href="index.html" class="back-btn">← Ödeme Sayfasına Dön</a>
+  </header>
 
-        <h2 class="section-title">Banka İban Bilgileri</h2>
-        <div class="company-label">Şirket Ünvanı - Alıcı Adı</div>
-        
-        <!-- Şirket Adı Kutusu -->
-        <div class="company-box">
-          <span class="company-name" id="companyName">Öz Üstüner Turizm Taş. Gayr. Dan. Tar. Akar. San. Ve Tic. Ltd. Şti.</span>
-          <button class="copy-btn" id="copyCompanyBtn" onclick="copyText('companyName', 'copyCompanyBtn')">Kopyala</button>
-        </div>
+  <main class="container">
+    <div class="card-header">
+      ACENTA RESMİ SÖZLEŞMELER VE YASAL METİNLER
+    </div>
 
-        <!-- IBAN Kutusu -->
-        <div class="iban-box">
-          <span class="iban-text" id="ibanText">TR65 0004 6000 7488 8000 0096 26</span>
-          <button class="copy-btn" id="copyIbanBtn" onclick="copyText('ibanText', 'copyIbanBtn', true)">Kopyala</button>
-        </div>
-      </div>
-
-      <!-- Sağ Taraf -->
-      <div class="right-content">
-        <img src="ibanlogo.png" alt="Akbank QR ile Ödeme" class="qr-image">
+    <!-- Yükleniyor Ekranı -->
+    <div class="content" id="loading-section">
+      <div class="loader-container">
+        <div class="loader"></div>
+        <p style="color: #ffffff; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+          Yasal Metinler ve Sözleşmeler Doğrulanıyor...
+        </p>
+        <p style="color: rgba(255,255,255,0.75); font-size: 12px; margin-top: 5px;">
+          Lütfen bekleyiniz
+        </p>
       </div>
     </div>
 
-    <!-- Alt Bilgilendirme Metinleri -->
-    <div class="info-list">
-      <p class="info-item">
-        Ücret Tur Katılımcısının Kendine Ait Hesabı Tarafından Ödenmelidir. Başkası tarafından yapılan ödemeler kabul edilmemektedir.
-      </p>
-
-      <div class="whatsapp-row">
-        <span>Ödeme Yapıldığında</span>
-        <a href="https://wa.me/908505328000" target="_blank" class="whatsapp-link">
-          <svg class="whatsapp-icon" viewBox="0 0 24 24">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-          </svg>
-          0850 532 80 00
-        </a>
-        <span>Nolu Whatsapp Kanalından Dekont İletilmelidir.</span>
+    <!-- Sonuç & Sözleşmeler Listesi -->
+    <div class="content hidden" id="result-section">
+      <div class="badge-wrapper">
+        <span id="status-badge" class="status-badge"></span>
       </div>
 
-      <p class="info-item">
-        Firmamız başkası tarafından ödenen ücretlerde 15 gün parayı bloke edecektir. Bizimle iletişime geçilmemesi dahilinde uygun gördüğü sosyal yardım kuruluna parayı gönderme hakkını saklı tutar.
-      </p>
+      <!-- Grup 1: Satış ve Tur Sözleşmeleri -->
+      <div class="category-title" id="cat-1">1. Satış ve Tur Kayıt Sözleşmeleri</div>
 
-      <p class="info-item">
-        Tur ücretini ödemiş misafirlerimiz Acenta Genel Hüküm ve Şartlarını kabul etmiş sayılır. Ayrıntılı bilgi sahibi olmak için Aydınlatma Metni, Genel Tur Kayıt Sözleşmesi, Turda Dikkat Edilmesi Gereken Kurallar ve Diğer sözleşmelere ulaşmak için aşağıdaki linkten ulaşabilirsiniz.
-        <br>
-        <a href="sozlesme.html" class="contract-link">
-          https://selcukustuns.github.io/UstunbusTravelWisard/sozlesme.html
-        </a>
-      </p>
+      <div class="contract-item" id="item-1" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">📋 Ön Bilgilendirme Formu</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          İşbu form, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri uyarınca müşterinin tur detayları, toplam fiyat, ödeme koşulları ve ifaya ilişkin önceden bilgilendirilmesi amacıyla düzenlenmiştir.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-2" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">📑 Mesafeli Satış Sözleşmesi</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          Alıcı ile Acenta arasında dijital ortamda kurulan işbu sözleşme; sunulan turizm, ulaşım ve acentelik hizmetlerinin kapsamını, tarafların hak ve yükümlülüklerini, yürürlük şartlarını düzenler.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-3" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">🚌 Paket Tur Sözleşmesi & Kurallar</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          Tur programı, hareket saatleri, bagaj kuralları, rehberlik hizmetleri ve tur esnasında uyulması gereken acenta genel kurallarını kapsar. Tur ücretini ödeyen katılımcı tüm hükümleri kabul etmiş sayılır.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-4" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">🔄 İptal, İade ve Değişiklik Politikası</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          Mücbir sebepler, rezervasyon iptal süreleri, kesinti oranları ile iade prosedürlerine dair tüm yasal süre ve kurallar bu politika dahilinde yönetilir.
+        </div>
+      </div>
+
+      <!-- Grup 2: KVKK ve Gizlilik Metinleri -->
+      <div class="category-title" id="cat-2">2. Kişisel Veri ve Gizlilik Metinleri (KVKK Uyumlu)</div>
+
+      <div class="contract-item" id="item-5" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">🔒 KVKK Genel Aydınlatma Metni</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca kimlik, iletişim, finans ve fatura bilgilerinizin hangi hukuki gerekçelerle işlendiğini ve aktarıldığını açıklar.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-6" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">✍️ KVKK Açık Rıza Metni</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          Özellikle yurt dışı turlarında verilerin yurt dışı konaklama/ulaşım sağlayıcılarına aktarımı ve özel nitelikli sağlık/tercih verilerinin işlenmesi için alınan rıza beyanıdır.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-7" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">🍪 Çerez (Cookie) Politikası</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          Platformumuzda kullanıcı deneyimini iyileştirmek, zorunlu ve analitik çerezlerin işleniş biçimini açıklamak ve tercihlerinizi yönetebilmeniz amacıyla hazırlanmıştır.
+        </div>
+      </div>
+
+      <div class="contract-item" id="item-8" onclick="toggleContract(this)">
+        <div class="contract-header">
+          <span class="contract-title-text">📩 Ticari Elektronik İleti Onayı (ETK & İYS)</span>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="contract-body">
+          SMS veya e-posta yoluyla sunulan kampanya, duyuru ve bülten bildirimlerine ilişkin izin metnidir. Müşteriler diledikleri an İYS üzerinden izinlerini geri çekme hakkına sahiptir.
+        </div>
+      </div>
     </div>
+
+    <footer class="footer">
+      Sistem Saati: <span id="current-time"></span><br>
+      Öz Üstüner Turizm Seyahat Acentası — Tüm Hakları Saklıdır.
+    </footer>
+  </main>
+
+  <div class="bottom-logo-container">
+    <img src="turkiyesenin.png" alt="Türkiye Senin Logo" class="logo-turkiyesenin-outside">
   </div>
 
   <script>
-    function copyText(elementId, btnId, removeSpaces = false) {
-      let text = document.getElementById(elementId).innerText;
-      if (removeSpaces) {
-        text = text.replace(/\s+/g, '');
-      }
+    // Zaman Güncelleme
+    const timeElement = document.getElementById('current-time');
+    setInterval(() => {
+      const now = new Date();
+      timeElement.innerText = now.toLocaleString('tr-TR');
+    }, 1000);
 
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById(btnId);
-        const originalText = btn.innerText;
-        btn.innerText = 'Kopyalandı!';
-        btn.style.backgroundColor = '#16a34a';
-        setTimeout(() => {
-          btn.innerText = originalText;
-          btn.style.backgroundColor = '#000000';
-        }, 2000);
+    // Sözleşme Akordiyon Aç/Kapa
+    function toggleContract(element) {
+      const isActive = element.classList.contains('active');
+      document.querySelectorAll('.contract-item').forEach(item => {
+        item.classList.remove('active');
       });
+      if (!isActive) {
+        element.classList.add('active');
+      }
     }
+
+    // Sıralı Yükleme Efekti
+    function initContracts() {
+      setTimeout(() => {
+        document.getElementById('loading-section').classList.add('hidden');
+        const resultSection = document.getElementById('result-section');
+        resultSection.classList.remove('hidden');
+
+        // Onay Rozeti Pop-up
+        const badge = document.getElementById('status-badge');
+        badge.className = 'status-badge show-popup';
+        badge.innerText = 'Tüm Sözleşmeler Güncel ve Yürürlükte ✅';
+
+        // Sözleşmeleri Sırayla Ekrana Getirme
+        const items = document.querySelectorAll('.contract-item');
+        items.forEach((item, index) => {
+          setTimeout(() => {
+            item.classList.add('visible');
+          }, 120 * (index + 1));
+        });
+      }, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', initContracts);
   </script>
 </body>
 </html>

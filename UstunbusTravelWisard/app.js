@@ -6,6 +6,27 @@ const OPERATOR_SIFRE = "selcukustun1234";
 
 let operatorOturumuAcik = false;
 
+async function ibanBilgisiKopyala(elementId, button, removeSpaces = false) {
+    const valueElement = document.getElementById(elementId);
+    if (!valueElement || !button) return;
+
+    let value = valueElement.textContent.trim();
+    if (removeSpaces) value = value.replace(/\s+/g, "");
+
+    try {
+        await navigator.clipboard.writeText(value);
+        button.textContent = "Kopyalandı!";
+        button.classList.add("copied");
+    } catch {
+        button.textContent = "Kopyalanamadı";
+    }
+
+    window.setTimeout(() => {
+        button.textContent = "Kopyala";
+        button.classList.remove("copied");
+    }, 2000);
+}
+
 function panelSekmesiDegistir(sekme) {
     const loginCard = document.getElementById("operatorLoginCard");
     const adminCard = document.getElementById("adminPanelCard");
@@ -14,6 +35,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeCard = document.getElementById("mesafeOlcerCard");
     const kdvCard = document.getElementById("kdvHesaplayiciCard");
     const taksitCard = document.getElementById("taksitTablosuCard");
+    const ibanCard = document.getElementById("ibanBilgisiCard");
     const uetdsCard = document.getElementById("uetdsCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
@@ -25,6 +47,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeTab = document.getElementById("tabMesafe");
     const kdvTab = document.getElementById("tabKdv");
     const taksitTab = document.getElementById("tabTaksit");
+    const ibanTab = document.getElementById("tabIban");
     const uetdsTab = document.getElementById("tabUetds");
 
     if (personelTab) personelTab.classList.remove("active");
@@ -34,6 +57,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeTab) mesafeTab.classList.remove("active");
     if (kdvTab) kdvTab.classList.remove("active");
     if (taksitTab) taksitTab.classList.remove("active");
+    if (ibanTab) ibanTab.classList.remove("active");
     if (uetdsTab) uetdsTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
@@ -43,6 +67,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeCard) mesafeCard.style.display = "none";
     if (kdvCard) kdvCard.style.display = "none";
     if (taksitCard) taksitCard.style.display = "none";
+    if (ibanCard) ibanCard.style.display = "none";
     if (uetdsCard) uetdsCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
@@ -58,6 +83,12 @@ function panelSekmesiDegistir(sekme) {
         if (taksitTab) taksitTab.classList.add("active");
         if (taksitCard) taksitCard.style.display = "block";
         taksitArayuzunuHazirla();
+        return;
+    }
+
+    if (sekme === "iban") {
+        if (ibanTab) ibanTab.classList.add("active");
+        if (ibanCard) ibanCard.style.display = "block";
         return;
     }
 
