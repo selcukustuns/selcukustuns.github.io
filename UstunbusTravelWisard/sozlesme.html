@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sözleşme Yükleme Portalı</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 520px;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--primary);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 32px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: #fbfcfe;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone.dragover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .dropzone svg {
+      width: 40px;
+      height: 40px;
+      fill: none;
+      stroke: var(--text-muted);
+      stroke-width: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .dropzone p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .dropzone span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .file-preview {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: background-color 0.2s;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Sözleşme Yükle</h1>
+      <p>Lütfen sisteme işlenecek sözleşme belgesini ve detaylarını girin.</p>
+    </div>
+
+    <form id="uploadForm" action="/api/contracts/upload" method="POST" enctype="multipart/form-data">
+      
+      <div class="form-group">
+        <label for="contractTitle">Sözleşme Başlığı / Referansı</label>
+        <input type="text" id="contractTitle" name="contractTitle" placeholder="Örn: Hizmet Sözleşmesi - Proje X" required>
+      </div>
+
+      <div class="form-group">
+        <label for="contractType">Sözleşme Türü</label>
+        <select id="contractType" name="contractType" required>
+          <option value="" disabled selected>Tür seçiniz</option>
+          <option value="nda">Gizlilik Sözleşmesi (NDA)</option>
+          <option value="service">Hizmet / Danışmanlık</option>
+          <option value="employment">İş Sözleşmesi</option>
+          <option value="license">Lisans / Satış</option>
+          <option value="other">Diğer</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Sözleşme Dosyası</label>
+        <div class="dropzone" id="dropzone">
+          <svg viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+          </svg>
+          <p>Dosyayı buraya sürükleyin veya <span>göz atın</span></p>
+          <p style="font-size: 0.75rem; margin-top: 4px;">PDF, DOCX veya PNG (Maks. 25 MB)</p>
+          <input type="file" id="fileInput" name="contractFile" accept=".pdf,.doc,.docx" style="display: none;" required>
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <span id="fileName">belge.pdf</span>
+          <span id="removeFile" style="color: #ef4444; cursor: pointer; font-size: 0.8rem;">Kaldır</span>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Sözleşmeyi Kaydet</button>
+    </form>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        updatePreview();
+      }
+    });
+
+    fileInput.addEventListener('change', updatePreview);
+
+    function updatePreview() {
+      if (fileInput.files.length > 0) {
+        fileName.textContent = fileInput.files[0].name;
+        filePreview.style.display = 'flex';
+        dropzone.style.display = 'none';
+      }
+    }
+
+    removeFile.addEventListener('click', () => {
+      fileInput.value = '';
+      filePreview.style.display = 'none';
+      dropzone.style.display = 'block';
+    });
+  </script>
+</body>
+</html>
