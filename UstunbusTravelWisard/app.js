@@ -2678,16 +2678,19 @@ function durakEkranaCiz() {
 /**
  * docx.js: 9'luktan 54'lüğe resmi güzergah sırasıyla TEK SAYFA A4 Word üretir.
  */
+/**
+ * Her tarayıcıda ve bilgisayarda hatasız çalışan DOCX oluşturma fonksiyonu
+ */
 async function resmiRotaDocxOlustur() {
     if (!durakAktifAyrismisVeri || durakAktifAyrismisVeri.toplamYolcu === 0) {
         alert("Lütfen önce ayrıştırılmış bir yolcu listesi yükleyin!");
         return;
     }
 
-    // docx kütüphanesi kontrolü
-    const docxLib = window.docx;
-    if (!docxLib) {
-        alert("DOCX oluşturma kütüphanesi (docx.js) henüz yüklenemedi. Lütfen sayfayı yenileyip internet bağlantınızı kontrol edin.");
+    // docx kütüphanesini her ortamda yakala
+    const docxLib = window.docx?.Document ? window.docx : (window.docx?.docx || window.docx);
+    if (!docxLib || !docxLib.Document) {
+        alert("DOCX oluşturma modülü başlatılamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
         return;
     }
 
@@ -2719,6 +2722,7 @@ async function resmiRotaDocxOlustur() {
 
     sehirSirasi.forEach(sehir => {
         const duraklarObj = sehirGruplari[sehir];
+        if (!duraklarObj) return;
         const durakAdlari = Object.keys(duraklarObj);
 
         if (durakAdlari.length === 0) return;
@@ -2887,8 +2891,21 @@ async function resmiRotaDocxOlustur() {
 
     try {
         const blob = await Packer.toBlob(doc);
-        const temizDosya = turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_");
-        saveAs(blob, `${temizDosya}_Resmi_Durak_Listesi.docx`);
+        const dosyaIsmi = `${turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_")}_Resmi_Durak_Listesi.docx`;
+
+        // FileSaver yüklüyse onu kullan, değilse tarayıcı indirme tetikle (Fallback)
+        if (typeof window.saveAs === "function") {
+            window.saveAs(blob, dosyaIsmi);
+        } else {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = dosyaIsmi;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
     } catch (e) {
         console.error("DOCX İndirme Hatası:", e);
         alert("Word belgesi oluşturulurken hata oluştu: " + e.message);
