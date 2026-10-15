@@ -3,23 +3,32 @@ name: Opet Fiyat Guncelleyici
 on:
   schedule:
     # Her akşam Türkiye saati ile 21:35 (UTC 18:35)
-    - cron: '50 18 * * *'
+    - cron: '35 18 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-fuel:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Depoyu Klonla
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Python Ortamını Hazırla
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Gerekli Paketleri Yukle
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
 
       - name: Fiyat Scriptini Çalıştır
         run: |
@@ -35,5 +44,5 @@ jobs:
             echo "Fiyatlarda değişiklik yok, commit atlanıyor."
           else
             git commit -m "chore(data): Opet anlık akaryakıt fiyatları güncellendi [skip ci]"
-            git push
+            git push origin main
           fi
