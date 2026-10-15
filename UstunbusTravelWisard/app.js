@@ -638,7 +638,7 @@ function haritayiIlklendir() {
     canliFiyatlariGoster();
 }
 
-// ⚡ SORGUDAN ÖNCE ANLIK OPET FİYATLARINI WİDGET (Mini İkonlu & Logolu Başlık)
+// ⚡ SORGUDAN ÖNCE ANLIK OPET FİYATLARINI WİDGET
 async function canliFiyatlariGoster() {
     const konteyner = document.getElementById("canliFiyatlarIcerik");
     if (!konteyner) return;
@@ -655,7 +655,6 @@ async function canliFiyatlariGoster() {
         }
 
         if (hedefBolge && hedefBolge.prices && Array.isArray(hedefBolge.prices)) {
-            // Başlığı Mersin/Tarsus [Logo] Pompa Fiyatları olarak güncelleyelim
             const widgetCard = document.getElementById("canliFiyatlarWidget");
             if (widgetCard) {
                 const h4 = widgetCard.querySelector("h4");
@@ -668,7 +667,6 @@ async function canliFiyatlariGoster() {
             hedefBolge.prices.forEach(p => {
                 let imgFile = "";
                 let displayName = p.productName;
-
                 const nameUp = p.productName.toLocaleUpperCase('tr-TR');
                 
                 if (nameUp.includes("BENZİN") || nameUp.includes("KURS")) {
@@ -825,19 +823,13 @@ async function motorinMaliyetiniHesapla(km) {
 
             if (motorinObj && motorinObj.amount !== null && motorinObj.amount !== undefined) {
                 const normalLitreFiyati = parseFloat(motorinObj.amount);
-                
-                // %5.25 İndirimli Litre Fiyatı
                 const indirimOrani = 0.0525;
                 const indirimliLitreFiyati = normalLitreFiyati * (1 - indirimOrani);
-
-                // Toplam Litre Tüketimi (100 km'de 30 Litre)
                 const toplamLitre = (km / 100) * 30; 
 
-                // Maliyetler
                 const normalMaliyet = toplamLitre * normalLitreFiyati;
                 const indirimliMaliyet = toplamLitre * indirimliLitreFiyati;
 
-                // Alanlara yazdır
                 document.getElementById("normalLitreFiyati").innerText = paraFormatla(normalLitreFiyati) + " / Lt";
                 document.getElementById("indirimliLitreFiyati").innerText = paraFormatla(indirimliLitreFiyati) + " / Lt";
                 document.getElementById("toplamLitre").innerText = toplamLitre.toFixed(1) + " Litre";
@@ -911,7 +903,6 @@ async function rotaHesapla() {
                 document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
                 document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
 
-                // Yakıt maliyeti hesaplamasını tetikle
                 await motorinMaliyetiniHesapla(parseFloat(km));
             }
         }
@@ -2122,17 +2113,15 @@ function uedtsSayfasiniAyristirVeIndir() {
     reader.onload = function(e) {
         try {
             const data = new Uint8Array(e.target.result);
-            // raw: false sayesinde formüllü alanların ekrandaki net değerini alır
             const wb = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
 
-            // UEDTS sayfasını bul
             const sayfaAdi = wb.SheetNames.find(ad => {
                 const norm = ad.trim().toUpperCase();
-                return norm === 'UEDTS' || norm === 'U-ETDS' || norm.startsWith('UEDTS');
+                return norm === 'UEDTS' || norm === 'UETDS' || norm === 'U-ETDS' || norm.startsWith('UEDTS') || norm.startsWith('UETDS');
             });
 
             if (!sayfaAdi) {
-                throw new Error(`Excel içinde "UEDTS" sayfası bulunamadı. Mevcut sayfalar: [${wb.SheetNames.join(', ')}]`);
+                throw new Error(`Excel içinde "UEDTS" veya "UETDS" sayfası bulunamadı. Mevcut sayfalar: [${wb.SheetNames.join(', ')}]`);
             }
 
             const sheet = wb.Sheets[sayfaAdi];
@@ -2142,7 +2131,6 @@ function uedtsSayfasiniAyristirVeIndir() {
                 throw new Error(`"${sayfaAdi}" sayfası boş görünüyor.`);
             }
 
-            // Başlık satırını bul
             let headerIdx = satirlar.findIndex(r => 
                 r.some(c => {
                     const txt = String(c).toUpperCase();
@@ -2162,30 +2150,24 @@ function uedtsSayfasiniAyristirVeIndir() {
 
             for (let i = headerIdx + 1; i < satirlar.length; i++) {
                 let row = [...satirlar[i]];
-
-                // Boş satır kontrolü
                 const doluMu = row.some(v => v !== null && String(v).trim() !== '' && String(v).trim() !== '-');
                 if (!doluMu) continue;
 
-                // 1. T.C. / Pasaport Boşluk ve Ondalık Temizliği
                 if (tcCol !== -1 && row[tcCol] !== undefined && row[tcCol] !== null) {
                     let tcHam = String(row[tcCol]).trim();
                     tcHam = tcHam.replace(/\.0$/, '').replace(/\s+/g, '');
                     row[tcCol] = tcHam;
                 }
 
-                // 2. Telefon Boşluk ve Format Temizliği
                 if (telCol !== -1 && row[telCol] !== undefined && row[telCol] !== null) {
                     let telHam = String(row[telCol]).trim();
                     telHam = telHam.replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
                     row[telCol] = (telHam === '' || telHam === '-') ? '-' : telHam;
                 }
 
-                // 3. Ad & Soyad Boşluk Kırpma
                 if (adCol !== -1 && row[adCol]) row[adCol] = String(row[adCol]).trim();
                 if (soyadCol !== -1 && row[soyadCol]) row[soyadCol] = String(row[soyadCol]).trim();
 
-                // Filtreleme (Boş koltuk, REHBER, ACENTA veya geçersiz TC ayıklama)
                 if (filtreUygula) {
                     const adVal = adCol !== -1 ? String(row[adCol] || '').toUpperCase() : '';
                     const tcVal = tcCol !== -1 ? String(row[tcCol] || '').replace(/\D/g, '') : '';
@@ -2198,11 +2180,9 @@ function uedtsSayfasiniAyristirVeIndir() {
                 yolcuSayisi++;
             }
 
-            // Yeni temiz Çalışma Kitabı oluştur
             const yeniWb = XLSX.utils.book_new();
             const yeniWs = XLSX.utils.aoa_to_sheet(temizVeriler, { raw: true });
 
-            // T.C. sütununu metin ('string') formatına sabitle (bilimsel gösterim bozulmasını önler)
             if (tcCol !== -1) {
                 for (let r = 1; r < temizVeriler.length; r++) {
                     const hucreAdresi = XLSX.utils.encode_cell({ r: r, c: tcCol });
@@ -2214,12 +2194,7 @@ function uedtsSayfasiniAyristirVeIndir() {
             }
 
             yeniWs['!cols'] = [
-                { wch: 8 },  // ÜLKE
-                { wch: 18 }, // ADI
-                { wch: 18 }, // SOYADI
-                { wch: 24 }, // TC KİMLİK / PASAPORT NO
-                { wch: 10 }, // CİNSİYET
-                { wch: 18 }  // TELEFON
+                { wch: 8 },  { wch: 18 }, { wch: 18 }, { wch: 24 }, { wch: 10 }, { wch: 18 }
             ];
 
             XLSX.utils.book_append_sheet(yeniWb, yeniWs, "U-ETDS");
@@ -2227,7 +2202,6 @@ function uedtsSayfasiniAyristirVeIndir() {
             const dosyaKok = file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
             const yeniDosyaAdi = `${dosyaKok}_UEDTS_Listesi.xlsx`;
 
-            // Temiz dosyayı bilgisayara indir
             XLSX.writeFile(yeniWb, yeniDosyaAdi);
 
             durum.style.background = '#f0fdf4';
@@ -2235,10 +2209,48 @@ function uedtsSayfasiniAyristirVeIndir() {
             durum.style.color = '#166534';
             durum.innerHTML = `✅ <strong>Ayrıştırma Başarılı:</strong> <em>"${sayfaAdi}"</em> sayfası çekildi. T.C. kimlik ve telefonlardaki boşluklar silindi.<br>Toplam <strong>${yolcuSayisi}</strong> yolcu ile <strong>"${yeniDosyaAdi}"</strong> oluşturuldu ve indirildi.`;
 
-            // Ayrıştırılan veriyi tabloda önizlet
             uedtsAyristirmaOnizlemeCiz(temizVeriler, tcCol);
             document.getElementById('uedtsAyristirilanSayi').innerText = yolcuSayisi;
             if (onizlemeAlani) onizlemeAlani.style.display = 'block';
+
+            // Alttaki sefer bildirimine aktarım
+            uetdsYuklenenYolcular = temizVeriler.slice(1).map((row, index) => {
+                const tc = String(row[tcCol] || '').trim();
+                const adSoyad = `${row[adCol] || ''} ${row[soyadCol] || ''}`.trim();
+                const cinsiyet = String(row[4] || '').toUpperCase();
+                const telefon = String(row[telCol] || '').trim();
+                
+                return {
+                    koltukNo: String(index + 1),
+                    tcKimlikPasaportNo: tc,
+                    adiSoyadi: adSoyad,
+                    cinsiyet: cinsiyet === 'E' ? 'E' : 'K',
+                    telefon: telefon === '-' ? '' : telefon,
+                    hatalar: (!tc || tc.length < 11) ? ["Geçersiz TC"] : []
+                };
+            });
+
+            const tbody = document.getElementById("uetdsYolcuGovde");
+            if (tbody) {
+                tbody.innerHTML = "";
+                uetdsYuklenenYolcular.forEach(y => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${y.koltukNo}</td>
+                        <td><strong>${y.tcKimlikPasaportNo}</strong></td>
+                        <td>${y.adiSoyadi}</td>
+                        <td>${y.cinsiyet === 'E' ? 'Erkek' : 'Kadın'}</td>
+                        <td>${y.telefon || '-'}</td>
+                        <td style="color:${y.hatalar.length ? '#b91c1c' : '#15803d'}; font-weight:bold;">
+                            ${y.hatalar.length ? '❌ ' + y.hatalar.join(';') : '✅ Uygun'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                document.getElementById("uetdsYolcuSayi").textContent = String(uetdsYuklenenYolcular.length);
+                document.getElementById("uetdsYolcuAlan").style.display = "block";
+                document.getElementById("btnUetdsGonder").disabled = !UETDS_API_URL || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
+            }
 
         } catch (err) {
             console.error("Ayrıştırma hatası:", err);
@@ -2284,46 +2296,6 @@ function uedtsAyristirmaOnizlemeCiz(veriler, tcCol) {
         });
         tbody.appendChild(tr);
     }
-}
-
-// --- AYRIŞTIRILAN LİSTEYİ DOĞRUDAN ALTTTAKİ SEFER BİLDİRİMİNE AKTAR ---
-uetdsYuklenenYolcular = temizVeriler.slice(1).map((row, index) => {
-    const tc = String(row[tcCol] || '').trim();
-    const adSoyad = `${row[adCol] || ''} ${row[soyadCol] || ''}`.trim();
-    const cinsiyet = String(row[4] || '').toUpperCase();
-    const telefon = String(row[telCol] || '').trim();
-    
-    return {
-        koltukNo: String(index + 1),
-        tcKimlikPasaportNo: tc,
-        adiSoyadi: adSoyad,
-        cinsiyet: cinsiyet === 'E' ? 'E' : 'K',
-        telefon: telefon === '-' ? '' : telefon,
-        hatalar: (!tc || tc.length < 11) ? ["Geçersiz TC"] : []
-    };
-});
-
-// Alttaki Sefer Bildirimi tablosunu ekranda anında doldur ve göster
-const tbody = document.getElementById("uetdsYolcuGovde");
-if (tbody) {
-    tbody.innerHTML = "";
-    uetdsYuklenenYolcular.forEach(y => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${y.koltukNo}</td>
-            <td><strong>${y.tcKimlikPasaportNo}</strong></td>
-            <td>${y.adiSoyadi}</td>
-            <td>${y.cinsiyet === 'E' ? 'Erkek' : 'Kadın'}</td>
-            <td>${y.telefon || '-'}</td>
-            <td style="color:${y.hatalar.length ? '#b91c1c' : '#15803d'}; font-weight:bold;">
-                ${y.hatalar.length ? '❌ ' + y.hatalar.join(';') : '✅ Uygun'}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-    document.getElementById("uetdsYolcuSayi").textContent = String(uetdsYuklenenYolcular.length);
-    document.getElementById("uetdsYolcuAlan").style.display = "block";
-    document.getElementById("btnUetdsGonder").disabled = !UETDS_API_URL || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
 }
 
 /* ============================================================
@@ -2389,7 +2361,7 @@ function durakDosyasiniIsle() {
     const sonucAlani = document.getElementById('durakSonucAlani');
     const btnDocx = document.getElementById('btnDurakDocxIndir');
 
-    if (!input.files || input.files.length === 0) {
+    if (!input || !input.files || input.files.length === 0) {
         alert("Lütfen bir Excel dosyası seçin.");
         return;
     }
@@ -2434,7 +2406,9 @@ function durakDosyasiniIsle() {
                 selectEl.appendChild(opt);
             });
 
-            kutuAracSecici.style.display = (durakTespitEdilenAracSayfalari.length > 1) ? 'inline-flex' : 'none';
+            if (kutuAracSecici) {
+                kutuAracSecici.style.display = (durakTespitEdilenAracSayfalari.length > 1) ? 'inline-flex' : 'none';
+            }
 
             durakSayfasiniAyristir(durakTespitEdilenAracSayfalari[0]);
 
@@ -2705,9 +2679,19 @@ function durakEkranaCiz() {
  * docx.js: 9'luktan 54'lüğe resmi güzergah sırasıyla TEK SAYFA A4 Word üretir.
  */
 async function resmiRotaDocxOlustur() {
-    if (!durakAktifAyrismisVeri || durakAktifAyrismisVeri.toplamYolcu === 0) return;
+    if (!durakAktifAyrismisVeri || durakAktifAyrismisVeri.toplamYolcu === 0) {
+        alert("Lütfen önce ayrıştırılmış bir yolcu listesi yükleyin!");
+        return;
+    }
 
-    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } = docx;
+    // docx kütüphanesi kontrolü
+    const docxLib = window.docx;
+    if (!docxLib) {
+        alert("DOCX oluşturma kütüphanesi (docx.js) henüz yüklenemedi. Lütfen sayfayı yenileyip internet bağlantınızı kontrol edin.");
+        return;
+    }
+
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } = docxLib;
     const { turAdi, hareketTarihi, hareketSaati, hareketYeri, toplamYolcu, sehirGruplari, aktifSayfa } = durakAktifAyrismisVeri;
 
     let yaziBoyutu = 13.5;
@@ -2901,7 +2885,12 @@ async function resmiRotaDocxOlustur() {
         }]
     });
 
-    const blob = await Packer.toBlob(doc);
-    const temizDosya = turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_");
-    saveAs(blob, `${temizDosya}_Resmi_Durak_Listesi.docx`);
+    try {
+        const blob = await Packer.toBlob(doc);
+        const temizDosya = turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_");
+        saveAs(blob, `${temizDosya}_Resmi_Durak_Listesi.docx`);
+    } catch (e) {
+        console.error("DOCX İndirme Hatası:", e);
+        alert("Word belgesi oluşturulurken hata oluştu: " + e.message);
+    }
 }
