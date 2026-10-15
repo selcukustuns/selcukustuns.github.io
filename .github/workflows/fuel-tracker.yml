@@ -3,7 +3,7 @@ name: Opet Fiyat Guncelleyici
 on:
   schedule:
     # Her akşam Türkiye saati ile 21:35 (UTC 18:35)
-    - cron: '35 18 * * *'
+    - cron: '50 18 * * *'
   workflow_dispatch:
 
 jobs:
