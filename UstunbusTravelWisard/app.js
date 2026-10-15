@@ -2286,6 +2286,46 @@ function uedtsAyristirmaOnizlemeCiz(veriler, tcCol) {
     }
 }
 
+// --- AYRIŞTIRILAN LİSTEYİ DOĞRUDAN ALTTTAKİ SEFER BİLDİRİMİNE AKTAR ---
+uetdsYuklenenYolcular = temizVeriler.slice(1).map((row, index) => {
+    const tc = String(row[tcCol] || '').trim();
+    const adSoyad = `${row[adCol] || ''} ${row[soyadCol] || ''}`.trim();
+    const cinsiyet = String(row[4] || '').toUpperCase();
+    const telefon = String(row[telCol] || '').trim();
+    
+    return {
+        koltukNo: String(index + 1),
+        tcKimlikPasaportNo: tc,
+        adiSoyadi: adSoyad,
+        cinsiyet: cinsiyet === 'E' ? 'E' : 'K',
+        telefon: telefon === '-' ? '' : telefon,
+        hatalar: (!tc || tc.length < 11) ? ["Geçersiz TC"] : []
+    };
+});
+
+// Alttaki Sefer Bildirimi tablosunu ekranda anında doldur ve göster
+const tbody = document.getElementById("uetdsYolcuGovde");
+if (tbody) {
+    tbody.innerHTML = "";
+    uetdsYuklenenYolcular.forEach(y => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${y.koltukNo}</td>
+            <td><strong>${y.tcKimlikPasaportNo}</strong></td>
+            <td>${y.adiSoyadi}</td>
+            <td>${y.cinsiyet === 'E' ? 'Erkek' : 'Kadın'}</td>
+            <td>${y.telefon || '-'}</td>
+            <td style="color:${y.hatalar.length ? '#b91c1c' : '#15803d'}; font-weight:bold;">
+                ${y.hatalar.length ? '❌ ' + y.hatalar.join(';') : '✅ Uygun'}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    document.getElementById("uetdsYolcuSayi").textContent = String(uetdsYuklenenYolcular.length);
+    document.getElementById("uetdsYolcuAlan").style.display = "block";
+    document.getElementById("btnUetdsGonder").disabled = !UETDS_API_URL || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
+}
+
 /* ============================================================
    RESMİ GÜZERGAH DURAK AYRIŞTIRICI & TEK SAYFA DOCX MOTORU
    ============================================================ */
