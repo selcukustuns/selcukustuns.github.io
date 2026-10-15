@@ -3,14 +3,11 @@ import sys
 import json
 import urllib.request
 
-# Scriptin bulunduğu dizin: .../UstunbusTravelWisard
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# prices.json dosyasının tam mutlak yolu: .../UstunbusTravelWisard/projectlibraries/prices.json
 TARGET_DIR = os.path.join(BASE_DIR, "projectlibraries")
 TARGET_FILE = os.path.join(TARGET_DIR, "prices.json")
 
-# projectlibraries klasörü yoksa oluştur
 os.makedirs(TARGET_DIR, exist_ok=True)
 
 try:
