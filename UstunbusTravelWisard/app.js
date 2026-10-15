@@ -2084,3 +2084,194 @@ document.addEventListener("DOMContentLoaded", () => {
     const excelInput = document.getElementById("uetdsExcelInput");
     if (excelInput) excelInput.addEventListener("change", uetdsExcelOku);
 });
+
+/* ============================================================
+   U-ETDS EXCEL AYRIŞTIRICI & T.C. BOŞLUK TEMİZLEME MOTORU
+   ============================================================ */
+function uedtsSayfasiniAyristirVeIndir() {
+    const fileInput = document.getElementById('uedtsAyristiriciInput');
+    const durum = document.getElementById('uedtsAyristiriciDurum');
+    const onizlemeAlani = document.getElementById('uedtsAyristiriciOnizleme');
+    const filtreUygula = document.getElementById('uedtsBoslariAyarla')?.checked ?? true;
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert("Lütfen önce ayrıştırılacak tur Excel dosyasını seçin.");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    durum.style.display = 'block';
+    durum.style.background = '#eff6ff';
+    durum.style.border = '1px solid #bfdbfe';
+    durum.style.color = '#1e40af';
+    durum.innerHTML = '⏳ Dosya inceleniyor, UEDTS sayfası ayrıştırılıyor ve T.C./telefon boşlukları temizleniyor...';
+    if (onizlemeAlani) onizlemeAlani.style.display = 'none';
+
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            // raw: false sayesinde formüllü alanların ekrandaki net değerini alır
+            const wb = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
+
+            // UEDTS sayfasını bul
+            const sayfaAdi = wb.SheetNames.find(ad => {
+                const norm = ad.trim().toUpperCase();
+                return norm === 'UEDTS' || norm === 'U-ETDS' || norm.startsWith('UEDTS');
+            });
+
+            if (!sayfaAdi) {
+                throw new Error(`Excel içinde "UEDTS" sayfası bulunamadı. Mevcut sayfalar: [${wb.SheetNames.join(', ')}]`);
+            }
+
+            const sheet = wb.Sheets[sayfaAdi];
+            const satirlar = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+            if (satirlar.length === 0) {
+                throw new Error(`"${sayfaAdi}" sayfası boş görünüyor.`);
+            }
+
+            // Başlık satırını bul
+            let headerIdx = satirlar.findIndex(r => 
+                r.some(c => {
+                    const txt = String(c).toUpperCase();
+                    return txt.includes('ÜLKE') || txt.includes('ADI') || txt.includes('TC');
+                })
+            );
+            if (headerIdx === -1) headerIdx = 0;
+
+            const basliklar = satirlar[headerIdx].map(h => String(h).trim());
+            const tcCol = basliklar.findIndex(h => h.toUpperCase().includes('TC') || h.toUpperCase().includes('PASAPORT'));
+            const adCol = basliklar.findIndex(h => h.toUpperCase() === 'ADI' || h.toUpperCase().includes('AD'));
+            const soyadCol = basliklar.findIndex(h => h.toUpperCase().includes('SOYAD'));
+            const telCol = basliklar.findIndex(h => h.toUpperCase().includes('TEL'));
+
+            const temizVeriler = [basliklar];
+            let yolcuSayisi = 0;
+
+            for (let i = headerIdx + 1; i < satirlar.length; i++) {
+                let row = [...satirlar[i]];
+
+                // Boş satır kontrolü
+                const doluMu = row.some(v => v !== null && String(v).trim() !== '' && String(v).trim() !== '-');
+                if (!doluMu) continue;
+
+                // 1. T.C. / Pasaport Boşluk ve Ondalık Temizliği
+                if (tcCol !== -1 && row[tcCol] !== undefined && row[tcCol] !== null) {
+                    let tcHam = String(row[tcCol]).trim();
+                    tcHam = tcHam.replace(/\.0$/, '').replace(/\s+/g, '');
+                    row[tcCol] = tcHam;
+                }
+
+                // 2. Telefon Boşluk ve Format Temizliği
+                if (telCol !== -1 && row[telCol] !== undefined && row[telCol] !== null) {
+                    let telHam = String(row[telCol]).trim();
+                    telHam = telHam.replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
+                    row[telCol] = (telHam === '' || telHam === '-') ? '-' : telHam;
+                }
+
+                // 3. Ad & Soyad Boşluk Kırpma
+                if (adCol !== -1 && row[adCol]) row[adCol] = String(row[adCol]).trim();
+                if (soyadCol !== -1 && row[soyadCol]) row[soyadCol] = String(row[soyadCol]).trim();
+
+                // Filtreleme (Boş koltuk, REHBER, ACENTA veya geçersiz TC ayıklama)
+                if (filtreUygula) {
+                    const adVal = adCol !== -1 ? String(row[adCol] || '').toUpperCase() : '';
+                    const tcVal = tcCol !== -1 ? String(row[tcCol] || '').replace(/\D/g, '') : '';
+
+                    if (adVal === 'REHBER' || adVal === 'ACENTA' || adVal === 'ACENTE') continue;
+                    if (tcCol !== -1 && tcVal.length < 5) continue;
+                }
+
+                temizVeriler.push(row);
+                yolcuSayisi++;
+            }
+
+            // Yeni temiz Çalışma Kitabı oluştur
+            const yeniWb = XLSX.utils.book_new();
+            const yeniWs = XLSX.utils.aoa_to_sheet(temizVeriler, { raw: true });
+
+            // T.C. sütununu metin ('string') formatına sabitle (bilimsel gösterim bozulmasını önler)
+            if (tcCol !== -1) {
+                for (let r = 1; r < temizVeriler.length; r++) {
+                    const hucreAdresi = XLSX.utils.encode_cell({ r: r, c: tcCol });
+                    if (yeniWs[hucreAdresi]) {
+                        yeniWs[hucreAdresi].t = 's';
+                        yeniWs[hucreAdresi].z = '@';
+                    }
+                }
+            }
+
+            yeniWs['!cols'] = [
+                { wch: 8 },  // ÜLKE
+                { wch: 18 }, // ADI
+                { wch: 18 }, // SOYADI
+                { wch: 24 }, // TC KİMLİK / PASAPORT NO
+                { wch: 10 }, // CİNSİYET
+                { wch: 18 }  // TELEFON
+            ];
+
+            XLSX.utils.book_append_sheet(yeniWb, yeniWs, "U-ETDS");
+
+            const dosyaKok = file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
+            const yeniDosyaAdi = `${dosyaKok}_UEDTS_Listesi.xlsx`;
+
+            // Temiz dosyayı bilgisayara indir
+            XLSX.writeFile(yeniWb, yeniDosyaAdi);
+
+            durum.style.background = '#f0fdf4';
+            durum.style.border = '1px solid #bbf7d0';
+            durum.style.color = '#166534';
+            durum.innerHTML = `✅ <strong>Ayrıştırma Başarılı:</strong> <em>"${sayfaAdi}"</em> sayfası çekildi. T.C. kimlik ve telefonlardaki boşluklar silindi.<br>Toplam <strong>${yolcuSayisi}</strong> yolcu ile <strong>"${yeniDosyaAdi}"</strong> oluşturuldu ve indirildi.`;
+
+            // Ayrıştırılan veriyi tabloda önizlet
+            uedtsAyristirmaOnizlemeCiz(temizVeriler, tcCol);
+            document.getElementById('uedtsAyristirilanSayi').innerText = yolcuSayisi;
+            if (onizlemeAlani) onizlemeAlani.style.display = 'block';
+
+        } catch (err) {
+            console.error("Ayrıştırma hatası:", err);
+            durum.style.background = '#fef2f2';
+            durum.style.border = '1px solid #fecaca';
+            durum.style.color = '#b91c1c';
+            durum.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Dosya işlenemedi.'}`;
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function uedtsAyristirmaOnizlemeCiz(veriler, tcCol) {
+    const table = document.getElementById('uedtsAyristirmaTablosu');
+    if (!table || veriler.length === 0) return;
+
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    const trHead = document.createElement('tr');
+    veriler[0].forEach(baslik => {
+        const th = document.createElement('th');
+        th.style.textAlign = 'left';
+        th.textContent = baslik || '-';
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+
+    for (let r = 1; r < veriler.length; r++) {
+        const tr = document.createElement('tr');
+        veriler[r].forEach((deger, colIdx) => {
+            const td = document.createElement('td');
+            td.style.textAlign = 'left';
+            if (colIdx === tcCol && deger && deger !== '-') {
+                td.innerHTML = `<span style="font-family: monospace; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">${deger}</span>`;
+            } else {
+                td.textContent = deger || '-';
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    }
+}
