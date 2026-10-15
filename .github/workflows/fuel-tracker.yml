@@ -31,19 +31,17 @@ jobs:
 
       - name: Fiyat Scriptini Çalıştır
         run: |
-          cd UstunbusTravelWisard/projectlibraries
-          python update_prices.py
+          python UstunbusTravelWisard/projectlibraries/update_prices.py
 
       - name: Değişiklikleri Commit ve Push Yap
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Oluşan veya güncellenen tüm dosyaları (prices.json vb.) ekle
-          git add -A
+          # prices.json dosyasını doğrudan sahnelenen alana ekle
+          git add UstunbusTravelWisard/projectlibraries/prices.json
           
+          # Değişiklik var mı kontrol et
           if git diff --staged --quiet; then
             echo "Fiyatlarda değişiklik yok, commit atlanıyor."
             exit 0
@@ -51,6 +49,6 @@ jobs:
           
           git commit -m "chore(data): Opet anlık akaryakıt fiyatları güncellendi [skip ci]"
           
-          # Aktif branch'e güvenli token ile push et
-          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:${CURRENT_BRANCH}
+          # Olası çakışmaları önlemek için önce son hali çek, sonra push et
+          git pull --rebase origin main || git pull --rebase origin master
+          git push
