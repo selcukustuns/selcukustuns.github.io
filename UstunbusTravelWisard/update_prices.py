@@ -60,10 +60,10 @@ try:
               with urllib.request.urlopen(req_prices) as price_res:
                 price_data = json.loads(price_res.read().decode())
 
-                with open("prices.json", "w", encoding="utf-8") as f:
+                with open("projectlibraries/prices.json", "w", encoding="utf-8") as f:
                   json.dump(price_data, f, ensure_ascii=False, indent=4)
 
-                print("✅ Başarılı! Gerçek anlık fiyatlar prices.json dosyasına yazıldı.")
+                print("✅ Başarılı! Gerçek anlık fiyatlar projectlibraries/prices.json dosyasına yazıldı.")
                 success = True
                 break
             except Exception as ex:

@@ -263,17 +263,17 @@ let aktifTaksitModu = 'tur';
 let aktifTaksitTurTipi = 'all';
 
 function turfiyatlariniOtomatikYukle() {
-    fetch("turfiyatlari.json", { cache: "no-store" })
+    fetch("projectlibraries/turfiyatları.json", { cache: "no-store" })
         .then(res => {
-            if (!res.ok) throw new Error("turfiyatlari.json okunamadı");
+            if (!res.ok) throw new Error("projectlibraries/turfiyatları.json okunamadı");
             return res.json();
         })
         .then(veri => {
             turFiyatVerisiniUygula(veri);
-            console.log("✅ turfiyatlari.json otomatik yüklendi");
+            console.log("✅ projectlibraries/turfiyatları.json otomatik yüklendi");
         })
         .catch(() => {
-            console.warn("⚠️ turfiyatlari.json bulunamadı, dahili liste devrede.");
+            console.warn("⚠️ projectlibraries/turfiyatları.json bulunamadı, dahili liste devrede.");
         });
 }
 
@@ -644,8 +644,8 @@ async function canliFiyatlariGoster() {
     if (!konteyner) return;
 
     try {
-        const res = await fetch("prices.json", { cache: "no-store" });
-        if (!res.ok) throw new Error("prices.json okunamadı");
+        const res = await fetch("projectlibraries/prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("projectlibraries/prices.json okunamadı");
         const data = await res.json();
 
         let hedefBolge = null;
@@ -659,7 +659,7 @@ async function canliFiyatlariGoster() {
             if (widgetCard) {
                 const h4 = widgetCard.querySelector("h4");
                 if (h4) {
-                    h4.innerHTML = `⛽ Mersin/Tarsus <img src="opetlogo.png" alt="Opet Logo" style="width: 48px; height: 48px; object-fit: contain; vertical-align: middle; margin: 0 4px;"> Pompa Fiyatları`;
+                    h4.innerHTML = `⛽ Mersin/Tarsus <img src="icons/opetlogo.png" alt="Opet Logo" style="width: 48px; height: 48px; object-fit: contain; vertical-align: middle; margin: 0 4px;"> Pompa Fiyatları`;
                 }
             }
 
@@ -670,13 +670,13 @@ async function canliFiyatlariGoster() {
                 const nameUp = p.productName.toLocaleUpperCase('tr-TR');
                 
                 if (nameUp.includes("BENZİN") || nameUp.includes("KURS")) {
-                    imgFile = "opetbenzin.png";
+                    imgFile = "icons/opetbenzin.png";
                     displayName = "Kurşunsuz Benzin 95 Oktan";
                 } else if (nameUp.includes("ECOFORCE")) {
-                    imgFile = "opetecoforce.webp";
+                    imgFile = "icons/opetecoforce.webp";
                     displayName = "Motorin EcoForce";
                 } else if (nameUp.includes("ULTRAFORCE")) {
-                    imgFile = "opetdizelultra.webp";
+                    imgFile = "icons/opetdizelultra.webp";
                     displayName = "Motorin UltraForce";
                 }
 
@@ -693,7 +693,7 @@ async function canliFiyatlariGoster() {
             konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">Fiyat verisi bulunamadı.</span>`;
         }
     } catch (err) {
-        konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">prices.json yüklenemedi.</span>`;
+        konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">projectlibraries/prices.json yüklenemedi.</span>`;
         console.warn("Canlı fiyat yükleme hatası:", err);
     }
 }
@@ -805,8 +805,8 @@ async function motorinMaliyetiniHesapla(km) {
     if (!kutu) return;
 
     try {
-        const res = await fetch("prices.json", { cache: "no-store" });
-        if (!res.ok) throw new Error("prices.json okunamadı");
+        const res = await fetch("projectlibraries/prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("projectlibraries/prices.json okunamadı");
         const data = await res.json();
 
         let hedefBolge = null;
@@ -1031,9 +1031,9 @@ function duyuruKutuphanesiniOtomatikYukle() {
         console.log(`✅ Duyuru kütüphanesi otomatik yüklendi (${duyuruSablonlari.length} kayıt) — ${kaynak}`);
     }
 
-    fetch("turduyurusu.json")
-        .then(res => { if (!res.ok) throw new Error("turduyurusu.json bulunamadı"); return res.json(); })
-        .then(veri => uygula(veri, "turduyurusu.json (fetch)"))
+    fetch("projectlibraries/turduyurusu.json")
+        .then(res => { if (!res.ok) throw new Error("projectlibraries/turduyurusu.json bulunamadı"); return res.json(); })
+        .then(veri => uygula(veri, "projectlibraries/turduyurusu.json (fetch)"))
         .catch(() => {
             fetch("turduyurusu.txt")
                 .then(res => { if (!res.ok) throw new Error("turduyurusu.txt bulunamadı"); return res.text(); })
@@ -1481,16 +1481,16 @@ function turListesiniUygula(veri, kaynak = "tur_listesi.json") {
 }
 
 function turListesiniOtomatikYukle() {
-    fetch("tur_listesi.json", { cache: "no-store" })
+    fetch("projectlibraries/tur_listesi.json", { cache: "no-store" })
         .then(res => {
-            if (!res.ok) throw new Error(`tur_listesi.json okunamadı (${res.status})`);
+            if (!res.ok) throw new Error(`projectlibraries/tur_listesi.json okunamadı (${res.status})`);
             return res.json();
         })
         .then(veri => {
-            turListesiniUygula(veri, "tur_listesi.json (fetch)");
+            turListesiniUygula(veri, "projectlibraries/tur_listesi.json (fetch)");
         })
         .catch(err => {
-            console.warn("⚠️ tur_listesi.json fetch ile okunamadı. tur_listesi.js deneniyor.", err);
+            console.warn("⚠️ projectlibraries/tur_listesi.json fetch ile okunamadı. tur_listesi.js deneniyor.", err);
             turListesiniScriptTagIleYukle();
         });
 }
