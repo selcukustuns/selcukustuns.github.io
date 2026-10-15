@@ -31,17 +31,17 @@ jobs:
 
       - name: Fiyat Scriptini Çalıştır
         run: |
-          python UstunbusTravelWisard/projectlibraries/update_prices.py
+          python UstunbusTravelWisard/update_prices.py
 
       - name: Değişiklikleri Commit ve Push Yap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # prices.json dosyasını doğrudan sahnelenen alana ekle
+          # Üretilen prices.json dosyasını takibe al
           git add UstunbusTravelWisard/projectlibraries/prices.json
           
-          # Değişiklik var mı kontrol et
+          # Değişiklik yoksa adımı hata vermeden sonlandır
           if git diff --staged --quiet; then
             echo "Fiyatlarda değişiklik yok, commit atlanıyor."
             exit 0
@@ -49,6 +49,6 @@ jobs:
           
           git commit -m "chore(data): Opet anlık akaryakıt fiyatları güncellendi [skip ci]"
           
-          # Olası çakışmaları önlemek için önce son hali çek, sonra push et
+          # Olası çakışmaları önlemek için rebase yapıp push et
           git pull --rebase origin main || git pull --rebase origin master
           git push
