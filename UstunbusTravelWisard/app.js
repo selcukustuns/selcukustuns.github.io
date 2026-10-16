@@ -37,6 +37,7 @@ function panelSekmesiDegistir(sekme) {
     const taksitCard = document.getElementById("taksitTablosuCard");
     const ibanCard = document.getElementById("ibanBilgisiCard");
     const uetdsCard = document.getElementById("uetdsCard");
+    const durakCard = document.getElementById("durakListesiCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -49,6 +50,7 @@ function panelSekmesiDegistir(sekme) {
     const taksitTab = document.getElementById("tabTaksit");
     const ibanTab = document.getElementById("tabIban");
     const uetdsTab = document.getElementById("tabUetds");
+    const durakTab = document.getElementById("tabDurak");
 
     if (personelTab) personelTab.classList.remove("active");
     if (operatorTab) operatorTab.classList.remove("active");
@@ -59,6 +61,7 @@ function panelSekmesiDegistir(sekme) {
     if (taksitTab) taksitTab.classList.remove("active");
     if (ibanTab) ibanTab.classList.remove("active");
     if (uetdsTab) uetdsTab.classList.remove("active");
+    if (durakTab) durakTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
     if (adminCard) adminCard.style.display = "none";
@@ -69,6 +72,7 @@ function panelSekmesiDegistir(sekme) {
     if (taksitCard) taksitCard.style.display = "none";
     if (ibanCard) ibanCard.style.display = "none";
     if (uetdsCard) uetdsCard.style.display = "none";
+    if (durakCard) durakCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
 
@@ -99,6 +103,12 @@ function panelSekmesiDegistir(sekme) {
         return;
     }
 
+    if (sekme === "durak") {
+        if (durakTab) durakTab.classList.add("active");
+        if (durakCard) durakCard.style.display = "block";
+        return;
+    }
+
     if (sekme === "dosya") {
         if (fileTab) fileTab.classList.add("active");
         if (fileCard) fileCard.style.display = "block";
@@ -115,7 +125,7 @@ function panelSekmesiDegistir(sekme) {
         if (mesafeTab) mesafeTab.classList.add("active");
         if (mesafeCard) mesafeCard.style.display = "block";
         haritayiIlklendir();
-        canliFiyatlariGoster(); // Sekme açıldığında canlı fiyatları yükle
+        canliFiyatlariGoster();
         return;
     }
 
@@ -253,17 +263,17 @@ let aktifTaksitModu = 'tur';
 let aktifTaksitTurTipi = 'all';
 
 function turfiyatlariniOtomatikYukle() {
-    fetch("turfiyatlari.json", { cache: "no-store" })
+    fetch("projectlibraries/turfiyatları.json", { cache: "no-store" })
         .then(res => {
-            if (!res.ok) throw new Error("turfiyatlari.json okunamadı");
+            if (!res.ok) throw new Error("projectlibraries/turfiyatları.json okunamadı");
             return res.json();
         })
         .then(veri => {
             turFiyatVerisiniUygula(veri);
-            console.log("✅ turfiyatlari.json otomatik yüklendi");
+            console.log("✅ projectlibraries/turfiyatları.json otomatik yüklendi");
         })
         .catch(() => {
-            console.warn("⚠️ turfiyatlari.json bulunamadı, dahili liste devrede.");
+            console.warn("⚠️ projectlibraries/turfiyatları.json bulunamadı, dahili liste devrede.");
         });
 }
 
@@ -628,14 +638,14 @@ function haritayiIlklendir() {
     canliFiyatlariGoster();
 }
 
-// ⚡ SORGUDAN ÖNCE ANLIK OPET FİYATLARINI WİDGET (Mini İkonlu & Logolu Başlık)
+// ⚡ SORGUDAN ÖNCE ANLIK OPET FİYATLARINI WİDGET
 async function canliFiyatlariGoster() {
     const konteyner = document.getElementById("canliFiyatlarIcerik");
     if (!konteyner) return;
 
     try {
-        const res = await fetch("prices.json", { cache: "no-store" });
-        if (!res.ok) throw new Error("prices.json okunamadı");
+        const res = await fetch("projectlibraries/prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("projectlibraries/prices.json okunamadı");
         const data = await res.json();
 
         let hedefBolge = null;
@@ -645,12 +655,11 @@ async function canliFiyatlariGoster() {
         }
 
         if (hedefBolge && hedefBolge.prices && Array.isArray(hedefBolge.prices)) {
-            // Başlığı Mersin/Tarsus [Logo] Pompa Fiyatları olarak güncelleyelim
             const widgetCard = document.getElementById("canliFiyatlarWidget");
             if (widgetCard) {
                 const h4 = widgetCard.querySelector("h4");
                 if (h4) {
-                    h4.innerHTML = `⛽ Mersin/Tarsus <img src="opetlogo.png" alt="Opet Logo" style="width: 48px; height: 48px; object-fit: contain; vertical-align: middle; margin: 0 4px;"> Pompa Fiyatları`;
+                    h4.innerHTML = `⛽ Mersin/Tarsus <img src="icons/opetlogo.png" alt="Opet Logo" style="width: 48px; height: 48px; object-fit: contain; vertical-align: middle; margin: 0 4px;"> Pompa Fiyatları`;
                 }
             }
 
@@ -658,17 +667,16 @@ async function canliFiyatlariGoster() {
             hedefBolge.prices.forEach(p => {
                 let imgFile = "";
                 let displayName = p.productName;
-
                 const nameUp = p.productName.toLocaleUpperCase('tr-TR');
                 
                 if (nameUp.includes("BENZİN") || nameUp.includes("KURS")) {
-                    imgFile = "opetbenzin.png";
+                    imgFile = "icons/opetbenzin.png";
                     displayName = "Kurşunsuz Benzin 95 Oktan";
                 } else if (nameUp.includes("ECOFORCE")) {
-                    imgFile = "opetecoforce.webp";
+                    imgFile = "icons/opetecoforce.webp";
                     displayName = "Motorin EcoForce";
                 } else if (nameUp.includes("ULTRAFORCE")) {
-                    imgFile = "opetdizelultra.webp";
+                    imgFile = "icons/opetdizelultra.webp";
                     displayName = "Motorin UltraForce";
                 }
 
@@ -685,7 +693,7 @@ async function canliFiyatlariGoster() {
             konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">Fiyat verisi bulunamadı.</span>`;
         }
     } catch (err) {
-        konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">prices.json yüklenemedi.</span>`;
+        konteyner.innerHTML = `<span style="color: #e74c3c; font-size: 13px;">projectlibraries/prices.json yüklenemedi.</span>`;
         console.warn("Canlı fiyat yükleme hatası:", err);
     }
 }
@@ -797,8 +805,8 @@ async function motorinMaliyetiniHesapla(km) {
     if (!kutu) return;
 
     try {
-        const res = await fetch("prices.json", { cache: "no-store" });
-        if (!res.ok) throw new Error("prices.json okunamadı");
+        const res = await fetch("projectlibraries/prices.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("projectlibraries/prices.json okunamadı");
         const data = await res.json();
 
         let hedefBolge = null;
@@ -815,19 +823,13 @@ async function motorinMaliyetiniHesapla(km) {
 
             if (motorinObj && motorinObj.amount !== null && motorinObj.amount !== undefined) {
                 const normalLitreFiyati = parseFloat(motorinObj.amount);
-                
-                // %5.25 İndirimli Litre Fiyatı
                 const indirimOrani = 0.0525;
                 const indirimliLitreFiyati = normalLitreFiyati * (1 - indirimOrani);
-
-                // Toplam Litre Tüketimi (100 km'de 30 Litre)
                 const toplamLitre = (km / 100) * 30; 
 
-                // Maliyetler
                 const normalMaliyet = toplamLitre * normalLitreFiyati;
                 const indirimliMaliyet = toplamLitre * indirimliLitreFiyati;
 
-                // Alanlara yazdır
                 document.getElementById("normalLitreFiyati").innerText = paraFormatla(normalLitreFiyati) + " / Lt";
                 document.getElementById("indirimliLitreFiyati").innerText = paraFormatla(indirimliLitreFiyati) + " / Lt";
                 document.getElementById("toplamLitre").innerText = toplamLitre.toFixed(1) + " Litre";
@@ -901,7 +903,6 @@ async function rotaHesapla() {
                 document.getElementById("sonucSureOtobus").innerText = `~${otobusSaat} sa ${otobusDk} dk`;
                 document.getElementById("sonucSureNormal").innerText = `~${otomobilSaat} sa ${otomobilDk} dk`;
 
-                // Yakıt maliyeti hesaplamasını tetikle
                 await motorinMaliyetiniHesapla(parseFloat(km));
             }
         }
@@ -1030,9 +1031,9 @@ function duyuruKutuphanesiniOtomatikYukle() {
         console.log(`✅ Duyuru kütüphanesi otomatik yüklendi (${duyuruSablonlari.length} kayıt) — ${kaynak}`);
     }
 
-    fetch("turduyurusu.json")
-        .then(res => { if (!res.ok) throw new Error("turduyurusu.json bulunamadı"); return res.json(); })
-        .then(veri => uygula(veri, "turduyurusu.json (fetch)"))
+    fetch("projectlibraries/turduyurusu.json")
+        .then(res => { if (!res.ok) throw new Error("projectlibraries/turduyurusu.json bulunamadı"); return res.json(); })
+        .then(veri => uygula(veri, "projectlibraries/turduyurusu.json (fetch)"))
         .catch(() => {
             fetch("turduyurusu.txt")
                 .then(res => { if (!res.ok) throw new Error("turduyurusu.txt bulunamadı"); return res.text(); })
@@ -1480,16 +1481,16 @@ function turListesiniUygula(veri, kaynak = "tur_listesi.json") {
 }
 
 function turListesiniOtomatikYukle() {
-    fetch("tur_listesi.json", { cache: "no-store" })
+    fetch("projectlibraries/tur_listesi.json", { cache: "no-store" })
         .then(res => {
-            if (!res.ok) throw new Error(`tur_listesi.json okunamadı (${res.status})`);
+            if (!res.ok) throw new Error(`projectlibraries/tur_listesi.json okunamadı (${res.status})`);
             return res.json();
         })
         .then(veri => {
-            turListesiniUygula(veri, "tur_listesi.json (fetch)");
+            turListesiniUygula(veri, "projectlibraries/tur_listesi.json (fetch)");
         })
         .catch(err => {
-            console.warn("⚠️ tur_listesi.json fetch ile okunamadı. tur_listesi.js deneniyor.", err);
+            console.warn("⚠️ projectlibraries/tur_listesi.json fetch ile okunamadı. tur_listesi.js deneniyor.", err);
             turListesiniScriptTagIleYukle();
         });
 }
@@ -2084,3 +2085,903 @@ document.addEventListener("DOMContentLoaded", () => {
     const excelInput = document.getElementById("uetdsExcelInput");
     if (excelInput) excelInput.addEventListener("change", uetdsExcelOku);
 });
+
+/* ============================================================
+   U-ETDS EXCEL AYRIŞTIRICI & T.C. BOŞLUK TEMİZLEME MOTORU
+   ============================================================ */
+<<<<<<< HEAD
+   function uedtsSayfasiniAyristirVeIndir() {
+=======
+function uedtsSayfasiniAyristirVeIndir() {
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+    const fileInput = document.getElementById('uedtsAyristiriciInput');
+    const durum = document.getElementById('uedtsAyristiriciDurum');
+    const onizlemeAlani = document.getElementById('uedtsAyristiriciOnizleme');
+    const filtreUygula = document.getElementById('uedtsBoslariAyarla')?.checked ?? true;
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert("Lütfen önce ayrıştırılacak tur Excel dosyasını seçin.");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    durum.style.display = 'block';
+    durum.style.background = '#eff6ff';
+    durum.style.border = '1px solid #bfdbfe';
+    durum.style.color = '#1e40af';
+    durum.innerHTML = '⏳ Dosya inceleniyor, UEDTS sayfası ayrıştırılıyor ve T.C./telefon boşlukları temizleniyor...';
+    if (onizlemeAlani) onizlemeAlani.style.display = 'none';
+
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+<<<<<<< HEAD
+            // raw: false sayesinde formüllü alanların ekrandaki net değerini alır
+            const wb = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
+
+            // UEDTS sayfasını bul
+            const sayfaAdi = wb.SheetNames.find(ad => {
+                const norm = ad.trim().toUpperCase();
+                return norm === 'UEDTS' || norm === 'U-ETDS' || norm.startsWith('UEDTS');
+            });
+
+            if (!sayfaAdi) {
+                throw new Error(`Excel içinde "UEDTS" sayfası bulunamadı. Mevcut sayfalar: [${wb.SheetNames.join(', ')}]`);
+=======
+            const wb = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
+
+            const sayfaAdi = wb.SheetNames.find(ad => {
+                const norm = ad.trim().toUpperCase();
+                return norm === 'UEDTS' || norm === 'UETDS' || norm === 'U-ETDS' || norm.startsWith('UEDTS') || norm.startsWith('UETDS');
+            });
+
+            if (!sayfaAdi) {
+                throw new Error(`Excel içinde "UEDTS" veya "UETDS" sayfası bulunamadı. Mevcut sayfalar: [${wb.SheetNames.join(', ')}]`);
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            }
+
+            const sheet = wb.Sheets[sayfaAdi];
+            const satirlar = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+            if (satirlar.length === 0) {
+                throw new Error(`"${sayfaAdi}" sayfası boş görünüyor.`);
+            }
+
+<<<<<<< HEAD
+            // Başlık satırını bul
+=======
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            let headerIdx = satirlar.findIndex(r => 
+                r.some(c => {
+                    const txt = String(c).toUpperCase();
+                    return txt.includes('ÜLKE') || txt.includes('ADI') || txt.includes('TC');
+                })
+            );
+            if (headerIdx === -1) headerIdx = 0;
+
+            const basliklar = satirlar[headerIdx].map(h => String(h).trim());
+            const tcCol = basliklar.findIndex(h => h.toUpperCase().includes('TC') || h.toUpperCase().includes('PASAPORT'));
+            const adCol = basliklar.findIndex(h => h.toUpperCase() === 'ADI' || h.toUpperCase().includes('AD'));
+            const soyadCol = basliklar.findIndex(h => h.toUpperCase().includes('SOYAD'));
+            const telCol = basliklar.findIndex(h => h.toUpperCase().includes('TEL'));
+
+            const temizVeriler = [basliklar];
+            let yolcuSayisi = 0;
+
+            for (let i = headerIdx + 1; i < satirlar.length; i++) {
+                let row = [...satirlar[i]];
+<<<<<<< HEAD
+
+                // Boş satır kontrolü
+                const doluMu = row.some(v => v !== null && String(v).trim() !== '' && String(v).trim() !== '-');
+                if (!doluMu) continue;
+
+                // 1. T.C. / Pasaport Boşluk ve Ondalık Temizliği
+=======
+                const doluMu = row.some(v => v !== null && String(v).trim() !== '' && String(v).trim() !== '-');
+                if (!doluMu) continue;
+
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+                if (tcCol !== -1 && row[tcCol] !== undefined && row[tcCol] !== null) {
+                    let tcHam = String(row[tcCol]).trim();
+                    tcHam = tcHam.replace(/\.0$/, '').replace(/\s+/g, '');
+                    row[tcCol] = tcHam;
+                }
+
+<<<<<<< HEAD
+                // 2. Telefon Boşluk ve Format Temizliği
+=======
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+                if (telCol !== -1 && row[telCol] !== undefined && row[telCol] !== null) {
+                    let telHam = String(row[telCol]).trim();
+                    telHam = telHam.replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
+                    row[telCol] = (telHam === '' || telHam === '-') ? '-' : telHam;
+                }
+
+<<<<<<< HEAD
+                // 3. Ad & Soyad Boşluk Kırpma
+                if (adCol !== -1 && row[adCol]) row[adCol] = String(row[adCol]).trim();
+                if (soyadCol !== -1 && row[soyadCol]) row[soyadCol] = String(row[soyadCol]).trim();
+
+                // Filtreleme (Boş koltuk, REHBER, ACENTA veya geçersiz TC ayıklama)
+=======
+                if (adCol !== -1 && row[adCol]) row[adCol] = String(row[adCol]).trim();
+                if (soyadCol !== -1 && row[soyadCol]) row[soyadCol] = String(row[soyadCol]).trim();
+
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+                if (filtreUygula) {
+                    const adVal = adCol !== -1 ? String(row[adCol] || '').toUpperCase() : '';
+                    const tcVal = tcCol !== -1 ? String(row[tcCol] || '').replace(/\D/g, '') : '';
+
+                    if (adVal === 'REHBER' || adVal === 'ACENTA' || adVal === 'ACENTE') continue;
+                    if (tcCol !== -1 && tcVal.length < 5) continue;
+                }
+
+                temizVeriler.push(row);
+                yolcuSayisi++;
+            }
+
+<<<<<<< HEAD
+            // Yeni temiz Çalışma Kitabı oluştur
+            const yeniWb = XLSX.utils.book_new();
+            const yeniWs = XLSX.utils.aoa_to_sheet(temizVeriler, { raw: true });
+
+            // T.C. sütununu metin ('string') formatına sabitle (bilimsel gösterim bozulmasını önler)
+=======
+            const yeniWb = XLSX.utils.book_new();
+            const yeniWs = XLSX.utils.aoa_to_sheet(temizVeriler, { raw: true });
+
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            if (tcCol !== -1) {
+                for (let r = 1; r < temizVeriler.length; r++) {
+                    const hucreAdresi = XLSX.utils.encode_cell({ r: r, c: tcCol });
+                    if (yeniWs[hucreAdresi]) {
+                        yeniWs[hucreAdresi].t = 's';
+                        yeniWs[hucreAdresi].z = '@';
+                    }
+                }
+            }
+
+            yeniWs['!cols'] = [
+<<<<<<< HEAD
+                { wch: 8 },  // ÜLKE
+                { wch: 18 }, // ADI
+                { wch: 18 }, // SOYADI
+                { wch: 24 }, // TC KİMLİK / PASAPORT NO
+                { wch: 10 }, // CİNSİYET
+                { wch: 18 }  // TELEFON
+=======
+                { wch: 8 },  { wch: 18 }, { wch: 18 }, { wch: 24 }, { wch: 10 }, { wch: 18 }
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            ];
+
+            XLSX.utils.book_append_sheet(yeniWb, yeniWs, "U-ETDS");
+
+            const dosyaKok = file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
+            const yeniDosyaAdi = `${dosyaKok}_UEDTS_Listesi.xlsx`;
+
+<<<<<<< HEAD
+            // Temiz dosyayı bilgisayara indir
+=======
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            XLSX.writeFile(yeniWb, yeniDosyaAdi);
+
+            durum.style.background = '#f0fdf4';
+            durum.style.border = '1px solid #bbf7d0';
+            durum.style.color = '#166534';
+            durum.innerHTML = `✅ <strong>Ayrıştırma Başarılı:</strong> <em>"${sayfaAdi}"</em> sayfası çekildi. T.C. kimlik ve telefonlardaki boşluklar silindi.<br>Toplam <strong>${yolcuSayisi}</strong> yolcu ile <strong>"${yeniDosyaAdi}"</strong> oluşturuldu ve indirildi.`;
+
+<<<<<<< HEAD
+            // Ayrıştırılan veriyi tabloda önizlet
+=======
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+            uedtsAyristirmaOnizlemeCiz(temizVeriler, tcCol);
+            document.getElementById('uedtsAyristirilanSayi').innerText = yolcuSayisi;
+            if (onizlemeAlani) onizlemeAlani.style.display = 'block';
+
+<<<<<<< HEAD
+=======
+            // Alttaki sefer bildirimine aktarım
+            uetdsYuklenenYolcular = temizVeriler.slice(1).map((row, index) => {
+                const tc = String(row[tcCol] || '').trim();
+                const adSoyad = `${row[adCol] || ''} ${row[soyadCol] || ''}`.trim();
+                const cinsiyet = String(row[4] || '').toUpperCase();
+                const telefon = String(row[telCol] || '').trim();
+                
+                return {
+                    koltukNo: String(index + 1),
+                    tcKimlikPasaportNo: tc,
+                    adiSoyadi: adSoyad,
+                    cinsiyet: cinsiyet === 'E' ? 'E' : 'K',
+                    telefon: telefon === '-' ? '' : telefon,
+                    hatalar: (!tc || tc.length < 11) ? ["Geçersiz TC"] : []
+                };
+            });
+
+            const tbody = document.getElementById("uetdsYolcuGovde");
+            if (tbody) {
+                tbody.innerHTML = "";
+                uetdsYuklenenYolcular.forEach(y => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${y.koltukNo}</td>
+                        <td><strong>${y.tcKimlikPasaportNo}</strong></td>
+                        <td>${y.adiSoyadi}</td>
+                        <td>${y.cinsiyet === 'E' ? 'Erkek' : 'Kadın'}</td>
+                        <td>${y.telefon || '-'}</td>
+                        <td style="color:${y.hatalar.length ? '#b91c1c' : '#15803d'}; font-weight:bold;">
+                            ${y.hatalar.length ? '❌ ' + y.hatalar.join(';') : '✅ Uygun'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                document.getElementById("uetdsYolcuSayi").textContent = String(uetdsYuklenenYolcular.length);
+                document.getElementById("uetdsYolcuAlan").style.display = "block";
+                document.getElementById("btnUetdsGonder").disabled = !UETDS_API_URL || uetdsYuklenenYolcular.some(y => y.hatalar.length > 0);
+            }
+
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+        } catch (err) {
+            console.error("Ayrıştırma hatası:", err);
+            durum.style.background = '#fef2f2';
+            durum.style.border = '1px solid #fecaca';
+            durum.style.color = '#b91c1c';
+            durum.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Dosya işlenemedi.'}`;
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function uedtsAyristirmaOnizlemeCiz(veriler, tcCol) {
+    const table = document.getElementById('uedtsAyristirmaTablosu');
+    if (!table || veriler.length === 0) return;
+
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    const trHead = document.createElement('tr');
+    veriler[0].forEach(baslik => {
+        const th = document.createElement('th');
+        th.style.textAlign = 'left';
+        th.textContent = baslik || '-';
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+
+    for (let r = 1; r < veriler.length; r++) {
+        const tr = document.createElement('tr');
+        veriler[r].forEach((deger, colIdx) => {
+            const td = document.createElement('td');
+            td.style.textAlign = 'left';
+            if (colIdx === tcCol && deger && deger !== '-') {
+                td.innerHTML = `<span style="font-family: monospace; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">${deger}</span>`;
+            } else {
+                td.textContent = deger || '-';
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    }
+<<<<<<< HEAD
+=======
+}
+
+/* ============================================================
+   RESMİ GÜZERGAH DURAK AYRIŞTIRICI & TEK SAYFA DOCX MOTORU
+   ============================================================ */
+const RESMI_ROTA_DURAKLARI = [
+    // 1. MERSİN
+    { sehir: "MERSİN", kod: "mersin_vipol", ad: "Mersin - Vipol", anahtarlar: ["VIPOL", "VİPOL"] },
+    { sehir: "MERSİN", kod: "mersin_forum", ad: "Mersin - Forum", anahtarlar: ["FORUM", "FORM"] },
+    { sehir: "MERSİN", kod: "mersin_eski_devlet", ad: "Mersin - Eski Devlet Hastanesi", anahtarlar: ["ESKI DEVLET", "ESKİ DEVLET", "DEVLET HASTANE", "HASTANE"] },
+    
+    // 2. TARSUS
+    { sehir: "TARSUS", kod: "tarsus_ofis", ad: "Tarsus - Ofis", anahtarlar: ["OFIS", "OFİS", "SEHITLER TEPESI", "ŞEHİTLER TEPESİ"] },
+    { sehir: "TARSUS", kod: "tarsus_madame_home", ad: "Tarsus - Madame Home", anahtarlar: ["MADAME", "MADAM", "HOME", "VATAN", "ESKI VATAN", "ESKİ VATAN"] },
+    { sehir: "TARSUS", kod: "tarsus_cengiz_topel", ad: "Tarsus - Cengiz Topel", anahtarlar: ["CENGIZ TOPEL", "CENGİZ TOPEL", "CENGIZ", "CENGİZ", "TOPEL"] },
+    { sehir: "TARSUS", kod: "tarsus_kleopatra", ad: "Tarsus - Kleopatra", anahtarlar: ["KLEOPATRA", "KLOPATRA", "KLEO"] },
+    { sehir: "TARSUS", kod: "tarsus_shell", ad: "Tarsus - Shell", anahtarlar: ["SHELL", "SEL", "ŞHEL"] },
+    { sehir: "TARSUS", kod: "tarsus_gemi", ad: "Tarsus - Gemi", anahtarlar: ["GEMI", "GEMİ", "NUSRET MAYIN", "NUSRET"] },
+    
+    // 3. ADANA
+    { sehir: "ADANA", kod: "adana_duygu_kafe", ad: "Adana - Duygu Kafe", anahtarlar: ["DUYGU", "DUYGU KAFE", "BARAJYOLU", "BARAJ YOLU"] }
+];
+
+let durakAktifWorkbook = null;
+let durakDosyaAdiTemiz = "";
+let durakTespitEdilenAracSayfalari = [];
+let durakAktifAyrismisVeri = null;
+
+function durakMetinNormallestir(str) {
+    return String(str || "")
+        .toLocaleUpperCase('tr-TR')
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function durakTelefonTemizle(hamTel) {
+    if (!hamTel) return "";
+    let t = String(hamTel).replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
+    return (t && t !== '-' && t.length >= 7) ? t : "";
+}
+
+function durakAdiniEslestir(hamDurak) {
+    if (!hamDurak) return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
+    let d = String(hamDurak).trim();
+    if (/^\d{10,11}$/.test(d.replace(/\D/g, ''))) return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
+    
+    const upper = durakMetinNormallestir(d);
+
+    for (const rota of RESMI_ROTA_DURAKLARI) {
+        for (const key of rota.anahtarlar) {
+            if (upper.includes(key)) {
+                return { sehir: rota.sehir, ad: rota.ad, kod: rota.kod };
+            }
+        }
+    }
+    return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
+}
+
+function durakDosyasiniIsle() {
+    const input = document.getElementById('durakExcelInput');
+    const durum = document.getElementById('durakBildirimKutusu');
+    const sonucAlani = document.getElementById('durakSonucAlani');
+    const btnDocx = document.getElementById('btnDurakDocxIndir');
+
+    if (!input || !input.files || input.files.length === 0) {
+        alert("Lütfen bir Excel dosyası seçin.");
+        return;
+    }
+
+    const file = input.files[0];
+    durakDosyaAdiTemiz = file.name.replace(/\.[^/.]+$/, "");
+    const reader = new FileReader();
+
+    durum.style.display = "block";
+    durum.style.background = "#eff6ff";
+    durum.style.border = "1px solid #bfdbfe";
+    durum.style.color = "#1e40af";
+    durum.innerHTML = "⏳ Excel taranıyor, duraklar resmi güzergaha göre (Mersin -> Tarsus -> Adana) tasnif ediliyor...";
+    sonucAlani.style.display = "none";
+    if (btnDocx) btnDocx.style.display = "none";
+
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            durakAktifWorkbook = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
+
+            // Araç koltuk sayfalarını tespit et
+            durakTespitEdilenAracSayfalari = durakAktifWorkbook.SheetNames.filter(name => {
+                const n = durakMetinNormallestir(name);
+                return !n.includes('ÖDEME') && !n.includes('ODEME') && 
+                       !n.includes('UEDTS') && !n.includes('UETDS') && !n.includes('U-ETDS') &&
+                       !n.includes('DURAK');
+            });
+
+            if (durakTespitEdilenAracSayfalari.length === 0) {
+                durakTespitEdilenAracSayfalari = [durakAktifWorkbook.SheetNames[0]];
+            }
+
+            const selectEl = document.getElementById('durakSelectAracSayfa');
+            const kutuAracSecici = document.getElementById('durakKutuAracSecici');
+            selectEl.innerHTML = '';
+            
+            durakTespitEdilenAracSayfalari.forEach(sName => {
+                const opt = document.createElement('option');
+                opt.value = sName;
+                opt.textContent = sName;
+                selectEl.appendChild(opt);
+            });
+
+            if (kutuAracSecici) {
+                kutuAracSecici.style.display = (durakTespitEdilenAracSayfalari.length > 1) ? 'inline-flex' : 'none';
+            }
+
+            durakSayfasiniAyristir(durakTespitEdilenAracSayfalari[0]);
+
+            if (durakAktifAyrismisVeri.toplamYolcu === 0) {
+                durum.style.background = "#fffbeb";
+                durum.style.border = "1px solid #fde68a";
+                durum.style.color = "#92400e";
+                durum.innerHTML = `⚠️ <strong>Bilgi:</strong> "<em>${durakAktifAyrismisVeri.aktifSayfa}</em>" şablonu algılandı fakat biniş yapacak yolcu kaydı bulunamadı (şablon boş).`;
+                sonucAlani.style.display = "none";
+                if (btnDocx) btnDocx.style.display = "none";
+                return;
+            }
+
+            durum.style.background = "#f0fdf4";
+            durum.style.border = "1px solid #bbf7d0";
+            durum.style.color = "#166534";
+            durum.innerHTML = `✅ <strong>Ayrıştırma Başarılı:</strong> "<em>${durakAktifAyrismisVeri.aktifSayfa}</em>" planından toplam <strong>${durakAktifAyrismisVeri.toplamYolcu} yolcu</strong> rota sırasına göre il il tasnif edildi.`;
+            sonucAlani.style.display = "block";
+            if (btnDocx) btnDocx.style.display = "inline-block";
+
+        } catch (err) {
+            console.error(err);
+            durum.style.background = "#fef2f2";
+            durum.style.border = "1px solid #fecaca";
+            durum.style.color = "#b91c1c";
+            durum.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Excel dosyası işlenirken bir sorun oluştu.'}`;
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function durakAracSayfasiDegisti() {
+    const secilenSayfa = document.getElementById('durakSelectAracSayfa').value;
+    durakSayfasiniAyristir(secilenSayfa);
+}
+
+function durakSayfasiniAyristir(sayfaAdi) {
+    if (!durakAktifWorkbook || !durakAktifWorkbook.Sheets[sayfaAdi]) return;
+
+    const wsKoltuk = durakAktifWorkbook.Sheets[sayfaAdi];
+    const koltukSatirlari = XLSX.utils.sheet_to_json(wsKoltuk, { header: 1, defval: '' });
+
+    const telefonHaritasiKoltuk = {};
+    const telefonHaritasiIsim = {};
+
+    // A) ÖDEME Sayfası
+    const odemeSayfaAdi = durakAktifWorkbook.SheetNames.find(s => {
+        const u = durakMetinNormallestir(s);
+        return u.includes('ÖDEME') || u.includes('ODEME');
+    });
+
+    if (odemeSayfaAdi) {
+        const wsOdeme = durakAktifWorkbook.Sheets[odemeSayfaAdi];
+        const odemeSatirlari = XLSX.utils.sheet_to_json(wsOdeme, { header: 1, defval: '' });
+
+        let oHeaderIdx = odemeSatirlari.findIndex(r => r.some(c => durakMetinNormallestir(c).includes('TELEFON') || durakMetinNormallestir(c).includes('İSİM')));
+        if (oHeaderIdx === -1) oHeaderIdx = 0;
+
+        const oHeader = odemeSatirlari[oHeaderIdx].map(c => durakMetinNormallestir(c));
+        const telCol = oHeader.findIndex(c => c.includes('TELEFON') || c.includes('TEL'));
+        const isimCol = oHeader.findIndex(c => c.includes('İSİM') || c.includes('ISIM') || c.includes('AD'));
+
+        for (let r = oHeaderIdx + 1; r < odemeSatirlari.length; r++) {
+            const row = odemeSatirlari[r];
+            const kNo = parseInt(row[0], 10);
+            const isim = isimCol !== -1 ? durakMetinNormallestir(row[isimCol]) : "";
+            const tel = telCol !== -1 ? durakTelefonTemizle(row[telCol]) : "";
+
+            if (!isNaN(kNo) && tel) telefonHaritasiKoltuk[kNo] = tel;
+            if (isim && tel) telefonHaritasiIsim[isim] = tel;
+        }
+    }
+
+    // B) UEDTS / UETDS Sayfası
+    const uetdsSayfaAdi = durakAktifWorkbook.SheetNames.find(s => {
+        const u = durakMetinNormallestir(s);
+        return u.includes('UEDTS') || u.includes('UETDS') || u.includes('U-ETDS');
+    });
+
+    if (uetdsSayfaAdi) {
+        const wsUetds = durakAktifWorkbook.Sheets[uetdsSayfaAdi];
+        const uSatirlar = XLSX.utils.sheet_to_json(wsUetds, { header: 1, defval: '' });
+        if (uSatirlar.length > 1) {
+            const uHead = uSatirlar[0].map(c => durakMetinNormallestir(c));
+            const adC = uHead.findIndex(c => c === 'ADI' || c === 'AD');
+            const soyadC = uHead.findIndex(c => c.includes('SOYAD'));
+            const telC = uHead.findIndex(c => c.includes('TEL'));
+
+            for (let r = 1; r < uSatirlar.length; r++) {
+                const row = uSatirlar[r];
+                const tamAd = `${row[adC] || ''} ${row[soyadC] || ''}`.trim();
+                const tel = telC !== -1 ? durakTelefonTemizle(row[telC]) : "";
+                if (tamAd && tel) telefonHaritasiIsim[durakMetinNormallestir(tamAd)] = tel;
+            }
+        }
+    }
+
+    // Tur Üst Bilgileri
+    let turAdi = "", hareketTarihi = "", hareketSaati = "", hareketYeri = "";
+    for (let r = 0; r < Math.min(10, koltukSatirlari.length); r++) {
+        const row = koltukSatirlari[r];
+        for (let c = 0; c < row.length; c++) {
+            const val = durakMetinNormallestir(row[c]);
+            if (val === 'TUR ADI') turAdi = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
+            if (val === 'HAREKET TARİHİ') hareketTarihi = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
+            if (val === 'HAREKET SAATİ') hareketSaati = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
+            if (val === 'HAREKET YERİ') hareketYeri = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
+        }
+    }
+
+    // Sütun İndekslerini Dinamik Yakala
+    let baslikSatirNo = koltukSatirlari.findIndex(r => r.some(c => durakMetinNormallestir(c).includes('AD SOYAD')));
+    if (baslikSatirNo === -1) baslikSatirNo = 6;
+
+    const bRow = koltukSatirlari[baslikSatirNo];
+    let koltukCol = -1;
+    let adCol = -1;
+    let durakCol = -1;
+
+    bRow.forEach((c, idx) => {
+        const t = durakMetinNormallestir(c);
+        if (t.includes('AD SOYAD') || (t.includes('AD') && t.includes('SOYAD'))) {
+            koltukCol = idx;
+            adCol = idx + 1;
+        }
+        if (t.includes('BİNİŞ') || t.includes('BINIS') || t.includes('DURAK')) {
+            durakCol = idx;
+        }
+    });
+
+    if (koltukCol === -1) koltukCol = 6;
+    if (adCol === -1) adCol = 7;
+    if (durakCol === -1) durakCol = 11;
+
+    const sehirGruplari = {
+        "MERSİN": {},
+        "TARSUS": {},
+        "ADANA": {},
+        "DİĞER": {}
+    };
+
+    let toplamYolcu = 0;
+
+    for (let r = baslikSatirNo + 1; r < koltukSatirlari.length; r++) {
+        const row = koltukSatirlari[r];
+        const rawKoltuk = row[koltukCol];
+        const rawAd = row[adCol];
+        const rawDurak = row[durakCol];
+
+        const koltukNo = parseInt(rawKoltuk, 10);
+        const yolcuAdi = String(rawAd || '').trim();
+
+        if (!yolcuAdi || isNaN(koltukNo)) continue;
+
+        const adNorm = durakMetinNormallestir(yolcuAdi);
+        if (['REHBER', 'ACENTA', 'ACENTE', 'KAPTAN', 'SOFOR', 'ŞOFÖR'].includes(adNorm)) continue;
+
+        const eslesme = durakAdiniEslestir(rawDurak);
+        const sehir = eslesme.sehir;
+        const durakAdi = eslesme.ad;
+
+        let tel = telefonHaritasiKoltuk[koltukNo] || telefonHaritasiIsim[adNorm] || "";
+        if (!tel && String(rawDurak).length >= 10 && !isNaN(rawDurak)) {
+            tel = durakTelefonTemizle(rawDurak);
+        }
+
+        if (!sehirGruplari[sehir][durakAdi]) {
+            sehirGruplari[sehir][durakAdi] = [];
+        }
+
+        sehirGruplari[sehir][durakAdi].push({
+            koltukNo,
+            adSoyad: yolcuAdi,
+            telefon: tel
+        });
+
+        toplamYolcu++;
+    }
+
+    durakAktifAyrismisVeri = {
+        turAdi: turAdi || durakDosyaAdiTemiz,
+        aktifSayfa: sayfaAdi,
+        hareketTarihi,
+        hareketSaati,
+        hareketYeri,
+        toplamYolcu,
+        sehirGruplari
+    };
+
+    durakEkranaCiz();
+}
+
+function durakEkranaCiz() {
+    if (!durakAktifAyrismisVeri) return;
+
+    document.getElementById('durakOzetTurAdi').innerText = `🚌 ${durakAktifAyrismisVeri.turAdi} (${durakAktifAyrismisVeri.aktifSayfa})`;
+    document.getElementById('durakOzetHareket').innerText = `Kalkış: ${durakAktifAyrismisVeri.hareketTarihi || '-'} ${durakAktifAyrismisVeri.hareketSaati ? '- ' + durakAktifAyrismisVeri.hareketSaati : ''} [${durakAktifAyrismisVeri.hareketYeri || 'Tarsus'}]`;
+    document.getElementById('durakOzetToplamYolcu').innerText = `${durakAktifAyrismisVeri.toplamYolcu} Kişi`;
+
+    const container = document.getElementById('durakSehirlerKapsayici');
+    container.innerHTML = "";
+
+    const sehirSiralamasi = ["MERSİN", "TARSUS", "ADANA", "DİĞER"];
+
+    sehirSiralamasi.forEach(sehir => {
+        const duraklarObj = durakAktifAyrismisVeri.sehirGruplari[sehir];
+        const durakAdlari = Object.keys(duraklarObj);
+
+        if (durakAdlari.length === 0) return;
+
+        let sehirToplamYolcu = 0;
+        durakAdlari.forEach(d => sehirToplamYolcu += duraklarObj[d].length);
+
+        const sehirDiv = document.createElement('div');
+        sehirDiv.className = "sehir-bolumu";
+
+        let sehirIkon = "📍";
+        if (sehir === "MERSİN") sehirIkon = "🌊 MERSİN DURAKLARI";
+        else if (sehir === "TARSUS") sehirIkon = "🏛️ TARSUS DURAKLARI";
+        else if (sehir === "ADANA") sehirIkon = "🏙️ ADANA DURAKLARI";
+        else sehirIkon = "❓ DİĞER / BELİRTİLMEMİŞ NOKTALAR";
+
+        sehirDiv.innerHTML = `
+            <div class="sehir-baslik">
+                <span>${sehirIkon}</span>
+                <span style="font-size:13px; color:#1e40af; font-weight:700;">Toplam: ${sehirToplamYolcu} Yolcu</span>
+            </div>
+            <div class="durak-grid" id="grid_durak_${sehir}"></div>
+        `;
+
+        container.appendChild(sehirDiv);
+        const gridEl = sehirDiv.querySelector(`#grid_durak_${sehir}`);
+
+        durakAdlari.sort((a, b) => {
+            const idxA = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === a);
+            const idxB = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            return a.localeCompare(b, 'tr');
+        });
+
+        durakAdlari.forEach(durak => {
+            const yolcular = duraklarObj[durak];
+            const card = document.createElement('div');
+            card.className = "durak-karti";
+
+            let listeHtml = yolcular.map(y => `
+                <li class="yolcu-item">
+                    <span class="koltuk-no">No:${y.koltukNo}</span>
+                    <span class="yolcu-ad">${y.adSoyad}</span>
+                    <span class="yolcu-tel">${y.telefon || '-'}</span>
+                </li>
+            `).join('');
+
+            card.innerHTML = `
+                <div class="durak-karti-baslik">
+                    <span>🚏 ${durak}</span>
+                    <span class="durak-sayac">${yolcular.length} Yolcu</span>
+                </div>
+                <ul class="yolcu-listesi">${listeHtml}</ul>
+            `;
+            gridEl.appendChild(card);
+        });
+    });
+}
+
+/**
+ * docx.js: 9'luktan 54'lüğe resmi güzergah sırasıyla TEK SAYFA A4 Word üretir.
+ */
+/**
+ * Her tarayıcıda ve bilgisayarda hatasız çalışan DOCX oluşturma fonksiyonu
+ */
+async function resmiRotaDocxOlustur() {
+    if (!durakAktifAyrismisVeri || durakAktifAyrismisVeri.toplamYolcu === 0) {
+        alert("Lütfen önce ayrıştırılmış bir yolcu listesi yükleyin!");
+        return;
+    }
+
+    // docx kütüphanesini her ortamda yakala
+    const docxLib = window.docx?.Document ? window.docx : (window.docx?.docx || window.docx);
+    if (!docxLib || !docxLib.Document) {
+        alert("DOCX oluşturma modülü başlatılamadı. Lütfen sayfayı yenileyip tekrar deneyin.");
+        return;
+    }
+
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } = docxLib;
+    const { turAdi, hareketTarihi, hareketSaati, hareketYeri, toplamYolcu, sehirGruplari, aktifSayfa } = durakAktifAyrismisVeri;
+
+    let yaziBoyutu = 13.5;
+    let durakBaslikBoyutu = 15;
+    let sehirBaslikBoyutu = 17;
+    let boslukOnce = 40;
+    let sayfaMargin = 320;
+
+    if (toplamYolcu <= 18) {
+        yaziBoyutu = 16;
+        durakBaslikBoyutu = 18;
+        sehirBaslikBoyutu = 20;
+        boslukOnce = 80;
+        sayfaMargin = 450;
+    } else if (toplamYolcu >= 46) {
+        yaziBoyutu = 12;
+        durakBaslikBoyutu = 14;
+        sehirBaslikBoyutu = 15;
+        boslukOnce = 25;
+        sayfaMargin = 280;
+    }
+
+    const siraliDurakKoleksiyonu = [];
+    const sehirSirasi = ["MERSİN", "TARSUS", "ADANA", "DİĞER"];
+
+    sehirSirasi.forEach(sehir => {
+        const duraklarObj = sehirGruplari[sehir];
+        if (!duraklarObj) return;
+        const durakAdlari = Object.keys(duraklarObj);
+
+        if (durakAdlari.length === 0) return;
+
+        durakAdlari.sort((a, b) => {
+            const idxA = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === a);
+            const idxB = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            return a.localeCompare(b, 'tr');
+        });
+
+        durakAdlari.forEach(durakAdi => {
+            siraliDurakKoleksiyonu.push({
+                sehir,
+                durakAdi,
+                yolcular: duraklarObj[durakAdi]
+            });
+        });
+    });
+
+    const solBlok = [];
+    const sagBlok = [];
+    let solAgirlik = 0, sagAgirlik = 0;
+
+    siraliDurakKoleksiyonu.forEach(item => {
+        const agirlik = item.yolcular.length + 2;
+        if (solAgirlik <= sagAgirlik) {
+            solBlok.push(item);
+            solAgirlik += agirlik;
+        } else {
+            sagBlok.push(item);
+            sagAgirlik += agirlik;
+        }
+    });
+
+    function sutunIcerigiUret(blokDizisi) {
+        const paragraflar = [];
+        let sonSehir = "";
+
+        blokDizisi.forEach(item => {
+            if (item.sehir !== sonSehir) {
+                sonSehir = item.sehir;
+                let sehirBaslikText = `📍 ${item.sehir} DURAKLARI`;
+                if (item.sehir === "DİĞER") sehirBaslikText = `❓ DİĞER / BELİRTİLMEMİŞ DURAKLAR`;
+
+                paragraflar.push(
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: sehirBaslikText, bold: true, size: sehirBaslikBoyutu, color: "0f172a" })
+                        ],
+                        spacing: { before: boslukOnce + 15, after: 10 }
+                    })
+                );
+            }
+
+            paragraflar.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: `🚏 ${item.durakAdi} `, bold: true, size: durakBaslikBoyutu, color: "1e40af" }),
+                        new TextRun({ text: `(${item.yolcular.length} Yolcu)`, bold: true, size: durakBaslikBoyutu - 2, color: "0284c7" })
+                    ],
+                    spacing: { before: boslukOnce, after: 10 }
+                })
+            );
+
+            const tableRows = [
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "K.", bold: true, size: yaziBoyutu })] })], width: { size: 10, type: WidthType.PERCENTAGE } }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "YOLCU ADI", bold: true, size: yaziBoyutu })] })], width: { size: 55, type: WidthType.PERCENTAGE } }),
+                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TELEFON", bold: true, size: yaziBoyutu })] })], width: { size: 35, type: WidthType.PERCENTAGE } }),
+                    ]
+                })
+            ];
+
+            item.yolcular.forEach(y => {
+                tableRows.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(y.koltukNo), size: yaziBoyutu, bold: true })] })] }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: y.adSoyad, size: yaziBoyutu })] })], width: { size: 55, type: WidthType.PERCENTAGE } }),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: y.telefon || "-", size: yaziBoyutu - 1 })] })], width: { size: 35, type: WidthType.PERCENTAGE } }),
+                        ]
+                    })
+                );
+            });
+
+            paragraflar.push(
+                new Table({
+                    rows: tableRows,
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: {
+                        top: { style: BorderStyle.SINGLE, size: 1, color: "cbd5e1" },
+                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "cbd5e1" },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                        insideHorizontal: { style: BorderStyle.DOTTED, size: 1, color: "e2e8f0" },
+                        insideVertical: { style: BorderStyle.NONE },
+                    }
+                })
+            );
+
+            paragraflar.push(new Paragraph({ text: "", spacing: { after: 15 } }));
+        });
+
+        return paragraflar;
+    }
+
+    const anaTablo = new Table({
+        rows: [
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: sutunIcerigiUret(solBlok),
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
+                    }),
+                    new TableCell({
+                        children: sutunIcerigiUret(sagBlok),
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
+                    })
+                ]
+            })
+        ],
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE } }
+    });
+
+    const doc = new Document({
+        sections: [{
+            properties: {
+                page: {
+                    margin: { top: sayfaMargin, bottom: sayfaMargin, left: sayfaMargin, right: sayfaMargin }
+                }
+            },
+            children: [
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: "ÜSTÜNBUS TURİZM - RESMİ GÜZERGAH BİNİŞ VE DURAK LİSTESİ", bold: true, size: 18, color: "0f172a" })
+                    ],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 20 }
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: `Tur: ${turAdi} (${aktifSayfa})  |  `, bold: true, size: 13 }),
+                        new TextRun({ text: `Tarih: ${hareketTarihi} ${hareketSaati}  |  `, size: 13 }),
+                        new TextRun({ text: `Güzergah: Mersin ➔ Tarsus ➔ Adana  |  `, size: 13 }),
+                        new TextRun({ text: `Yolcu: ${toplamYolcu}`, bold: true, color: "16a34a", size: 13 })
+                    ],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 50 }
+                }),
+                anaTablo,
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: "* Lütfen misafirleri yalnızca teyit edilen durak noktalarından alınız. İyi yolculuklar dileriz!", italics: true, size: 11, color: "64748b" })
+                    ],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { before: 35 }
+                })
+            ]
+        }]
+    });
+
+    try {
+        const blob = await Packer.toBlob(doc);
+        const dosyaIsmi = `${turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_")}_Resmi_Durak_Listesi.docx`;
+
+        // FileSaver yüklüyse onu kullan, değilse tarayıcı indirme tetikle (Fallback)
+        if (typeof window.saveAs === "function") {
+            window.saveAs(blob, dosyaIsmi);
+        } else {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = dosyaIsmi;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+    } catch (e) {
+        console.error("DOCX İndirme Hatası:", e);
+        alert("Word belgesi oluşturulurken hata oluştu: " + e.message);
+    }
+>>>>>>> e19995f6d4b0857e914f6820555044254e7e7a67
+}

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üstünbus - U-ETDS Liste Ayrıştırıcı</title>
+    <!-- SheetJS CDN -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --border: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f1f5f9;
+            color: #334155;
+            padding: 25px 15px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            color: var(--dark);
+            margin: 0 0 8px 0;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desc {
+            color: #64748b;
+            font-size: 13.5px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .upload-card {
+            background: var(--bg);
+            border: 2px dashed #93c5fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            flex: 2;
+            min-width: 260px;
+            padding: 9px 12px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13.5px;
+        }
+
+        .btn-run {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-run:hover {
+            background: var(--primary-hover);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .status-box {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .status-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+        .status-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .status-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .preview-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 480px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: #ffffff;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f8fafc;
+            color: var(--dark);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tr:nth-child(even) {
+            background: #fbfcfe;
+        }
+
+        tr:hover {
+            background: #f1f5f9;
+        }
+
+        .badge-tc {
+            font-family: monospace;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-tel {
+            font-family: monospace;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚌 U-ETDS Liste Ayrıştırıcı &amp; Formatlayıcı</h1>
+    <p class="desc">
+        Tur Excel dosyasını (ör. <code>29 EKİM ANKARA TURU.xlsx</code>) seçin. Araç sadece <strong>UEDTS</strong> sayfasını çeker, formülleri çözer, <strong>T.C. ve telefonlardaki tüm boşlukları kaldırarak</strong> metin formatına dönüştürür ve tek tıklamayla doğrudan U-ETDS'ye yüklenebilir temiz bir <strong>.xlsx</strong> dosyası oluşturur.
+    </p>
+
+    <div class="upload-card">
+        <label for="excelDosyaGirdi" style="font-weight: 700; font-size: 13.5px; color: #334155; display: block; margin-bottom: 8px;">
+            Tur Excel Dosyasını Seçin (.xlsx / .xls):
+        </label>
+        <div class="form-row">
+            <input type="file" id="excelDosyaGirdi" accept=".xlsx,.xls">
+            <button type="button" class="btn-run" onclick="uedtsDosyayiAyristir()">⚡ Ayrıştır ve İndir</button>
+        </div>
+        <label class="checkbox-container">
+            <input type="checkbox" id="filtreTemizle" checked>
+            Boş koltukları, REHBER, ACENTA satırlarını ve eksik T.C. numaralarını otomatik temizle
+        </label>
+    </div>
+
+    <div id="bildirimKutusu" class="status-box"></div>
+
+    <div id="onizlemeAlani" style="display: none;">
+        <div class="preview-header">
+            <h3>📋 Ayrıştırılan Yolcu Listesi (<span id="yolcuSayac">0</span> Kişi)</h3>
+        </div>
+        <div class="table-responsive">
+            <table id="tabloGosterim">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function uedtsDosyayiAyristir() {
+    const input = document.getElementById('excelDosyaGirdi');
+    const bildirim = document.getElementById('bildirimKutusu');
+    const filtreUygula = document.getElementById('filtreTemizle').checked;
+    const onizlemeAlani = document.getElementById('onizlemeAlani');
+
+    if (!input.files || input.files.length === 0) {
+        alert("Lütfen önce bilgisayarınızdan bir tur Excel dosyası seçin.");
+        return;
+    }
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    bildirim.className = "status-box status-info";
+    bildirim.style.display = "block";
+    bildirim.innerHTML = "⏳ Dosya okunuyor, formüller çözümleniyor ve T.C./telefon numaralarındaki boşluklar temizleniyor...";
+    onizlemeAlani.style.display = "none";
+
+    reader.onload = function(e) {
+        try {
+            const buffer = new Uint8Array(e.target.result);
+            // raw: false parametresi ile formüllü hücrelerin ekrandaki net hesaplanmış metin karşılığı okunur
+            const workbook = XLSX.read(buffer, { type: 'array', cellDates: true, raw: false });
+
+            // UEDTS sayfasını tespit et
+            const hedefSayfaAdi = workbook.SheetNames.find(ad => {
+                const norm = ad.trim().toUpperCase();
+                return norm === 'UEDTS' || norm === 'U-ETDS' || norm.startsWith('UEDTS');
+            });
+
+            if (!hedefSayfaAdi) {
+                throw new Error(`Dosya içerisinde "UEDTS" sayfası bulunamadı. Mevcut sayfalar: [${workbook.SheetNames.join(', ')}]`);
+            }
+
+            const sheet = workbook.Sheets[hedefSayfaAdi];
+            const tumSatirlar = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+            if (tumSatirlar.length === 0) {
+                throw new Error(`"${hedefSayfaAdi}" sayfası boş.`);
+            }
+
+            // Başlık satırını bul
+            let baslikSatirNo = tumSatirlar.findIndex(satir =>
+                satir.some(hucre => {
+                    const txt = String(hucre).toUpperCase();
+                    return txt.includes('ÜLKE') || txt.includes('ADI') || txt.includes('TC');
+                })
+            );
+            if (baslikSatirNo === -1) baslikSatirNo = 0;
+
+            const hamBasliklar = tumSatirlar[baslikSatirNo].map(h => String(h).trim());
+            const tcIndex = hamBasliklar.findIndex(h => h.toUpperCase().includes('TC') || h.toUpperCase().includes('PASAPORT'));
+            const adIndex = hamBasliklar.findIndex(h => h.toUpperCase() === 'ADI' || h.toUpperCase().includes('AD'));
+            const soyadIndex = hamBasliklar.findIndex(h => h.toUpperCase().includes('SOYAD'));
+            const telIndex = hamBasliklar.findIndex(h => h.toUpperCase().includes('TEL'));
+
+            const temizVeri = [hamBasliklar];
+            let yolcuSayisi = 0;
+
+            for (let i = baslikSatirNo + 1; i < tumSatirlar.length; i++) {
+                let satir = [...tumSatirlar[i]];
+
+                // Boş satır denetimi
+                const satirDolu = satir.some(deger => deger !== null && String(deger).trim() !== '' && String(deger).trim() !== '-');
+                if (!satirDolu) continue;
+
+                // 1. T.C. / Kimlik / Pasaport Temizliği: Tüm boşlukları ve .0 uzantılarını kaldır
+                if (tcIndex !== -1 && satir[tcIndex] !== undefined && satir[tcIndex] !== null) {
+                    let tcMetin = String(satir[tcIndex]).trim();
+                    tcMetin = tcMetin.replace(/\.0$/, '').replace(/\s+/g, '');
+                    satir[tcIndex] = tcMetin;
+                }
+
+                // 2. Telefon Temizliği: Boşlukları ve gereksiz karakterleri kaldır
+                if (telIndex !== -1 && satir[telIndex] !== undefined && satir[telIndex] !== null) {
+                    let telMetin = String(satir[telIndex]).trim();
+                    telMetin = telMetin.replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
+                    satir[telIndex] = (telMetin === '' || telMetin === '-') ? '-' : telMetin;
+                }
+
+                // 3. Ad & Soyad kırpma
+                if (adIndex !== -1 && satir[adIndex]) satir[adIndex] = String(satir[adIndex]).trim();
+                if (soyadIndex !== -1 && satir[soyadIndex]) satir[soyadIndex] = String(satir[soyadIndex]).trim();
+
+                // Filtreleme kuralları
+                if (filtreUygula) {
+                    const adDegeri = adIndex !== -1 ? String(satir[adIndex] || '').toUpperCase() : '';
+                    const tcDegeri = tcIndex !== -1 ? String(satir[tcIndex] || '').replace(/\D/g, '') : '';
+
+                    if (adDegeri === 'REHBER' || adDegeri === 'ACENTA' || adDegeri === 'ACENTE') continue;
+                    if (tcIndex !== -1 && tcDegeri.length < 5) continue;
+                }
+
+                temizVeri.push(satir);
+                yolcuSayisi++;
+            }
+
+            // Yeni XLSX oluştur
+            const yeniKitap = XLSX.utils.book_new();
+            const yeniSayfa = XLSX.utils.aoa_to_sheet(temizVeri, { raw: true });
+
+            // T.C. sütununu metin (string) olarak formatla (Excel'in bilimsel sayıya çevirmesini önler)
+            if (tcIndex !== -1) {
+                for (let r = 1; r < temizVeri.length; r++) {
+                    const hucreKodu = XLSX.utils.encode_cell({ r: r, c: tcIndex });
+                    if (yeniSayfa[hucreKodu]) {
+                        yeniSayfa[hucreKodu].t = 's';
+                        yeniSayfa[hucreKodu].z = '@';
+                    }
+                }
+            }
+
+            // Sütun genişlikleri
+            yeniSayfa['!cols'] = [
+                { wch: 8 },  // ÜLKE
+                { wch: 18 }, // ADI
+                { wch: 18 }, // SOYADI
+                { wch: 24 }, // TC KİMLİK / PASAPORT NO
+                { wch: 10 }, // CİNSİYET
+                { wch: 18 }  // TELEFON
+            ];
+
+            XLSX.utils.book_append_sheet(yeniKitap, yeniSayfa, "U-ETDS");
+
+            const ciktiAdi = file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '_') + '_UEDTS_Listesi.xlsx';
+            XLSX.writeFile(yeniKitap, ciktiAdi);
+
+            bildirim.className = "status-box status-success";
+            bildirim.innerHTML = `✅ <strong>İşlem Başarılı:</strong> <em>"${hedefSayfaAdi}"</em> sayfası ayrıştırıldı.<br>Toplam <strong>${yolcuSayisi}</strong> yolcunun T.C. ve telefon boşlukları temizlendi, <strong>${ciktiAdi}</strong> olarak indirildi.`;
+
+            tabloyuOlustur(temizVeri, tcIndex, telIndex);
+            document.getElementById('yolcuSayac').innerText = yolcuSayisi;
+            onizlemeAlani.style.display = "block";
+
+        } catch (hata) {
+            console.error(hata);
+            bildirim.className = "status-box status-error";
+            bildirim.innerHTML = `❌ <strong>Hata:</strong> ${hata.message || 'Dosya işlenirken bir sorun oluştu.'}`;
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function tabloyuOlustur(veriDizisi, tcCol, telCol) {
+    const table = document.getElementById('tabloGosterim');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    if (!veriDizisi || veriDizisi.length === 0) return;
+
+    // Başlık satırı
+    const trBaslik = document.createElement('tr');
+    veriDizisi[0].forEach(baslik => {
+        const th = document.createElement('th');
+        th.textContent = baslik || '-';
+        trBaslik.appendChild(th);
+    });
+    thead.appendChild(trBaslik);
+
+    // Veri satırları
+    for (let r = 1; r < veriDizisi.length; r++) {
+        const tr = document.createElement('tr');
+        veriDizisi[r].forEach((deger, colIdx) => {
+            const td = document.createElement('td');
+            if (colIdx === tcCol && deger && deger !== '-') {
+                td.innerHTML = `<span class="badge-tc">${deger}</span>`;
+            } else if (colIdx === telCol && deger && deger !== '-') {
+                td.innerHTML = `<span class="badge-tel">${deger}</span>`;
+            } else {
+                td.textContent = deger || '-';
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    }
+}
+</script>
+
+</body>
+</html>

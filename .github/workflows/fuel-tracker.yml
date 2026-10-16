@@ -1,0 +1,54 @@
+name: Opet Fiyat Guncelleyici
+
+on:
+  schedule:
+    # Her gece Türkiye saati ile 01:30 (UTC 22:30)
+    - cron: '30 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-fuel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Depoyu Klonla
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Python Ortamını Hazırla
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gerekli Paketleri Yukle
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Fiyat Scriptini Çalıştır
+        run: |
+          python UstunbusTravelWisard/update_prices.py
+
+      - name: Değişiklikleri Commit ve Push Yap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Üretilen prices.json dosyasını takibe al
+          git add UstunbusTravelWisard/projectlibraries/prices.json
+          
+          # Değişiklik yoksa adımı hata vermeden sonlandır
+          if git diff --staged --quiet; then
+            echo "Fiyatlarda değişiklik yok, commit atlanıyor."
+            exit 0
+          fi
+          
+          git commit -m "chore(data): Opet anlık akaryakıt fiyatları güncellendi [skip ci]"
+          
+          # Olası çakışmaları önlemek için rebase yapıp push et
+          git pull --rebase origin main || git pull --rebase origin master
+          git push
