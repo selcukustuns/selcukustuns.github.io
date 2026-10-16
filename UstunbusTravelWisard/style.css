@@ -146,6 +146,11 @@ body {
     line-height: 1.5;
 }
 
+.iban-payment-note a {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
 .iban-whatsapp-row {
     display: flex;
     align-items: center;

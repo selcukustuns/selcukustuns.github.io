@@ -210,10 +210,49 @@
     }
 
     .contract-item.active .contract-body {
-      max-height: 350px;
+      max-height: 70vh;
       overflow-y: auto;
       padding: 14px 18px 18px 18px;
       border-top: 1px solid #e2e8f0;
+    }
+
+    .company-card {
+      background: rgba(16, 42, 67, 0.78);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .company-card strong {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 6px;
+    }
+
+    .legal-p { margin: 0 0 10px 0; }
+    .legal-p:last-child { margin-bottom: 0; }
+
+    .legal-h {
+      margin: 12px 0 6px 0;
+      font-size: 13px;
+      color: #102a43;
+      font-weight: 800;
+    }
+
+    .legal-list {
+      margin: 0 0 10px 18px;
+      padding: 0;
+    }
+
+    .legal-list li { margin-bottom: 6px; }
+
+    .legal-note {
+      margin-top: 10px;
+      font-size: 11.5px;
+      color: #64748b;
     }
 
     .footer {
@@ -275,6 +314,15 @@
         <span id="status-badge" class="status-badge"></span>
       </div>
 
+      <div class="company-card">
+        <strong>Öz Üstünbus Turizm</strong>
+        Satıcı / Acenta: Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi<br>
+        Vergi Kimlik No: 6620819592<br>
+        Adres: Şehitler Tepesi Mahallesi 3631 Sokak Kılınç Apartmanı No:5A Tarsus/Mersin<br>
+        İletişim: 0850 532 80 00 · WhatsApp üzerinden dekont ve rezervasyon bildirimi<br>
+        Yürürlük tarihi: 16 Ekim 2026
+      </div>
+
       <!-- Grup 1: Satış ve Tur Sözleşmeleri -->
       <div class="category-title" id="cat-1">1. Satış ve Tur Kayıt Sözleşmeleri</div>
 
@@ -284,7 +332,18 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          İşbu form, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri uyarınca müşterinin tur detayları, toplam fiyat, ödeme koşulları ve ifaya ilişkin önceden bilgilendirilmesi amacıyla düzenlenmiştir.
+          <p class="legal-p">İşbu form, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca, Öz Üstünbus Turizm markası altında faaliyet gösteren satıcı tarafından paket tur ve ulaşım hizmeti satın almadan önce tüketiciye sunulur.</p>
+          <h4 class="legal-h">1. Satıcı bilgileri</h4>
+          <p class="legal-p">Unvan: Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi. Vergi Kimlik No: 6620819592. Adres: Şehitler Tepesi Mahallesi 3631 Sokak Kılınç Apartmanı No:5A Tarsus/Mersin. Acenta adı: Öz Üstünbus Turizm. Telefon: 0850 532 80 00.</p>
+          <h4 class="legal-h">2. Hizmetin temel nitelikleri</h4>
+          <p class="legal-p">Satın alınan hizmet; rezervasyon anında bildirilen tur adı, güzergâh, gece/gün sayısı, kalkış-dönüş tarih ve saatleri, konaklama varsa otel/tesis sınıfı, araç tipi ve dahil olan yeme-içme, rehberlik, müze/park girişi gibi unsurlardan oluşur. Programa dahil olmayan ekstra harcamalar, kişisel harcamalar ve isteğe bağlı opsiyonel turlar fiyata dahil değildir.</p>
+          <h4 class="legal-h">3. Bedel ve ödeme</h4>
+          <p class="legal-p">Toplam bedel, kişi sayısı, tur tipi ve varsa vade farkı ile birlikte rezervasyon/ödeme bildiriminde teyit edilir. Ödeme, tur katılımcısının kendine ait banka hesabından Acentanın bildirdiği IBAN’a yapılır. Başkası adına yapılan ödemeler kabul edilmez; bu tür tutarlar 15 gün süreyle bloke edilebilir. Ödeme dekontu 0850 532 80 00 numaralı WhatsApp hattına iletilmedikçe rezervasyon kesinleşmiş sayılmaz.</p>
+          <h4 class="legal-h">4. İfa yeri ve zamanı</h4>
+          <p class="legal-p">Hizmet, bildirilen kalkış duraklarında (Mersin, Tarsus, Adana güzergâhındaki kayıtlı duraklar) ve programda yazılı tarihte ifa edilir. Katılımcı yalnızca Acentaya bildirdiği duraktan alınır; listede adı yoksa araç o durakta durmayabilir.</p>
+          <h4 class="legal-h">5. Cayma hakkı hakkında</h4>
+          <p class="legal-p">Belirli bir tarihte veya dönemde ifası gereken konaklama, taşıma ve boş zamanın değerlendirilmesine yönelik paket tur sözleşmelerinde Mesafeli Sözleşmeler Yönetmeliği’nin 15. maddesi uyarınca 14 günlük cayma hakkı kural olarak uygulanmaz. İptal ve iade koşulları “İptal, İade ve Değişiklik Politikası”nda yer alır.</p>
+          <p class="legal-note">Ödeme yapılması, bu ön bilgilendirme formunun okunduğu ve kabul edildiği anlamına gelir.</p>
         </div>
       </div>
 
@@ -294,17 +353,59 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          Alıcı ile Acenta arasında dijital ortamda kurulan işbu sözleşme; sunulan turizm, ulaşım ve acentelik hizmetlerinin kapsamını, tarafların hak ve yükümlülüklerini, yürürlük şartlarını düzenler.
+          <p class="legal-p">İşbu sözleşme, telefon, WhatsApp, internet veya benzeri mesafeli iletişim araçlarıyla kurulan satış ilişkisini düzenler.</p>
+          <h4 class="legal-h">1. Taraflar</h4>
+          <p class="legal-p"><strong>Satıcı:</strong> Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi (Öz Üstünbus Turizm). VKN: 6620819592. Adres: Şehitler Tepesi Mahallesi 3631 Sokak Kılınç Apartmanı No:5A Tarsus/Mersin.</p>
+          <p class="legal-p"><strong>Alıcı / Katılımcı:</strong> Rezervasyon sırasında adı, soyadı, telefonu ve varsa T.C. kimlik numarası bildirilen gerçek kişi ile aynı rezervasyona dahil ettiği yolcular.</p>
+          <h4 class="legal-h">2. Konu</h4>
+          <p class="legal-p">Satıcı, Alıcıya paket tur, günübirlik gezi, otobüslü transfer ve bunlara bağlı acentelik hizmetlerini; Alıcı da bedeli ödemeyi ve acenta kurallarına uymayı kabul eder.</p>
+          <h4 class="legal-h">3. Sözleşmenin kurulması</h4>
+          <p class="legal-p">Sözleşme; Alıcının turu seçmesi, bedeli Satıcının IBAN’ına kendi hesabından yatırması ve dekontu 0850 532 80 00 WhatsApp hattına iletmesi ile kurulur. Tur ücretinin ödenmesi, Acenta Genel Hüküm ve Şartları ile işbu yasal metinlerin kabulü sayılır.</p>
+          <h4 class="legal-h">4. Bedel, fatura ve üçüncü kişi ödemesi</h4>
+          <ul class="legal-list">
+            <li>Ücret, tur katılımcısının kendine ait hesabından ödenir.</li>
+            <li>Başkası tarafından yapılan ödemeler kabul edilmez; Satıcı tutarı 15 gün bloke edebilir. Bu süre içinde Alıcı ile irtibat kurulamazsa Satıcı, tutarı uygun gördüğü sosyal yardım kuruluşuna aktarma hakkını saklı tutar.</li>
+            <li>Fatura, bildirilen kimlik ve vergi bilgilerine göre düzenlenir. Gerçek dışı bilgi verilmesinden Alıcı sorumludur.</li>
+          </ul>
+          <h4 class="legal-h">5. Satıcının yükümlülükleri</h4>
+          <p class="legal-p">Satıcı, programda taahhüt edilen ulaşım, konaklama (varsa) ve dahil hizmetleri özenle ifa eder. Mücbir sebep, resmi makam kararı, hava/yol koşulları veya tedarikçi kaynaklı zorunluluklarda eşdeğer tesis, güzergâh veya saat değişikliği yapabilir; bu durum tek başına tazminat sebebi sayılmaz.</p>
+          <h4 class="legal-h">6. Alıcının yükümlülükleri</h4>
+          <p class="legal-p">Alıcı; doğru kimlik ve iletişim bilgisi vermek, U-ETDS ve benzeri yasal bildirimler için istenen belgeleri sunmak, kalkış saatinden önce kayıtlı durakta bulunmak ve diğer yolcuların güvenliğini bozacak davranışlardan kaçınmakla yükümlüdür.</p>
+          <h4 class="legal-h">7. Uyuşmazlık</h4>
+          <p class="legal-p">Tüketici işlemlerinde Tarsus Tüketici Hakem Heyeti ve Tarsus/Mersin Tüketici Mahkemeleri; ticari işlerde Tarsus mahkemeleri ve icra daireleri yetkilidir. Tüketici, Gümrük ve Ticaret Bakanlığı’nın ilan ettiği parasal sınırlar içinde hakem heyetine başvurabilir.</p>
         </div>
       </div>
 
       <div class="contract-item" id="item-3" onclick="toggleContract(this)">
         <div class="contract-header">
-          <span class="contract-title-text">🚌 Paket Tur Sözleşmesi & Kurallar</span>
+          <span class="contract-title-text">🚌 Paket Tur Sözleşmesi &amp; Kurallar</span>
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          Tur programı, hareket saatleri, bagaj kuralları, rehberlik hizmetleri ve tur esnasında uyulması gereken acenta genel kurallarını kapsar. Tur ücretini ödeyen katılımcı tüm hükümleri kabul etmiş sayılır.
+          <p class="legal-p">Bu metin, Paket Tur Sözleşmeleri Yönetmeliği kapsamında Öz Üstünbus Turizm’in düzenlediği paket ve günübirlik turlara uygulanır.</p>
+          <h4 class="legal-h">1. Kapsam</h4>
+          <p class="legal-p">Tur; bildirilen ulaşım, program akışı, rehberlik (varsa), konaklama ve öğünlerden oluşur. Şehir içi ekstra transfer, kişisel harcama, içecek, fotoğraf, opsiyonel tur ve bahşişler fiyata dahil değildir.</p>
+          <h4 class="legal-h">2. Kalkış, durak ve saat</h4>
+          <ul class="legal-list">
+            <li>Araçlar yalnızca önceden bildirilen duraklardan yolcu alır (Mersin, Tarsus, Adana güzergâhındaki kayıtlı duraklar).</li>
+            <li>Genel durak listesinde yer alsa bile, yolcu listesinde adı bulunmayan misafir o duraktan alınmaz.</li>
+            <li>Katılımcı, bildirilen saatten en az 15 dakika önce durakta hazır bulunur. Gecikme nedeniyle kaçırılan turda ücret iade edilmez.</li>
+            <li>Durak değişikliği, tur kalkışından en geç 1 gün önce çağrı merkezi / WhatsApp hattına bildirilmelidir.</li>
+          </ul>
+          <h4 class="legal-h">3. Kimlik, koltuk ve U-ETDS</h4>
+          <p class="legal-p">Karayolu yolcu taşımacılığı mevzuatı gereği T.C. kimlik numarası, ad-soyad, telefon ve cinsiyet bilgisi U-ETDS’ye bildirilebilir. Yanlış veya eksik bilgi sefere alınmamaya veya resmi yaptırıma yol açarsa sorumluluk katılımcıya aittir. Koltuk tahsisi operasyonel gerekçeyle değiştirilebilir.</p>
+          <h4 class="legal-h">4. Bagaj ve eşya</h4>
+          <p class="legal-p">Kişi başı 1 adet orta boy valiz (yaklaşık 20 kg) ve 1 adet kabin çantası esastır. Değerli eşya, nakit ve elektronik cihazlar yolcunun nezaretindedir. Kayıp, hırsızlık ve hasarda Acentanın kusuru kanıtlanmadıkça tazminat ödenmez.</p>
+          <h4 class="legal-h">5. Araç ve konaklama kuralları</h4>
+          <ul class="legal-list">
+            <li>Araçta emniyet kemeri takılır; alkollü, uyuşturucu etkisi altındaki veya diğer yolcuları rahatsız eden kişiler sefere alınmayabilir.</li>
+            <li>Sigara, elektronik sigara ve açık ateş yasaktır.</li>
+            <li>Otel değişikliği aynı veya üst kategoride yapılabilir. Erken/geç check-in otel politikasına bağlıdır.</li>
+            <li>Çocuk ve bebek fiyatları rezervasyon anında belirtilir; yaş belgesi istenebilir.</li>
+          </ul>
+          <h4 class="legal-h">6. Program değişikliği ve mücbir sebep</h4>
+          <p class="legal-p">Hava muhalefeti, yol kapanması, resmi yasak, salgın, grev, tedarikçi iflası, araç arızası ve benzeri mücbir sebeplerde Acenta güzergâh, tesis, saat veya araç değiştirebilir, turu erteleyebilir veya iptal edebilir. Bu hâlde yasal zorunluluklar saklı kalmak kaydıyla cezai şart talep edilemez.</p>
+          <p class="legal-note">Tur ücretini ödeyen katılımcı, kendisi ve birlikte kayıt ettiği yolcular adına bu kuralları kabul etmiş sayılır.</p>
         </div>
       </div>
 
@@ -314,7 +415,23 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          Mücbir sebepler, rezervasyon iptal süreleri, kesinti oranları ile iade prosedürlerine dair tüm yasal süre ve kurallar bu politika dahilinde yönetilir.
+          <p class="legal-p">Aşağıdaki oranlar, belirli tarihli paket tur ve otobüslü gezi rezervasyonları içindir. Cayma hakkı istisnası saklıdır.</p>
+          <h4 class="legal-h">1. Katılımcı iptali (tur bedeli üzerinden)</h4>
+          <ul class="legal-list">
+            <li>Kalkışa 30 günden fazla süre varken: %15 kesinti</li>
+            <li>15–30 gün kala: %35 kesinti</li>
+            <li>8–14 gün kala: %60 kesinti</li>
+            <li>7 gün ve daha az, kalkış günü veya no-show: %100 kesinti (iade yok)</li>
+          </ul>
+          <p class="legal-p">İptal talebi yazılı veya 0850 532 80 00 WhatsApp hattına iletilmiş sayılır. Acentanın otel, feribot, bilet veya tedarikçiye ödediği iade edilemeyen tutarlar ayrıca kesilebilir.</p>
+          <h4 class="legal-h">2. İsim / tarih / durak değişikliği</h4>
+          <p class="legal-p">Kalkıştan en az 7 gün önce ve yer müsaitse isim değişikliği yapılabilir. Tarih değişikliği yeni turun fiyat farkına ve müsaitliğe bağlıdır. Durak değişikliği kalkıştan en geç 1 gün önce talep edilir; operasyonel olarak mümkün değilse Acenta reddedebilir.</p>
+          <h4 class="legal-h">3. Acenta iptali</h4>
+          <p class="legal-p">Yeterli katılım oluşmaması, mücbir sebep veya resmi engel hâlinde Acenta turu iptal veya erteleyebilir. Bu durumda ödenen bedel, kesinti yapılmaksızın Alıcının bildirdiği kendi IBAN’ına iade edilir veya Alıcının onayıyla başka tura mahsup edilir. Dolaylı zarar, kazanç kaybı ve manevi tazminat talep edilemez.</p>
+          <h4 class="legal-h">4. İade yöntemi</h4>
+          <p class="legal-p">İadeler yalnızca ödemeyi yapan katılımcı hesabına, dekont ve kimlik teyidinden sonra, banka süreçleri dikkate alınarak makul sürede yapılır. Taksitli ödemelerde bankanın vade farkı ve iade komisyonu Alıcıya aittir.</p>
+          <h4 class="legal-h">5. Sağlık ve vize</h4>
+          <p class="legal-p">Pasaport, vize, aşı ve sağlık belgesi katılımcının sorumluluğundadır. Vize reddi veya sağlık raporu, yukarıdaki iptal tablosunu kendiliğinden ortadan kaldırmaz; seyahat sigortası tavsiye edilir.</p>
         </div>
       </div>
 
@@ -327,7 +444,24 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          6698 sayılı Kişisel Verilerin Korunması Kanunu uyarınca kimlik, iletişim, finans ve fatura bilgilerinizin hangi hukuki gerekçelerle işlendiğini ve aktarıldığını açıklar.
+          <p class="legal-p">6698 sayılı Kişisel Verilerin Korunması Kanunu’nun 10. maddesi uyarınca veri sorumlusu:</p>
+          <p class="legal-p"><strong>Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi</strong> (Öz Üstünbus Turizm), VKN 6620819592, Şehitler Tepesi Mahallesi 3631 Sokak Kılınç Apartmanı No:5A Tarsus/Mersin, Tel: 0850 532 80 00.</p>
+          <h4 class="legal-h">1. İşlenen veriler</h4>
+          <p class="legal-p">Kimlik (ad, soyad, T.C. kimlik no, doğum tarihi, cinsiyet), iletişim (telefon, varsa e-posta), müşteri işlem (tur, koltuk, durak, ödeme tutarı, dekont), finans (IBAN sahibi bilgisi), seyahat (kalkış-varış, otel) ve işlem güvenliği verileri.</p>
+          <h4 class="legal-h">2. Amaç ve hukuki sebep</h4>
+          <ul class="legal-list">
+            <li>Sözleşmenin kurulması ve ifası (rezervasyon, taşıma, konaklama).</li>
+            <li>U-ETDS ve karayolu taşıma mevzuatı gereği yasal yükümlülük.</li>
+            <li>Fatura, vergi ve muhasebe yükümlülükleri.</li>
+            <li>Ödeme teyidi, dolandırıcılığın önlenmesi, üçüncü kişi ödemelerinin incelenmesi.</li>
+            <li>WhatsApp / telefon ile operasyonel bilgilendirme (kalkış saati, durak, dekont).</li>
+          </ul>
+          <h4 class="legal-h">3. Aktarım</h4>
+          <p class="legal-p">Veriler; otel ve tesis işletmeleri, taşımacı / kaptan, rehber, sigorta, banka, yasal zorunluluk halinde Ulaştırma ve Altyapı Bakanlığı U-ETDS sistemi, yetkili kamu kurumları ve hizmet alınan tedarikçilerle paylaşılabilir. Yurt dışı turlarda konaklama ve sınır kapısı işlemleri için yurt dışına aktarım söz konusu olabilir.</p>
+          <h4 class="legal-h">4. Toplama yöntemi ve saklama</h4>
+          <p class="legal-p">Veriler çağrı, WhatsApp, form, dekont ve tur listelerinden toplanır. Saklama süresi, ticari defter ve taşıma mevzuatındaki zamanaşımı / zorunlu arşiv süreleriyle sınırlıdır.</p>
+          <h4 class="legal-h">5. Haklarınız</h4>
+          <p class="legal-p">Kanunun 11. maddesi uyarınca veri sorumlusuna başvurarak verilerinizin işlenip işlenmediğini öğrenme, düzeltme, silme, aktarılan üçüncü kişileri bilme ve Şikâyet için Kişisel Verileri Koruma Kurulu’na başvurma haklarına sahipsiniz. Başvurular 0850 532 80 00 veya yukarıdaki adrese yapılabilir.</p>
         </div>
       </div>
 
@@ -337,7 +471,16 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          Özellikle yurt dışı turlarında verilerin yurt dışı konaklama/ulaşım sağlayıcılarına aktarımı ve özel nitelikli sağlık/tercih verilerinin işlenmesi için alınan rıza beyanıdır.
+          <p class="legal-p">Bu metin, sözleşmenin ifası veya kanuni yükümlülük dışında kalan işlemler içindir. Rezervasyon ve U-ETDS için zorunlu veriler açık rızaya bağlı değildir.</p>
+          <h4 class="legal-h">Açık rıza konuları</h4>
+          <ul class="legal-list">
+            <li>Yurt dışı turlarında kimlik ve iletişim verilerinin yurt dışındaki otel, transfer ve acente tedarikçilerine aktarılması.</li>
+            <li>Sağlık, beslenme, engellilik veya özel yardım ihtiyacına ilişkin beyanların turun güvenli ifası için işlenmesi (yalnızca sizin bildirmeniz hâlinde).</li>
+            <li>Tur esnasında çekilen genel fotoğraf/video karelerinde görünme ve bunların Acentanın tanıtım hesaplarında kullanılması. Bu rıza verilmezse mümkün olduğunca kadraj dışında tutulursunuz; grup fotoğrafından tamamen çıkarma her durumda mümkün olmayabilir.</li>
+            <li>Kampanya, yeni tur ve fırsatların telefon / WhatsApp / SMS ile iletilmesi (ayrıca ETK izni).</li>
+          </ul>
+          <p class="legal-p">Açık rızanız özgür iradenize bağlıdır; vermemeniz zorunlu rezervasyon hizmetinden yoksun bırakılmaz. Rızayı 0850 532 80 00 hattından veya yazılı başvurunuzla her zaman geri alabilirsiniz. Geri alma, önceki hukuka uygun işlemleri etkilemez.</p>
+          <p class="legal-note">Tur kaydı ve ödeme sırasında özel veri veya pazarlama izni verdiyseniz bu metin o beyanınızın kaydıdır.</p>
         </div>
       </div>
 
@@ -347,24 +490,40 @@
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          Platformumuzda kullanıcı deneyimini iyileştirmek, zorunlu ve analitik çerezlerin işleniş biçimini açıklamak ve tercihlerinizi yönetebilmeniz amacıyla hazırlanmıştır.
+          <p class="legal-p">Öz Üstünbus Turizm dijital paneli ve sözleşme sayfaları temel olarak statik sayfalardır. Tarayıcınızda oturumun çalışması, dil/yerel saat gösterimi ve güvenlik için zorunlu teknik çerezler veya yerel depolama kullanılabilir.</p>
+          <h4 class="legal-h">Kullanılan veri</h4>
+          <ul class="legal-list">
+            <li>Zorunlu: sayfa oturumu, güvenlik ve formların çalışması.</li>
+            <li>İşlevsel: tercih ettiğiniz cihaz/ekran ayarları.</li>
+            <li>Harita ve rota: mesafe ölçer kullanılırken Google hizmetleri üçüncü taraf çerez / bağlantı çalıştırabilir.</li>
+          </ul>
+          <p class="legal-p">Reklam amaçlı profilleme çerezi kullanılmaz. Tarayıcı ayarlarından çerezleri silebilir veya engelleyebilirsiniz; bu durumda bazı harita ve kopyalama özellikleri çalışmayabilir. Google’ın kendi politikası ayrıca geçerlidir.</p>
+          <p class="legal-note">Bu politika, 16 Ekim 2026 itibarıyla panel ve sozlesme.html sayfaları için geçerlidir.</p>
         </div>
       </div>
 
       <div class="contract-item" id="item-8" onclick="toggleContract(this)">
         <div class="contract-header">
-          <span class="contract-title-text">📩 Ticari Elektronik İleti Onayı (ETK & İYS)</span>
+          <span class="contract-title-text">📩 Ticari Elektronik İleti Onayı (ETK &amp; İYS)</span>
           <span class="toggle-icon">▼</span>
         </div>
         <div class="contract-body">
-          SMS veya e-posta yoluyla sunulan kampanya, duyuru ve bülten bildirimlerine ilişkin izin metnidir. Müşteriler diledikleri an İYS üzerinden izinlerini geri çekme hakkına sahiptir.
+          <p class="legal-p">6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun ve Ticari İletişim ve Ticari Elektronik İletiler Hakkında Yönetmelik uyarınca:</p>
+          <p class="legal-p">Hizmet sağlayıcı: Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi (Öz Üstünbus Turizm), VKN 6620819592, Şehitler Tepesi Mahallesi 3631 Sokak Kılınç Apartmanı No:5A Tarsus/Mersin.</p>
+          <h4 class="legal-h">İzin kapsamı</h4>
+          <p class="legal-p">Onay vermeniz hâlinde; yeni tur, kampanya, fiyat, taksit ve duyuru içerikli ticari elektronik iletiler SMS, telefon araması, e-posta ve WhatsApp (0850 532 80 00) kanallarından gönderilebilir.</p>
+          <h4 class="legal-h">Onayın kapsamı dışında kalanlar</h4>
+          <p class="legal-p">Rezervasyon teyidi, dekont, kalkış saati, durak, iptal ve yasal bildirimler ticari reklam sayılmaz; hizmetin ifası için gönderilir ve bu onaydan bağımsızdır.</p>
+          <h4 class="legal-h">Reddetme ve İYS</h4>
+          <p class="legal-p">İzni dilediğiniz an İleti Yönetim Sistemi (iys.org.tr), “RET” yazarak mesaj yanıtı veya 0850 532 80 00 hattı üzerinden geri alabilirsiniz. Red sonrası ticari iletiler makul süre içinde durdurulur.</p>
         </div>
       </div>
     </div>
 
     <footer class="footer">
       Sistem Saati: <span id="current-time"></span><br>
-      Öz Üstüner Turizm Seyahat Acentası — Tüm Hakları Saklıdır.
+      Öz Üstüner Turizm Taşımacılık Gayrimenkul Danışmanlığı Tarım Akaryakıt Sanayi ve Ticaret Limited Şirketi — Öz Üstünbus Turizm<br>
+      VKN: 6620819592 · Tarsus/Mersin — Tüm hakları saklıdır.
     </footer>
   </main>
 
