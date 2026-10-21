@@ -3,876 +3,387 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Üstünbus - Resmi Güzergah Durak & Şoför Listesi</title>
-    <!-- SheetJS (Excel Okuma) -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <!-- docx.js (Client-side Word Belgesi Oluşturma) -->
-    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
-    <!-- FileSaver (Dosya İndirme) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    
+    <title>YKES - Canlı Tur Kayıt Test Paneli</title>
     <style>
         :root {
-            --primary: #1e40af;
+            --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --success: #16a34a;
-            --warning: #d97706;
+            --danger: #dc2626;
+            --warning: #f59e0b;
             --dark: #0f172a;
-            --bg: #f8fafc;
             --border: #cbd5e1;
+            --bg: #f8fafc;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f1f5f9;
-            color: #334155;
-            padding: 25px 15px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
             margin: 0;
+            padding: 30px 15px;
+            color: #334155;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 620px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-            padding: 28px;
-            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            border: 1px solid #e2e8f0;
         }
 
-        h1 {
-            color: var(--dark);
-            margin: 0 0 8px 0;
-            font-size: 22px;
+        .header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--dark);
+            font-size: 20px;
+            letter-spacing: -0.3px;
+        }
+
+        .badge-live {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #bbf7d0;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-live::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            background-color: #16a34a;
+            border-radius: 50%;
+            display: inline-block;
         }
 
         .desc {
+            font-size: 13px;
             color: #64748b;
-            font-size: 13.5px;
-            line-height: 1.5;
+            margin-top: -6px;
             margin-bottom: 20px;
+            line-height: 1.45;
         }
 
-        .upload-card {
-            background: var(--bg);
-            border: 2px dashed #93c5fd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+        label {
+            display: block;
+            margin-top: 13px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #334155;
         }
 
-        .form-row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        input[type="file"] {
-            flex: 2;
-            min-width: 250px;
-            padding: 9px 12px;
-            background: #ffffff;
+        input, select {
+            width: 100%;
+            padding: 11px 13px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 13.5px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 700;
+            border-radius: 7px;
             font-size: 14px;
-            cursor: pointer;
-            border: none;
+            color: #1e293b;
+            background: #ffffff;
             transition: all 0.2s ease;
         }
 
-        .btn-parse { background: var(--primary); color: #fff; }
-        .btn-parse:hover { background: var(--primary-hover); }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
 
-        .btn-docx { background: #0284c7; color: #fff; }
-        .btn-docx:hover { background: #0369a1; }
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 560px) {
+            .row-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-submit {
+            width: 100%;
+            margin-top: 22px;
+            padding: 13px 20px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         .status-box {
             display: none;
-            padding: 12px 16px;
+            margin-top: 18px;
+            padding: 14px 16px;
             border-radius: 8px;
             font-size: 13.5px;
             line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .status-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
-        .status-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .status-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-        .status-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-
-        .tur-ozet-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 14px 18px;
-            margin-bottom: 20px;
-        }
-
-        .arac-secici-kutu {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 13px;
             font-weight: 600;
+            word-break: break-word;
         }
 
-        .arac-secici-kutu select {
-            border: none;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--primary);
-            background: transparent;
-            cursor: pointer;
-            outline: none;
+        .status-loading {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
         }
 
-        .sehir-bolumu {
-            margin-bottom: 25px;
-            background: #fafafa;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 16px;
+        .status-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
         }
 
-        .sehir-baslik {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--dark);
-            margin: 0 0 12px 0;
-            padding-bottom: 6px;
-            border-bottom: 2px solid var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .status-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
         }
 
-        .durak-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 14px;
+        .spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.65s linear infinite;
         }
 
-        .durak-karti {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 14px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            border-left: 4px solid var(--primary);
-        }
-
-        .durak-karti-baslik {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13.5px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-
-        .durak-sayac {
-            font-size: 11.5px;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 2px 7px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .yolcu-listesi {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 12.5px;
-        }
-
-        .yolcu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid #f8fafc;
-        }
-        .yolcu-item:last-child { border-bottom: none; }
-
-        .koltuk-no {
-            font-weight: 700;
-            color: #64748b;
-            min-width: 32px;
-        }
-
-        .yolcu-ad {
-            flex: 1;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0 6px;
-        }
-
-        .yolcu-tel {
-            font-family: monospace;
-            font-size: 11.5px;
-            color: #64748b;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚌 Üstünbus Resmi Rota ve Durak Ayrıştırıcı</h1>
+    <div class="header">
+        <h2>🚌 YKES - Tur Kayıt Sistemi</h2>
+        <span class="badge-live">Canlı Bağlantı</span>
+    </div>
+
     <p class="desc">
-        Güzergah sırasına göre <strong>Mersin Vipol'den başlar</strong>, Tarsus duraklarını geçer ve <strong>Adana Duygu Kafe'de son bulur</strong>. Excel'deki koltuk planını okuyarak her ili kendi altında gruplar ve şoför için <strong>tek sayfalık A4 Word (.docx)</strong> çıktısı üretir.
+        Bu form Google Drive'daki izinli klasörünüzü otomatik sorgular. Girilen yolcu verilerini AES/XOR şifrelemesiyle paketleyerek aracı köprü üzerinden doğrudan hedef tur dosyasına kaydeder.
     </p>
 
-    <div class="upload-card">
-        <label for="excelInput" style="font-weight: 700; font-size: 13.5px; color: #334155; display: block; margin-bottom: 8px;">
-            Tur Excel Dosyasını Yükleyin (.xlsx / .xls):
-        </label>
-        <div class="form-row">
-            <input type="file" id="excelInput" accept=".xlsx,.xls">
-            <button type="button" class="btn-parse" onclick="dosyayiIsle()">🔍 Listeyi Ayrıştır</button>
-            <button type="button" id="btnDocxIndir" class="btn-docx" style="display:none;" onclick="resmiRotaDocxOlustur()">📄 Tek Sayfa DOCX İndir</button>
+    <!-- 1. HEDEF TUR DOSYASI -->
+    <label for="turSecim">📁 Klasördeki Tur Dosyası:</label>
+    <select id="turSecim">
+        <option value="">⏳ Klasördeki turlar taranıyor, lütfen bekleyin...</option>
+    </select>
+
+    <!-- 2. KOLTUK VE TC -->
+    <div class="row-2">
+        <div>
+            <label for="koltukNo">Koltuk No:</label>
+            <input type="text" id="koltukNo" placeholder="Örn: 12" value="12">
+        </div>
+        <div>
+            <label for="tcKimlik">T.C. Kimlik / Pasaport No:</label>
+            <input type="text" id="tcKimlik" placeholder="11 Haneli T.C." maxlength="11" value="12345678901">
         </div>
     </div>
 
+    <!-- 3. AD SOYAD VE TELEFON -->
+    <div class="row-2">
+        <div>
+            <label for="adSoyad">Yolcu Adı Soyadı:</label>
+            <input type="text" id="adSoyad" placeholder="Örn: Ahmet Yılmaz" value="Ahmet Yılmaz">
+        </div>
+        <div>
+            <label for="telefon">Telefon Numarası:</label>
+            <input type="text" id="telefon" placeholder="Örn: 05321234567" value="05321234567">
+        </div>
+    </div>
+
+    <!-- 4. ÖDENEN VE KALAN TUTAR -->
+    <div class="row-2">
+        <div>
+            <label for="odenen">Ödenen Kapora (₺):</label>
+            <input type="number" id="odenen" placeholder="Örn: 1500" value="1500">
+        </div>
+        <div>
+            <label for="kalanBorc">Kalan Borç (₺):</label>
+            <input type="number" id="kalanBorc" placeholder="Örn: 1000" value="1000">
+        </div>
+    </div>
+
+    <!-- 5. BİNİŞ DURAĞI -->
+    <label for="binisDuragi">Biniş Durağı:</label>
+    <select id="binisDuragi">
+        <optgroup label="Mersin Durakları">
+            <option value="Mersin - Vipol">Mersin - Vipol</option>
+            <option value="Mersin - Forum">Mersin - Forum</option>
+            <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
+        </optgroup>
+        <optgroup label="Tarsus Durakları">
+            <option value="Tarsus - Ofis" selected>Tarsus - Şehitler Tepesi Ofis</option>
+            <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
+            <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
+            <option value="Tarsus - Kleopatra">Tarsus - Kleopatra Kapısı</option>
+        </optgroup>
+        <optgroup label="Adana Durakları">
+            <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
+        </optgroup>
+    </select>
+
+    <!-- 6. AÇIKLAMA / NOT -->
+    <label for="notAciklama">Özel İstek / Not:</label>
+    <input type="text" id="notAciklama" placeholder="Örn: Ön koltuk talebi var" value="Web Panel Canlı Test Kaydı">
+
+    <!-- GÖNDER BUTONU -->
+    <button type="button" class="btn-submit" id="btnGonder" onclick="kayitGonder()">
+        <span>🚀 Kriptola ve Tur Dosyasına Yaz</span>
+    </button>
+
+    <!-- DURUM BİLDİRİM KUTUSU -->
     <div id="durumKutusu" class="status-box"></div>
-
-    <div id="sonucAlani" style="display: none;">
-        <div class="tur-ozet-bar">
-            <div>
-                <strong id="ozetTurAdi" style="font-size: 16px; color: var(--dark);">-</strong>
-                <div style="font-size: 12.5px; color: #64748b; margin-top: 4px;">
-                    <span id="ozetHareket">-</span> | 
-                    Toplam Biniş Yapacak Yolcu: <strong id="ozetToplamYolcu" style="color:var(--success);">0 Kişi</strong>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <div class="arac-secici-kutu" id="kutuAracSecici" style="display:none;">
-                    <span>🚌 Araç Planı:</span>
-                    <select id="selectAracSayfa" onchange="aracSayfasiDegisti()"></select>
-                </div>
-                <button type="button" class="btn-docx" onclick="resmiRotaDocxOlustur()">📄 Şoför Listesini DOCX İndir</button>
-            </div>
-        </div>
-
-        <!-- İllere Göre Ayrıştırılmış Durak Konteyneri -->
-        <div id="sehirlerKapsayici"></div>
-    </div>
 </div>
 
 <script>
-// --- RESMİ GÜZERGAH DURAKLARI SIRALAMASI VE EŞLEŞTİRME HARİTASI ---
-const RESMI_ROTA_DURAKLARI = [
-    // 1. MERSİN
-    { sehir: "MERSİN", kod: "mersin_vipol", ad: "Mersin - Vipol", anahtarlar: ["VIPOL", "VİPOL"] },
-    { sehir: "MERSİN", kod: "mersin_forum", ad: "Mersin - Forum", anahtarlar: ["FORUM", "FORM"] },
-    { sehir: "MERSİN", kod: "mersin_eski_devlet", ad: "Mersin - Eski Devlet Hastanesi", anahtarlar: ["ESKI DEVLET", "ESKİ DEVLET", "DEVLET HASTANE", "HASTANE"] },
+    // Canlı Google Apps Script Web App URL'niz:
+    const KOPRU_API_URL = "https://script.google.com/macros/s/AKfycbw6u2YRyvbRbBwt84ovzi5oSBypsoHvGmsdnukwyVa4Nud5CRXsYltb9XgZ0ODfvMyM/exec";
     
-    // 2. TARSUS
-    { sehir: "TARSUS", kod: "tarsus_ofis", ad: "Tarsus - Ofis", anahtarlar: ["OFIS", "OFİS", "SEHITLER TEPESI", "ŞEHİTLER TEPESİ"] },
-    { sehir: "TARSUS", kod: "tarsus_madame_home", ad: "Tarsus - Madame Home", anahtarlar: ["MADAME", "MADAM", "HOME", "VATAN", "ESKI VATAN", "ESKİ VATAN"] },
-    { sehir: "TARSUS", kod: "tarsus_cengiz_topel", ad: "Tarsus - Cengiz Topel", anahtarlar: ["CENGIZ TOPEL", "CENGİZ TOPEL", "CENGIZ", "CENGİZ", "TOPEL"] },
-    { sehir: "TARSUS", kod: "tarsus_kleopatra", ad: "Tarsus - Kleopatra", anahtarlar: ["KLEOPATRA", "KLOPATRA", "KLEO"] },
-    { sehir: "TARSUS", kod: "tarsus_shell", ad: "Tarsus - Shell", anahtarlar: ["SHELL", "SEL", "ŞHEL"] },
-    { sehir: "TARSUS", kod: "tarsus_gemi", ad: "Tarsus - Gemi", anahtarlar: ["GEMI", "GEMİ", "NUSRET MAYIN", "NUSRET"] },
-    
-    // 3. ADANA
-    { sehir: "ADANA", kod: "adana_duygu_kafe", ad: "Adana - Duygu Kafe", anahtarlar: ["DUYGU", "DUYGU KAFE", "BARAJYOLU", "BARAJ YOLU"] }
-];
+    // Backend ile birebir örtüşen gizli simetrik anahtar:
+    const GIZLI_ANAHTAR = "UstunbusSecretKey2026";
 
-let aktifWorkbook = null;
-let dosyaAdiTemiz = "";
-let tespitEdilenAracSayfalari = [];
-let aktifAyrismisVeri = null;
-
-function metinNormallestir(str) {
-    return String(str || "")
-        .toLocaleUpperCase('tr-TR')
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, ' ')
-        .trim();
-}
-
-function telefonTemizle(hamTel) {
-    if (!hamTel) return "";
-    let t = String(hamTel).replace(/\.0$/, '').replace(/\s+/g, '').replace(/[()\-]/g, '');
-    return (t && t !== '-' && t.length >= 7) ? t : "";
-}
-
-/**
- * Yazılan metni resmi güzergah duraklarından biriyle akıllıca eşleştirir
- */
-function durakEslestir(hamDurak) {
-    if (!hamDurak) return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
-    let d = String(hamDurak).trim();
-    
-    // Telefon numarası girilmişse durak sayma
-    if (/^\d{10,11}$/.test(d.replace(/\D/g, ''))) return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
-    
-    const upper = metinNormallestir(d);
-
-    for (const rota of RESMI_ROTA_DURAKLARI) {
-        for (const key of rota.anahtarlar) {
-            if (upper.includes(key)) {
-                return { sehir: rota.sehir, ad: rota.ad, kod: rota.kod };
-            }
+    // Tarayıcı tarafı XOR + UTF8 + Base64 Kriptolama Motoru
+    function metniSifrele(acikMetin, anahtar) {
+        if (!acikMetin) return "";
+        const utf8Metin = unescape(encodeURIComponent(acikMetin));
+        let xorlanmis = "";
+        for (let i = 0; i < utf8Metin.length; i++) {
+            xorlanmis += String.fromCharCode(utf8Metin.charCodeAt(i) ^ anahtar.charCodeAt(i % anahtar.length));
         }
+        return btoa(xorlanmis);
     }
 
-    return { sehir: "DİĞER", ad: "Belirtilmemiş / Diğer" };
-}
-
-function dosyayiIsle() {
-    const input = document.getElementById('excelInput');
-    const durum = document.getElementById('durumKutusu');
-    const sonucAlani = document.getElementById('sonucAlani');
-    const btnDocx = document.getElementById('btnDocxIndir');
-
-    if (!input.files || input.files.length === 0) {
-        alert("Lütfen önce bir Excel dosyası seçin.");
-        return;
+    // Durum kutusunu dinamik güncelleyen yardımcı fonksiyon
+    function bildirimGoster(mesaj, tip) {
+        const durum = document.getElementById("durumKutusu");
+        durum.style.display = "block";
+        durum.className = "status-box status-" + tip;
+        durum.innerHTML = mesaj;
     }
 
-    const file = input.files[0];
-    dosyaAdiTemiz = file.name.replace(/\.[^/.]+$/, "");
-    const reader = new FileReader();
-
-    durum.className = "status-box status-info";
-    durum.style.display = "block";
-    durum.innerHTML = "⏳ Excel taranıyor, duraklar resmi güzergaha göre (Mersin -> Tarsus -> Adana) tasnif ediliyor...";
-    sonucAlani.style.display = "none";
-    btnDocx.style.display = "none";
-
-    reader.onload = function(e) {
+    // Sayfa açıldığında Drive klasöründeki turları çeker
+    window.onload = async function() {
+        const select = document.getElementById("turSecim");
         try {
-            const data = new Uint8Array(e.target.result);
-            aktifWorkbook = XLSX.read(data, { type: 'array', cellDates: true, raw: false });
+            const res = await fetch(KOPRU_API_URL);
+            const data = await res.json();
 
-            // Araç koltuk sayfalarını tespit et
-            tespitEdilenAracSayfalari = aktifWorkbook.SheetNames.filter(name => {
-                const n = metinNormallestir(name);
-                return !n.includes('ÖDEME') && !n.includes('ODEME') && 
-                       !n.includes('UEDTS') && !n.includes('UETDS') && !n.includes('U-ETDS') &&
-                       !n.includes('DURAK');
-            });
-
-            if (tespitEdilenAracSayfalari.length === 0) {
-                tespitEdilenAracSayfalari = [aktifWorkbook.SheetNames[0]];
+            if (data.success && data.turlar && data.turlar.length > 0) {
+                select.innerHTML = "";
+                data.turlar.forEach(tur => {
+                    const opt = document.createElement("option");
+                    opt.value = tur.dosyaId;
+                    opt.textContent = "📄 " + tur.dosyaAdi;
+                    select.appendChild(opt);
+                });
+            } else if (data.success && (!data.turlar || data.turlar.length === 0)) {
+                select.innerHTML = "<option value=''>⚠️ Belirtilen klasörde Excel/E-Tablo bulunamadı.</option>";
+            } else {
+                select.innerHTML = `<option value=''>❌ Klasör taranamadı: ${data.error || 'Bilinmeyen hata'}</option>`;
             }
-
-            const selectEl = document.getElementById('selectAracSayfa');
-            const kutuAracSecici = document.getElementById('kutuAracSecici');
-            selectEl.innerHTML = '';
-            
-            tespitEdilenAracSayfalari.forEach(sName => {
-                const opt = document.createElement('option');
-                opt.value = sName;
-                opt.textContent = sName;
-                selectEl.appendChild(opt);
-            });
-
-            kutuAracSecici.style.display = (tespitEdilenAracSayfalari.length > 1) ? 'inline-flex' : 'none';
-
-            // İlk araç sayfasını işle
-            sayfayiAyristir(tespitEdilenAracSayfalari[0]);
-
-            if (aktifAyrismisVeri.toplamYolcu === 0) {
-                durum.className = "status-box status-warning";
-                durum.innerHTML = `⚠️ <strong>Bilgi:</strong> "<em>${aktifAyrismisVeri.aktifSayfa}</em>" oturma şablonu algılandı fakat içerisinde biniş yapacak yolcu kaydı bulunamadı.`;
-                sonucAlani.style.display = "none";
-                btnDocx.style.display = "none";
-                return;
-            }
-
-            durum.className = "status-box status-success";
-            durum.innerHTML = `✅ <strong>Ayrıştırma Başarılı:</strong> "<em>${aktifAyrismisVeri.aktifSayfa}</em>" planından toplam <strong>${aktifAyrismisVeri.toplamYolcu} yolcu</strong> rota sırasına göre il il tasnif edildi.`;
-            sonucAlani.style.display = "block";
-            btnDocx.style.display = "inline-block";
-
         } catch (err) {
-            console.error(err);
-            durum.className = "status-box status-error";
-            durum.innerHTML = `❌ <strong>Hata:</strong> ${err.message || 'Excel dosyası işlenirken bir sorun oluştu.'}`;
+            console.error("Tur listesi çekme hatası:", err);
+            select.innerHTML = "<option value=''>❌ API bağlantı hatası! URL erişimini kontrol edin.</option>";
         }
     };
 
-    reader.readAsArrayBuffer(file);
-}
+    // Formu şifreleyip Apps Script'e POST eden ana işlem fonksiyonu
+    async function kayitGonder() {
+        const btn = document.getElementById("btnGonder");
+        const dosyaId = document.getElementById("turSecim").value;
 
-function aracSayfasiDegisti() {
-    const secilenSayfa = document.getElementById('selectAracSayfa').value;
-    sayfayiAyristir(secilenSayfa);
-}
-
-function sayfayiAyristir(sayfaAdi) {
-    if (!aktifWorkbook || !aktifWorkbook.Sheets[sayfaAdi]) return;
-
-    const wsKoltuk = aktifWorkbook.Sheets[sayfaAdi];
-    const koltukSatirlari = XLSX.utils.sheet_to_json(wsKoltuk, { header: 1, defval: '' });
-
-    // Telefon Eşleştirmeleri
-    const telefonHaritasiKoltuk = {};
-    const telefonHaritasiIsim = {};
-
-    // A) ÖDEME Sayfası
-    const odemeSayfaAdi = aktifWorkbook.SheetNames.find(s => {
-        const u = metinNormallestir(s);
-        return u.includes('ÖDEME') || u.includes('ODEME');
-    });
-
-    if (odemeSayfaAdi) {
-        const wsOdeme = aktifWorkbook.Sheets[odemeSayfaAdi];
-        const odemeSatirlari = XLSX.utils.sheet_to_json(wsOdeme, { header: 1, defval: '' });
-
-        let oHeaderIdx = odemeSatirlari.findIndex(r => r.some(c => metinNormallestir(c).includes('TELEFON') || metinNormallestir(c).includes('İSİM')));
-        if (oHeaderIdx === -1) oHeaderIdx = 0;
-
-        const oHeader = odemeSatirlari[oHeaderIdx].map(c => metinNormallestir(c));
-        const telCol = oHeader.findIndex(c => c.includes('TELEFON') || c.includes('TEL'));
-        const isimCol = oHeader.findIndex(c => c.includes('İSİM') || c.includes('ISIM') || c.includes('AD'));
-
-        for (let r = oHeaderIdx + 1; r < odemeSatirlari.length; r++) {
-            const row = odemeSatirlari[r];
-            const kNo = parseInt(row[0], 10);
-            const isim = isimCol !== -1 ? metinNormallestir(row[isimCol]) : "";
-            const tel = telCol !== -1 ? telefonTemizle(row[telCol]) : "";
-
-            if (!isNaN(kNo) && tel) telefonHaritasiKoltuk[kNo] = tel;
-            if (isim && tel) telefonHaritasiIsim[isim] = tel;
-        }
-    }
-
-    // B) UEDTS / UETDS Sayfası
-    const uetdsSayfaAdi = aktifWorkbook.SheetNames.find(s => {
-        const u = metinNormallestir(s);
-        return u.includes('UEDTS') || u.includes('UETDS') || u.includes('U-ETDS');
-    });
-
-    if (uetdsSayfaAdi) {
-        const wsUetds = aktifWorkbook.Sheets[uetdsSayfaAdi];
-        const uSatirlar = XLSX.utils.sheet_to_json(wsUetds, { header: 1, defval: '' });
-        if (uSatirlar.length > 1) {
-            const uHead = uSatirlar[0].map(c => metinNormallestir(c));
-            const adC = uHead.findIndex(c => c === 'ADI' || c === 'AD');
-            const soyadC = uHead.findIndex(c => c.includes('SOYAD'));
-            const telC = uHead.findIndex(c => c.includes('TEL'));
-
-            for (let r = 1; r < uSatirlar.length; r++) {
-                const row = uSatirlar[r];
-                const tamAd = `${row[adC] || ''} ${row[soyadC] || ''}`.trim();
-                const tel = telC !== -1 ? telefonTemizle(row[telC]) : "";
-                if (tamAd && tel) telefonHaritasiIsim[metinNormallestir(tamAd)] = tel;
-            }
-        }
-    }
-
-    // Tur Üst Bilgileri
-    let turAdi = "", hareketTarihi = "", hareketSaati = "", hareketYeri = "";
-    for (let r = 0; r < Math.min(10, koltukSatirlari.length); r++) {
-        const row = koltukSatirlari[r];
-        for (let c = 0; c < row.length; c++) {
-            const val = metinNormallestir(row[c]);
-            if (val === 'TUR ADI') turAdi = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
-            if (val === 'HAREKET TARİHİ') hareketTarihi = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
-            if (val === 'HAREKET SAATİ') hareketSaati = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
-            if (val === 'HAREKET YERİ') hareketYeri = String(row[c+1] || row[c+2] || row[c+3] || '').trim();
-        }
-    }
-
-    // Başlık Satırını ve Sütunları Yakala
-    let baslikSatirNo = koltukSatirlari.findIndex(r => r.some(c => metinNormallestir(c).includes('AD SOYAD')));
-    if (baslikSatirNo === -1) baslikSatirNo = 6;
-
-    const bRow = koltukSatirlari[baslikSatirNo];
-    let koltukCol = -1;
-    let adCol = -1;
-    let durakCol = -1;
-
-    bRow.forEach((c, idx) => {
-        const t = metinNormallestir(c);
-        if (t.includes('AD SOYAD') || (t.includes('AD') && t.includes('SOYAD'))) {
-            koltukCol = idx;
-            adCol = idx + 1;
-        }
-        if (t.includes('BİNİŞ') || t.includes('BINIS') || t.includes('DURAK')) {
-            durakCol = idx;
-        }
-    });
-
-    if (koltukCol === -1) koltukCol = 6;
-    if (adCol === -1) adCol = 7;
-    if (durakCol === -1) durakCol = 11;
-
-    // Şehir ve Durak Dağılımını Hazırla
-    const sehirGruplari = {
-        "MERSİN": {},
-        "TARSUS": {},
-        "ADANA": {},
-        "DİĞER": {}
-    };
-
-    let toplamYolcu = 0;
-
-    for (let r = baslikSatirNo + 1; r < koltukSatirlari.length; r++) {
-        const row = koltukSatirlari[r];
-        const rawKoltuk = row[koltukCol];
-        const rawAd = row[adCol];
-        const rawDurak = row[durakCol];
-
-        const koltukNo = parseInt(rawKoltuk, 10);
-        const yolcuAdi = String(rawAd || '').trim();
-
-        if (!yolcuAdi || isNaN(koltukNo)) continue;
-
-        const adNorm = metinNormallestir(yolcuAdi);
-        if (['REHBER', 'ACENTA', 'ACENTE', 'KAPTAN', 'SOFOR', 'ŞOFÖR'].includes(adNorm)) continue;
-
-        const eslesme = durakEslestir(rawDurak);
-        const sehir = eslesme.sehir;
-        const durakAdi = eslesme.ad;
-
-        let tel = telefonHaritasiKoltuk[koltukNo] || telefonHaritasiIsim[adNorm] || "";
-        if (!tel && String(rawDurak).length >= 10 && !isNaN(rawDurak)) {
-            tel = telefonTemizle(rawDurak);
+        if (!dosyaId) {
+            alert("Lütfen önce listeden geçerli bir tur dosyası seçin!");
+            return;
         }
 
-        if (!sehirGruplari[sehir][durakAdi]) {
-            sehirGruplari[sehir][durakAdi] = [];
-        }
+        // Gönderim esnasında butonu ve durumu güncelle
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> <span>Şifreleniyor ve Gönderiliyor...</span>`;
+        bildirimGoster("⏳ Veri paketi XOR ile kriptolanıyor ve hedef tur dosyasına işleniyor...", "loading");
 
-        sehirGruplari[sehir][durakAdi].push({
-            koltukNo,
-            adSoyad: yolcuAdi,
-            telefon: tel
-        });
+        const paket = {
+            dosyaId: dosyaId,
+            koltukNo: document.getElementById("koltukNo").value.trim(),
+            tcKimlik: document.getElementById("tcKimlik").value.trim(),
+            adSoyad: document.getElementById("adSoyad").value.trim(),
+            telefon: document.getElementById("telefon").value.trim(),
+            odenen: document.getElementById("odenen").value,
+            kalanBorc: document.getElementById("kalanBorc").value,
+            binisDuragi: document.getElementById("binisDuragi").value,
+            not: document.getElementById("notAciklama").value.trim()
+        };
 
-        toplamYolcu++;
-    }
+        // Veriyi anında kriptola (Ağ trafiğinde salt metinler görünmez)
+        const sifreliPayload = metniSifrele(JSON.stringify(paket), GIZLI_ANAHTAR);
 
-    aktifAyrismisVeri = {
-        turAdi: turAdi || dosyaAdiTemiz,
-        aktifSayfa: sayfaAdi,
-        hareketTarihi,
-        hareketSaati,
-        hareketYeri,
-        toplamYolcu,
-        sehirGruplari
-    };
-
-    ekranaCiz();
-}
-
-function ekranaCiz() {
-    if (!aktifAyrismisVeri) return;
-
-    document.getElementById('ozetTurAdi').innerText = `🚌 ${aktifAyrismisVeri.turAdi} (${aktifAyrismisVeri.aktifSayfa})`;
-    document.getElementById('ozetHareket').innerText = `Kalkış: ${aktifAyrismisVeri.hareketTarihi || '-'} ${aktifAyrismisVeri.hareketSaati ? '- ' + aktifAyrismisVeri.hareketSaati : ''} [${aktifAyrismisVeri.hareketYeri || 'Tarsus'}]`;
-    document.getElementById('ozetToplamYolcu').innerText = `${aktifAyrismisVeri.toplamYolcu} Kişi`;
-
-    const container = document.getElementById('sehirlerKapsayici');
-    container.innerHTML = "";
-
-    const sehirSiralamasi = ["MERSİN", "TARSUS", "ADANA", "DİĞER"];
-
-    sehirSiralamasi.forEach(sehir => {
-        const duraklarObj = aktifAyrismisVeri.sehirGruplari[sehir];
-        const durakAdlari = Object.keys(duraklarObj);
-
-        if (durakAdlari.length === 0) return;
-
-        // Toplam şehir yolcusu
-        let sehirToplamYolcu = 0;
-        durakAdlari.forEach(d => sehirToplamYolcu += duraklarObj[d].length);
-
-        const sehirDiv = document.createElement('div');
-        sehirDiv.className = "sehir-bolumu";
-
-        let sehirIkon = "📍";
-        if (sehir === "MERSİN") sehirIkon = "🌊 MERSİN DURAKLARI";
-        else if (sehir === "TARSUS") sehirIkon = "🏛️ TARSUS DURAKLARI";
-        else if (sehir === "ADANA") sehirIkon = "🏙️ ADANA DURAKLARI";
-        else sehirIkon = "❓ DİĞER / BELİRTİLMEMİŞ NOKTALAR";
-
-        sehirDiv.innerHTML = `
-            <div class="sehir-baslik">
-                <span>${sehirIkon}</span>
-                <span style="font-size:13px; color:#1e40af; font-weight:700;">Toplam: ${sehirToplamYolcu} Yolcu</span>
-            </div>
-            <div class="durak-grid" id="grid_${sehir}"></div>
-        `;
-
-        container.appendChild(sehirDiv);
-        const gridEl = sehirDiv.querySelector(`#grid_${sehir}`);
-
-        // Durakları resmi güzergah sırasına göre diz
-        durakAdlari.sort((a, b) => {
-            const idxA = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === a);
-            const idxB = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            return a.localeCompare(b, 'tr');
-        });
-
-        durakAdlari.forEach(durak => {
-            const yolcular = duraklarObj[durak];
-            const card = document.createElement('div');
-            card.className = "durak-karti";
-
-            let listeHtml = yolcular.map(y => `
-                <li class="yolcu-item">
-                    <span class="koltuk-no">No:${y.koltukNo}</span>
-                    <span class="yolcu-ad">${y.adSoyad}</span>
-                    <span class="yolcu-tel">${y.telefon || '-'}</span>
-                </li>
-            `).join('');
-
-            card.innerHTML = `
-                <div class="durak-karti-baslik">
-                    <span>🚏 ${durak}</span>
-                    <span class="durak-sayac">${yolcular.length} Yolcu</span>
-                </div>
-                <ul class="yolcu-listesi">${listeHtml}</ul>
-            `;
-            gridEl.appendChild(card);
-        });
-    });
-}
-
-/**
- * Resmi güzergaha göre MERSİN, TARSUS ve ADANA başlıklarıyla
- * tek sayfalık kompakt Word (.docx) çıktısı oluşturur.
- */
-async function resmiRotaDocxOlustur() {
-    if (!aktifAyrismisVeri || aktifAyrismisVeri.toplamYolcu === 0) return;
-
-    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } = docx;
-    const { turAdi, hareketTarihi, hareketSaati, hareketYeri, toplamYolcu, sehirGruplari, aktifSayfa } = aktifAyrismisVeri;
-
-    // Kapasiteye Göre Akıllı Punto & Kenar Boşluğu
-    let yaziBoyutu = 13.5;
-    let durakBaslikBoyutu = 15;
-    let sehirBaslikBoyutu = 17;
-    let boslukOnce = 40;
-    let sayfaMargin = 320;
-
-    if (toplamYolcu <= 18) {
-        yaziBoyutu = 16;
-        durakBaslikBoyutu = 18;
-        sehirBaslikBoyutu = 20;
-        boslukOnce = 80;
-        sayfaMargin = 450;
-    } else if (toplamYolcu >= 46) {
-        yaziBoyutu = 12;
-        durakBaslikBoyutu = 14;
-        sehirBaslikBoyutu = 15;
-        boslukOnce = 25;
-        sayfaMargin = 280;
-    }
-
-    // Durakları resmi güzergah sırasına göre sıralı bir dizi haline getir
-    const siraliDurakKoleksiyonu = [];
-    const sehirSirasi = ["MERSİN", "TARSUS", "ADANA", "DİĞER"];
-
-    sehirSirasi.forEach(sehir => {
-        const duraklarObj = sehirGruplari[sehir];
-        const durakAdlari = Object.keys(duraklarObj);
-
-        if (durakAdlari.length === 0) return;
-
-        durakAdlari.sort((a, b) => {
-            const idxA = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === a);
-            const idxB = RESMI_ROTA_DURAKLARI.findIndex(r => r.ad === b);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            return a.localeCompare(b, 'tr');
-        });
-
-        durakAdlari.forEach(durakAdi => {
-            siraliDurakKoleksiyonu.push({
-                sehir,
-                durakAdi,
-                yolcular: duraklarObj[durakAdi]
-            });
-        });
-    });
-
-    // İki sütuna dengeli dağıt (Sol Sütun: Mersin + Tarsus başı, Sağ Sütun: Tarsus kalanı + Adana)
-    const solBlok = [];
-    const sagBlok = [];
-    let solAgirlik = 0, sagAgirlik = 0;
-
-    siraliDurakKoleksiyonu.forEach(item => {
-        const agirlik = item.yolcular.length + 2;
-        if (solAgirlik <= sagAgirlik) {
-            solBlok.push(item);
-            solAgirlik += agirlik;
-        } else {
-            sagBlok.push(item);
-            sagAgirlik += agirlik;
-        }
-    });
-
-    function sutunIcerigiUret(blokDizisi) {
-        const paragraflar = [];
-        let sonSehir = "";
-
-        blokDizisi.forEach(item => {
-            // Şehir değiştiğinde Şehir Başlığı bas
-            if (item.sehir !== sonSehir) {
-                sonSehir = item.sehir;
-                let sehirBaslikText = `📍 ${item.sehir} DURAKLARI`;
-                if (item.sehir === "DİĞER") sehirBaslikText = `❓ DİĞER / BELİRTİLMEMİŞ DURAKLAR`;
-
-                paragraflar.push(
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: sehirBaslikText, bold: true, size: sehirBaslikBoyutu, color: "0f172a" })
-                        ],
-                        spacing: { before: boslukOnce + 15, after: 10 }
-                    })
-                );
-            }
-
-            // Durak Başlığı
-            paragraflar.push(
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: `🚏 ${item.durakAdi} `, bold: true, size: durakBaslikBoyutu, color: "1e40af" }),
-                        new TextRun({ text: `(${item.yolcular.length} Yolcu)`, bold: true, size: durakBaslikBoyutu - 2, color: "0284c7" })
-                    ],
-                    spacing: { before: boslukOnce, after: 10 }
-                })
-            );
-
-            // Tablo Satırları
-            const tableRows = [
-                new TableRow({
-                    children: [
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "K.", bold: true, size: yaziBoyutu })] })], width: { size: 10, type: WidthType.PERCENTAGE } }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "YOLCU ADI", bold: true, size: yaziBoyutu })] })], width: { size: 55, type: WidthType.PERCENTAGE } }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "TELEFON", bold: true, size: yaziBoyutu })] })], width: { size: 35, type: WidthType.PERCENTAGE } }),
-                    ]
-                })
-            ];
-
-            item.yolcular.forEach(y => {
-                tableRows.push(
-                    new TableRow({
-                        children: [
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(y.koltukNo), size: yaziBoyutu, bold: true })] })] }),
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: y.adSoyad, size: yaziBoyutu })] })] }),
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: y.telefon || "-", size: yaziBoyutu - 1 })] })] }),
-                        ]
-                    })
-                );
+        try {
+            const res = await fetch(KOPRU_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ payload: sifreliPayload })
             });
 
-            paragraflar.push(
-                new Table({
-                    rows: tableRows,
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: {
-                        top: { style: BorderStyle.SINGLE, size: 1, color: "cbd5e1" },
-                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "cbd5e1" },
-                        left: { style: BorderStyle.NONE },
-                        right: { style: BorderStyle.NONE },
-                        insideHorizontal: { style: BorderStyle.DOTTED, size: 1, color: "e2e8f0" },
-                        insideVertical: { style: BorderStyle.NONE },
-                    }
-                })
-            );
+            const sonuc = await res.json();
 
-            paragraflar.push(new Paragraph({ text: "", spacing: { after: 15 } }));
-        });
-
-        return paragraflar;
+            if (sonuc.success) {
+                bildirimGoster(`✅ <strong>Harika:</strong> ${sonuc.message}`, "success");
+            } else {
+                bildirimGoster(`❌ <strong>Hata:</strong> ${sonuc.error}`, "error");
+            }
+        } catch (error) {
+            bildirimGoster(`❌ <strong>İletişim Hatası:</strong> ${error.message}`, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<span>🚀 Kriptola ve Tur Dosyasına Yaz</span>`;
+        }
     }
-
-    const anaTablo = new Table({
-        rows: [
-            new TableRow({
-                children: [
-                    new TableCell({
-                        children: sutunIcerigiUret(solBlok),
-                        width: { size: 50, type: WidthType.PERCENTAGE },
-                        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
-                    }),
-                    new TableCell({
-                        children: sutunIcerigiUret(sagBlok),
-                        width: { size: 50, type: WidthType.PERCENTAGE },
-                        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
-                    })
-                ]
-            })
-        ],
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE } }
-    });
-
-    const doc = new Document({
-        sections: [{
-            properties: {
-                page: {
-                    margin: { top: sayfaMargin, bottom: sayfaMargin, left: sayfaMargin, right: sayfaMargin }
-                }
-            },
-            children: [
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: "ÜSTÜNBUS TURİZM - RESMİ GÜZERGAH BİNİŞ VE DURAK LİSTESİ", bold: true, size: 18, color: "0f172a" })
-                    ],
-                    alignment: AlignmentType.CENTER,
-                    spacing: { after: 20 }
-                }),
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: `Tur: ${turAdi} (${aktifSayfa})  |  `, bold: true, size: 13 }),
-                        new TextRun({ text: `Tarih: ${hareketTarihi} ${hareketSaati}  |  `, size: 13 }),
-                        new TextRun({ text: `Güzergah: Mersin ➔ Tarsus ➔ Adana  |  `, size: 13 }),
-                        new TextRun({ text: `Yolcu: ${toplamYolcu}`, bold: true, color: "16a34a", size: 13 })
-                    ],
-                    alignment: AlignmentType.CENTER,
-                    spacing: { after: 50 }
-                }),
-                anaTablo,
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: "* Lütfen misafirleri yalnızca teyit edilen durak noktalarından alınız. İyi yolculuklar dileriz!", italics: true, size: 11, color: "64748b" })
-                    ],
-                    alignment: AlignmentType.CENTER,
-                    spacing: { before: 35 }
-                })
-            ]
-        }]
-    });
-
-    const blob = await Packer.toBlob(doc);
-    const temizDosya = turAdi.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]/g, "_");
-    saveAs(blob, `${temizDosya}_Resmi_Durak_Listesi.docx`);
-}
 </script>
 
 </body>
