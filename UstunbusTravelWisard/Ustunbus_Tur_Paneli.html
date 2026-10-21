@@ -35,10 +35,24 @@
 </div>
 
 <div id="ykesCard" class="card" style="display:none; max-width: 1350px; margin: 0 auto 20px auto;">
-    <div class="ykes-container">
+    <div id="ykes-ykesLoginCard" class="card operator-login-card ykes-login-card">
+        <h2>🔐 YKES Giriş Ekranı</h2>
+        <p style="font-size:13px; color:#64748b; margin-top:-10px;">Yolcu kaydetme sistemine erişmek için YKES güvenlik şifrenizi girin.</p>
+
+        <label for="ykes-loginPassword">Şifre:</label>
+        <input type="password" id="ykes-loginPassword" autocomplete="current-password" placeholder="YKES şifresi" onkeydown="if(event.key==='Enter') ykesGirisYap()">
+
+        <button type="button" id="ykes-btnGiris" onclick="ykesGirisYap()" class="btn-orange" style="width:100%; transition: all 0.3s ease;">🔓 YKES'e Giriş Yap</button>
+        <div id="ykes-loginError" role="alert" style="display:none; margin-top:10px; padding:10px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:13px; font-weight:600;"></div>
+    </div>
+
+    <div id="ykes-ykesPanelContent" class="ykes-container" style="display:none;">
     <div class="header">
         <h2>🚌 Yolcu Kaydetme Sistemi (YKES)</h2>
-        <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:bold;">● Başarıyla Bağlandı</span>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:bold;">● Başarıyla Bağlandı</span>
+            <button type="button" class="btn-red btn-small" onclick="panelSekmesiDegistir('personel')">🔒 YKES'ten Çıkış Yap</button>
+        </div>
     </div>
 
     <!-- TUR SEÇİMİ -->

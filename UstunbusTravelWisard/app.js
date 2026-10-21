@@ -1,3 +1,32 @@
+let ykesOturumAnahtari = sessionStorage.getItem("ykes_token") || null;
+let ykesGirisDenemeNo = 0;
+
+async function ykesGirisKontrol(denenecekSifre) {
+    try {
+        const res = await fetch(`${YKES_API_BASE}/api/turlar`, {
+            headers: {
+                "Authorization": `Bearer ${denenecekSifre}`
+            }
+        });
+
+        if (res.status === 401) {
+            sessionStorage.removeItem("ykes_token");
+            ykesOturumAnahtari = null;
+            ykesGirisHatasiGoster("❌ Hatalı şifre! YKES sistemine giriş yetkiniz yok.");
+            return false;
+        }
+
+        if (!res.ok) {
+            throw new Error("Sunucuya bağlanılamadı.");
+        }
+
+        return true;
+    } catch (err) {
+        ykesGirisHatasiGoster("Bağlantı hatası: " + err.message);
+        return false;
+    }
+}
+
 /* ============================================================
    OPERATÖR ERİŞİMİ (Kullanıcı: selcukustun | Şifre: selcukustun1234)
    ============================================================ */
@@ -16,7 +45,13 @@ const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
         select.innerHTML = '<option value="">⏳ Turlar taranıyor...</option>';
 
         try {
-            const res = await fetch(`${YKES_API_BASE}/api/turlar`);
+            const res = await fetch(`${YKES_API_BASE}/api/turlar`, {
+                headers: { "Authorization": `Bearer ${ykesOturumAnahtari}` }
+            });
+            if (res.status === 401) {
+                ykesOturumuKilitle("Oturum doğrulanamadı. Lütfen tekrar giriş yapın.");
+                return;
+            }
             const data = await res.json();
             if (!data.success) throw new Error(data.hata);
 
@@ -55,7 +90,13 @@ const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
         ykesBildirimGoster("⏳ Tur ve koltuk durumu yükleniyor...", "#0369a1", "#eff6ff", "#bfdbfe");
 
         try {
-            const res = await fetch(`${YKES_API_BASE}/api/tur-detay?id=${ykesAktifDosyaId}`);
+            const res = await fetch(`${YKES_API_BASE}/api/tur-detay?id=${ykesAktifDosyaId}`, {
+                headers: { "Authorization": `Bearer ${ykesOturumAnahtari}` }
+            });
+            if (res.status === 401) {
+                ykesOturumuKilitle("Oturum doğrulanamadı. Lütfen tekrar giriş yapın.");
+                return;
+            }
             const data = await res.json();
             if (!data.success) throw new Error(data.hata);
 
@@ -498,7 +539,10 @@ const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
         try {
             const res = await fetch(`${YKES_API_BASE}/api/grup-kaydet`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${ykesOturumAnahtari}`
+                },
                 body: JSON.stringify({
                     dosya_id: ykesAktifDosyaId,
                     kapasite: ykesAktifKapasiteTipi,
@@ -506,6 +550,10 @@ const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
                 })
             });
             const data = await res.json();
+            if (res.status === 401) {
+                ykesOturumuKilitle("Oturum doğrulanamadı. Lütfen tekrar giriş yapın.");
+                throw new Error("Girdiğiniz YKES şifresi yanlış!");
+            }
             if (!data.success) throw new Error(data.hata);
 
             ykesBildirimGoster(`✅ Başarılı: ${data.mesaj}`, "#166534", "#f0fdf4", "#bbf7d0");
@@ -529,7 +577,79 @@ const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
         durum.innerHTML = mesaj;
     }
 
-    document.addEventListener("DOMContentLoaded", ykesTurlariYukle);
+    function ykesGirisHatasiGoster(mesaj) {
+        const hata = ykesGetElement("loginError");
+        hata.textContent = mesaj;
+        hata.style.display = "block";
+    }
+
+    function ykesOturumuKilitle(mesaj) {
+        ykesGirisDenemeNo++;
+        ykesOturumAnahtari = null;
+        sessionStorage.removeItem("ykes_token");
+        ykesGetElement("ykesPanelContent").style.display = "none";
+        ykesGetElement("ykesLoginCard").style.display = "block";
+        ykesGetElement("loginPassword").value = "";
+        ykesGirisHatasiGoster(mesaj);
+    }
+
+    async function ykesGirisYap() {
+        const sifreInput = ykesGetElement("loginPassword");
+        const hata = ykesGetElement("loginError");
+        const btn = ykesGetElement("btnGiris");
+        const sifre = sifreInput.value.trim();
+        if (!sifre) {
+            ykesGirisHatasiGoster("Şifre girilmedi, erişim engellendi!");
+            sifreInput.focus();
+            return;
+        }
+
+        const denemeNo = ++ykesGirisDenemeNo;
+        hata.style.display = "none";
+        hata.textContent = "";
+        btn.disabled = true;
+        btn.className = "btn-orange";
+        btn.innerHTML = `<span class="spinner"></span> Giriş Kontrol Ediliyor...`;
+
+        try {
+            const izin = await ykesGirisKontrol(sifre);
+            if (denemeNo !== ykesGirisDenemeNo || !document.getElementById("tabYkes").classList.contains("active")) return;
+            if (!izin) {
+                btn.className = "btn-red btn-danger-anim";
+                btn.textContent = "❌ Hatalı Şifre !";
+                sifreInput.value = "";
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                if (denemeNo === ykesGirisDenemeNo) {
+                    btn.className = "btn-orange";
+                    btn.textContent = "🔓 YKES'e Giriş Yap";
+                    btn.disabled = false;
+                    sifreInput.focus();
+                }
+                return;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            if (denemeNo !== ykesGirisDenemeNo || !document.getElementById("tabYkes").classList.contains("active")) return;
+
+            btn.className = "btn-orange btn-success-anim";
+            btn.innerHTML = "✅ Giriş Onaylandı";
+            await new Promise(resolve => setTimeout(resolve, 800));
+            if (denemeNo !== ykesGirisDenemeNo || !document.getElementById("tabYkes").classList.contains("active")) return;
+
+            ykesOturumAnahtari = sifre;
+            sessionStorage.setItem("ykes_token", ykesOturumAnahtari);
+            ykesGetElement("ykesLoginCard").style.display = "none";
+            ykesGetElement("ykesPanelContent").style.display = "block";
+            ykesTurlariYukle();
+        } finally {
+            if (denemeNo === ykesGirisDenemeNo) {
+                btn.disabled = false;
+                btn.className = "btn-orange";
+                btn.innerHTML = "🔓 YKES'e Giriş Yap";
+            }
+        }
+    }
+
 const OPERATOR_KULLANICI_ADI = "selcukustun";
 const OPERATOR_SIFRE = "selcukustun1234";
 
@@ -557,6 +677,12 @@ async function ibanBilgisiKopyala(elementId, button, removeSpaces = false) {
 }
 
 function panelSekmesiDegistir(sekme) {
+    if (sekme !== "ykes") {
+        ykesGirisDenemeNo++;
+        ykesOturumAnahtari = null;
+        sessionStorage.removeItem("ykes_token");
+    }
+
     const loginCard = document.getElementById("operatorLoginCard");
     const adminCard = document.getElementById("adminPanelCard");
     const fileCard = document.getElementById("fileUploadCard");
@@ -624,8 +750,18 @@ function panelSekmesiDegistir(sekme) {
     }
 
     if (sekme === "ykes") {
+        ykesGirisDenemeNo++;
+        ykesOturumAnahtari = null;
+        sessionStorage.removeItem("ykes_token");
+        ykesGetElement("loginPassword").value = "";
+        ykesGetElement("loginError").textContent = "";
+        ykesGetElement("loginError").style.display = "none";
+        ykesGetElement("btnGiris").disabled = false;
+        ykesGetElement("ykesPanelContent").style.display = "none";
+        ykesGetElement("ykesLoginCard").style.display = "block";
         if (ykesTab) ykesTab.classList.add("active");
         if (ykesCard) ykesCard.style.display = "block";
+        ykesGetElement("loginPassword").focus();
         return;
     }
 

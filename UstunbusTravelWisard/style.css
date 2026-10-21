@@ -1038,6 +1038,24 @@ button:hover {
             --border: #cbd5e1;
             --bg: #f8fafc;
         }
+        #ykesCard .ykes-login-card {
+            display: block;
+            max-width: 520px;
+            margin: 0 auto 20px;
+            background: #fffdf9;
+            border: 1px solid #fbd38d;
+        }
+        #ykesCard .ykes-login-card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-color: var(--warning);
+        }
+        #ykesCard .ykes-login-card input {
+            padding: 11px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
         #ykesCard * { box-sizing: border-box; }
         #ykesCard .ykes-container {
             max-width: 1260px;
