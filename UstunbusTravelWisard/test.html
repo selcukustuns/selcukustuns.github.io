@@ -10,24 +10,18 @@
             --primary-hover: #1d4ed8;
             --success: #16a34a;
             --danger: #dc2626;
-            --warning: #f59e0b;
             --dark: #0f172a;
             --border: #cbd5e1;
             --bg: #f8fafc;
         }
-
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             margin: 0;
             padding: 30px 15px;
             color: #334155;
         }
-
         .container {
             max-width: 620px;
             margin: 0 auto;
@@ -37,7 +31,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
             border: 1px solid #e2e8f0;
         }
-
         .header {
             display: flex;
             align-items: center;
@@ -46,14 +39,7 @@
             padding-bottom: 12px;
             margin-bottom: 18px;
         }
-
-        h2 {
-            margin: 0;
-            color: var(--dark);
-            font-size: 20px;
-            letter-spacing: -0.3px;
-        }
-
+        h2 { margin: 0; color: var(--dark); font-size: 20px; }
         .badge-live {
             background: #dcfce7;
             color: #15803d;
@@ -62,70 +48,31 @@
             padding: 4px 10px;
             border-radius: 20px;
             border: 1px solid #bbf7d0;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
         }
-
-        .badge-live::before {
-            content: "";
-            width: 7px;
-            height: 7px;
-            background-color: #16a34a;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .desc {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: -6px;
-            margin-bottom: 20px;
-            line-height: 1.45;
-        }
-
         label {
             display: block;
             margin-top: 13px;
             margin-bottom: 4px;
             font-weight: 600;
             font-size: 13px;
-            color: #334155;
         }
-
         input, select {
             width: 100%;
-            padding: 11px 13px;
+            padding: 10px 12px;
             border: 1px solid var(--border);
             border-radius: 7px;
             font-size: 14px;
-            color: #1e293b;
-            background: #ffffff;
-            transition: all 0.2s ease;
         }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
         .row-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
-
-        @media (max-width: 560px) {
-            .row-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        @media (max-width: 560px) { .row-2 { grid-template-columns: 1fr; } }
         .btn-submit {
             width: 100%;
             margin-top: 22px;
-            padding: 13px 20px;
+            padding: 13px;
             background: var(--primary);
             color: #ffffff;
             border: none;
@@ -133,65 +80,16 @@
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
-
-        .btn-submit:hover:not(:disabled) {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        .btn-submit:hover { background: var(--primary-hover); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         .status-box {
             display: none;
             margin-top: 18px;
-            padding: 14px 16px;
+            padding: 14px;
             border-radius: 8px;
             font-size: 13.5px;
-            line-height: 1.5;
             font-weight: 600;
-            word-break: break-word;
-        }
-
-        .status-loading {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-        }
-
-        .status-success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-
-        .status-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            border: 2px solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.65s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -199,29 +97,25 @@
 
 <div class="container">
     <div class="header">
-        <h2>🚌 YKES - Tur Kayıt Sistemi</h2>
-        <span class="badge-live">Canlı Bağlantı</span>
+        <h2>🚌 YKES - Tur Kayıt Sistemi (CORS Korumalı)</h2>
+        <span class="badge-live">● Canlı Test</span>
     </div>
-
-    <p class="desc">
-        Bu form Google Drive'daki izinli klasörünüzü otomatik sorgular. Girilen yolcu verilerini AES/XOR şifrelemesiyle paketleyerek aracı köprü üzerinden doğrudan hedef tur dosyasına kaydeder.
-    </p>
 
     <!-- 1. HEDEF TUR DOSYASI -->
     <label for="turSecim">📁 Klasördeki Tur Dosyası:</label>
     <select id="turSecim">
-        <option value="">⏳ Klasördeki turlar taranıyor, lütfen bekleyin...</option>
+        <option value="">⏳ Klasör taranıyor, lütfen bekleyin...</option>
     </select>
 
     <!-- 2. KOLTUK VE TC -->
     <div class="row-2">
         <div>
             <label for="koltukNo">Koltuk No:</label>
-            <input type="text" id="koltukNo" placeholder="Örn: 12" value="12">
+            <input type="text" id="koltukNo" value="12">
         </div>
         <div>
-            <label for="tcKimlik">T.C. Kimlik / Pasaport No:</label>
-            <input type="text" id="tcKimlik" placeholder="11 Haneli T.C." maxlength="11" value="12345678901">
+            <label for="tcKimlik">T.C. Kimlik / Pasaport:</label>
+            <input type="text" id="tcKimlik" maxlength="11" value="12345678901">
         </div>
     </div>
 
@@ -229,11 +123,11 @@
     <div class="row-2">
         <div>
             <label for="adSoyad">Yolcu Adı Soyadı:</label>
-            <input type="text" id="adSoyad" placeholder="Örn: Ahmet Yılmaz" value="Ahmet Yılmaz">
+            <input type="text" id="adSoyad" value="Ahmet Yılmaz">
         </div>
         <div>
-            <label for="telefon">Telefon Numarası:</label>
-            <input type="text" id="telefon" placeholder="Örn: 05321234567" value="05321234567">
+            <label for="telefon">Telefon No:</label>
+            <input type="text" id="telefon" value="05321234567">
         </div>
     </div>
 
@@ -241,54 +135,36 @@
     <div class="row-2">
         <div>
             <label for="odenen">Ödenen Kapora (₺):</label>
-            <input type="number" id="odenen" placeholder="Örn: 1500" value="1500">
+            <input type="number" id="odenen" value="1500">
         </div>
         <div>
             <label for="kalanBorc">Kalan Borç (₺):</label>
-            <input type="number" id="kalanBorc" placeholder="Örn: 1000" value="1000">
+            <input type="number" id="kalanBorc" value="1000">
         </div>
     </div>
 
     <!-- 5. BİNİŞ DURAĞI -->
     <label for="binisDuragi">Biniş Durağı:</label>
     <select id="binisDuragi">
-        <optgroup label="Mersin Durakları">
-            <option value="Mersin - Vipol">Mersin - Vipol</option>
-            <option value="Mersin - Forum">Mersin - Forum</option>
-            <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
-        </optgroup>
-        <optgroup label="Tarsus Durakları">
-            <option value="Tarsus - Ofis" selected>Tarsus - Şehitler Tepesi Ofis</option>
-            <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
-            <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
-            <option value="Tarsus - Kleopatra">Tarsus - Kleopatra Kapısı</option>
-        </optgroup>
-        <optgroup label="Adana Durakları">
-            <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
-        </optgroup>
+        <option value="Mersin - Vipol">Mersin - Vipol</option>
+        <option value="Tarsus - Ofis" selected>Tarsus - Ofis</option>
+        <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
     </select>
 
-    <!-- 6. AÇIKLAMA / NOT -->
     <label for="notAciklama">Özel İstek / Not:</label>
-    <input type="text" id="notAciklama" placeholder="Örn: Ön koltuk talebi var" value="Web Panel Canlı Test Kaydı">
+    <input type="text" id="notAciklama" value="Web Test Kaydı">
 
-    <!-- GÖNDER BUTONU -->
     <button type="button" class="btn-submit" id="btnGonder" onclick="kayitGonder()">
-        <span>🚀 Kriptola ve Tur Dosyasına Yaz</span>
+        🚀 Kriptola ve Tur Dosyasına Yaz
     </button>
 
-    <!-- DURUM BİLDİRİM KUTUSU -->
     <div id="durumKutusu" class="status-box"></div>
 </div>
 
 <script>
-    // Canlı Google Apps Script Web App URL'niz:
     const KOPRU_API_URL = "https://script.google.com/macros/s/AKfycbw6u2YRyvbRbBwt84ovzi5oSBypsoHvGmsdnukwyVa4Nud5CRXsYltb9XgZ0ODfvMyM/exec";
-    
-    // Backend ile birebir örtüşen gizli simetrik anahtar:
     const GIZLI_ANAHTAR = "UstunbusSecretKey2026";
 
-    // Tarayıcı tarafı XOR + UTF8 + Base64 Kriptolama Motoru
     function metniSifrele(acikMetin, anahtar) {
         if (!acikMetin) return "";
         const utf8Metin = unescape(encodeURIComponent(acikMetin));
@@ -299,21 +175,38 @@
         return btoa(xorlanmis);
     }
 
-    // Durum kutusunu dinamik güncelleyen yardımcı fonksiyon
-    function bildirimGoster(mesaj, tip) {
+    function bildirimGoster(mesaj, renk, arkaplan, kenarlik) {
         const durum = document.getElementById("durumKutusu");
         durum.style.display = "block";
-        durum.className = "status-box status-" + tip;
+        durum.style.color = renk;
+        durum.style.background = arkaplan;
+        durum.style.border = "1px solid " + kenarlik;
         durum.innerHTML = mesaj;
     }
 
-    // Sayfa açıldığında Drive klasöründeki turları çeker
+    // CORS Engelini Aşarak Veri Çeken Motor (app.js ile aynı mantık)
+    async function engelsizGetIstegi(hedefUrl) {
+        try {
+            const r1 = await fetch(hedefUrl, { redirect: "follow" });
+            if (r1.ok) {
+                const t1 = await r1.text();
+                return JSON.parse(t1);
+            }
+        } catch(e) {}
+
+        // Doğrudan istek başarısızsa Proxy köprüsünü devreye sok
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(hedefUrl)}&timestamp=${Date.now()}`;
+        const r2 = await fetch(proxyUrl);
+        if (!r2.ok) throw new Error("Proxy bağlantısı kurulamadı.");
+        const data = await r2.json();
+        return JSON.parse(data.contents);
+    }
+
+    // Klasördeki turları otomatik yükle
     window.onload = async function() {
         const select = document.getElementById("turSecim");
         try {
-            const res = await fetch(KOPRU_API_URL);
-            const data = await res.json();
-
+            const data = await engelsizGetIstegi(KOPRU_API_URL);
             if (data.success && data.turlar && data.turlar.length > 0) {
                 select.innerHTML = "";
                 data.turlar.forEach(tur => {
@@ -322,31 +215,30 @@
                     opt.textContent = "📄 " + tur.dosyaAdi;
                     select.appendChild(opt);
                 });
-            } else if (data.success && (!data.turlar || data.turlar.length === 0)) {
-                select.innerHTML = "<option value=''>⚠️ Belirtilen klasörde Excel/E-Tablo bulunamadı.</option>";
+            } else if (data.success) {
+                select.innerHTML = "<option value=''>⚠️ Klasörde Excel/E-Tablo bulunamadı.</option>";
             } else {
-                select.innerHTML = `<option value=''>❌ Klasör taranamadı: ${data.error || 'Bilinmeyen hata'}</option>`;
+                select.innerHTML = `<option value=''>❌ Hata: ${data.error}</option>`;
             }
         } catch (err) {
-            console.error("Tur listesi çekme hatası:", err);
-            select.innerHTML = "<option value=''>❌ API bağlantı hatası! URL erişimini kontrol edin.</option>";
+            console.error(err);
+            select.innerHTML = "<option value=''>❌ Bağlantı hatası: Tarayıcı engeli aşılamadı.</option>";
         }
     };
 
-    // Formu şifreleyip Apps Script'e POST eden ana işlem fonksiyonu
+    // Kayıt Gönderme
     async function kayitGonder() {
         const btn = document.getElementById("btnGonder");
         const dosyaId = document.getElementById("turSecim").value;
 
         if (!dosyaId) {
-            alert("Lütfen önce listeden geçerli bir tur dosyası seçin!");
+            alert("Lütfen önce bir tur dosyası seçin!");
             return;
         }
 
-        // Gönderim esnasında butonu ve durumu güncelle
         btn.disabled = true;
-        btn.innerHTML = `<span class="spinner"></span> <span>Şifreleniyor ve Gönderiliyor...</span>`;
-        bildirimGoster("⏳ Veri paketi XOR ile kriptolanıyor ve hedef tur dosyasına işleniyor...", "loading");
+        btn.innerText = "⏳ Kayıt İletiliyor...";
+        bildirimGoster("⏳ Veri kriptolanıyor ve hedef tur dosyasına işleniyor...", "#1e40af", "#eff6ff", "#bfdbfe");
 
         const paket = {
             dosyaId: dosyaId,
@@ -360,7 +252,6 @@
             not: document.getElementById("notAciklama").value.trim()
         };
 
-        // Veriyi anında kriptola (Ağ trafiğinde salt metinler görünmez)
         const sifreliPayload = metniSifrele(JSON.stringify(paket), GIZLI_ANAHTAR);
 
         try {
@@ -371,17 +262,16 @@
             });
 
             const sonuc = await res.json();
-
             if (sonuc.success) {
-                bildirimGoster(`✅ <strong>Harika:</strong> ${sonuc.message}`, "success");
+                bildirimGoster(`✅ <strong>Başarılı:</strong> ${sonuc.message}`, "#166534", "#f0fdf4", "#bbf7d0");
             } else {
-                bildirimGoster(`❌ <strong>Hata:</strong> ${sonuc.error}`, "error");
+                bildirimGoster(`❌ <strong>Hata:</strong> ${sonuc.error}`, "#b91c1c", "#fef2f2", "#fecaca");
             }
-        } catch (error) {
-            bildirimGoster(`❌ <strong>İletişim Hatası:</strong> ${error.message}`, "error");
+        } catch (err) {
+            bildirimGoster(`❌ <strong>Bağlantı Hatası:</strong> ${err.message}`, "#b91c1c", "#fef2f2", "#fecaca");
         } finally {
             btn.disabled = false;
-            btn.innerHTML = `<span>🚀 Kriptola ve Tur Dosyasına Yaz</span>`;
+            btn.innerText = "🚀 Kriptola ve Tur Dosyasına Yaz";
         }
     }
 </script>
