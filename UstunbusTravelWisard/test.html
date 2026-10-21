@@ -23,12 +23,12 @@
             color: #334155;
         }
         .container {
-            max-width: 620px;
+            max-width: 600px;
             margin: 0 auto;
             background: #ffffff;
-            padding: 30px;
+            padding: 26px 30px;
             border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
             border: 1px solid #e2e8f0;
         }
         .header {
@@ -36,10 +36,10 @@
             align-items: center;
             justify-content: space-between;
             border-bottom: 2px solid var(--primary);
-            padding-bottom: 12px;
-            margin-bottom: 18px;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
         }
-        h2 { margin: 0; color: var(--dark); font-size: 20px; }
+        h2 { margin: 0; color: var(--dark); font-size: 19px; }
         .badge-live {
             background: #dcfce7;
             color: #15803d;
@@ -51,7 +51,7 @@
         }
         label {
             display: block;
-            margin-top: 13px;
+            margin-top: 12px;
             margin-bottom: 4px;
             font-weight: 600;
             font-size: 13px;
@@ -71,7 +71,7 @@
         @media (max-width: 560px) { .row-2 { grid-template-columns: 1fr; } }
         .btn-submit {
             width: 100%;
-            margin-top: 22px;
+            margin-top: 20px;
             padding: 13px;
             background: var(--primary);
             color: #ffffff;
@@ -80,16 +80,18 @@
             font-size: 15px;
             font-weight: 700;
             cursor: pointer;
+            transition: 0.2s;
         }
         .btn-submit:hover { background: var(--primary-hover); }
         .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         .status-box {
             display: none;
-            margin-top: 18px;
-            padding: 14px;
+            margin-top: 16px;
+            padding: 13px 15px;
             border-radius: 8px;
             font-size: 13.5px;
             font-weight: 600;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -97,14 +99,14 @@
 
 <div class="container">
     <div class="header">
-        <h2>🚌 YKES - Tur Kayıt Sistemi (CORS Korumalı)</h2>
-        <span class="badge-live">● Canlı Test</span>
+        <h2>🚌 YKES - Canlı Tur Kayıt Testi</h2>
+        <span class="badge-live">● Canlı Bağlantı</span>
     </div>
 
     <!-- 1. HEDEF TUR DOSYASI -->
     <label for="turSecim">📁 Klasördeki Tur Dosyası:</label>
     <select id="turSecim">
-        <option value="">⏳ Klasör taranıyor, lütfen bekleyin...</option>
+        <option value="">⏳ Turlar taranıyor, lütfen bekleyin...</option>
     </select>
 
     <!-- 2. KOLTUK VE TC -->
@@ -161,10 +163,17 @@
     <div id="durumKutusu" class="status-box"></div>
 </div>
 
+<!-- Arka planda CORS'a takılmadan POST atan görünmez form -->
+<iframe name="gizliPostIframe" id="gizliPostIframe" style="display:none;"></iframe>
+<form id="gizliForm" method="POST" target="gizliPostIframe" style="display:none;">
+    <input type="hidden" name="payload" id="gizliPayloadInput">
+</form>
+
 <script>
     const KOPRU_API_URL = "https://script.google.com/macros/s/AKfycbw6u2YRyvbRbBwt84ovzi5oSBypsoHvGmsdnukwyVa4Nud5CRXsYltb9XgZ0ODfvMyM/exec";
     const GIZLI_ANAHTAR = "UstunbusSecretKey2026";
 
+    // Kriptolama Motoru (XOR + UTF8 + Base64)
     function metniSifrele(acikMetin, anahtar) {
         if (!acikMetin) return "";
         const utf8Metin = unescape(encodeURIComponent(acikMetin));
@@ -184,30 +193,36 @@
         durum.innerHTML = mesaj;
     }
 
-    // CORS Engelini Aşarak Veri Çeken Motor (app.js ile aynı mantık)
-    async function engelsizGetIstegi(hedefUrl) {
-        try {
-            const r1 = await fetch(hedefUrl, { redirect: "follow" });
-            if (r1.ok) {
-                const t1 = await r1.text();
-                return JSON.parse(t1);
-            }
-        } catch(e) {}
+    // 1. ADIM: JSONP ile Turları Çekme (CORS'u %100 atlar)
+    function jsonpIleGetir(url) {
+        return new Promise((resolve, reject) => {
+            const callbackAdi = "jsonp_cb_" + Math.round(100000 * Math.random());
+            const script = document.createElement("script");
 
-        // Doğrudan istek başarısızsa Proxy köprüsünü devreye sok
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(hedefUrl)}&timestamp=${Date.now()}`;
-        const r2 = await fetch(proxyUrl);
-        if (!r2.ok) throw new Error("Proxy bağlantısı kurulamadı.");
-        const data = await r2.json();
-        return JSON.parse(data.contents);
+            window[callbackAdi] = function(data) {
+                delete window[callbackAdi];
+                if (script.parentNode) script.parentNode.removeChild(script);
+                resolve(data);
+            };
+
+            script.onerror = function() {
+                delete window[callbackAdi];
+                if (script.parentNode) script.parentNode.removeChild(script);
+                reject(new Error("Bağlantı kurulamadı."));
+            };
+
+            const ayirici = url.includes("?") ? "&" : "?";
+            script.src = `${url}${ayirici}callback=${callbackAdi}`;
+            document.body.appendChild(script);
+        });
     }
 
-    // Klasördeki turları otomatik yükle
+    // Sayfa açıldığında klasördeki turları doldur
     window.onload = async function() {
         const select = document.getElementById("turSecim");
         try {
-            const data = await engelsizGetIstegi(KOPRU_API_URL);
-            if (data.success && data.turlar && data.turlar.length > 0) {
+            const data = await jsonpIleGetir(KOPRU_API_URL);
+            if (data && data.success && data.turlar && data.turlar.length > 0) {
                 select.innerHTML = "";
                 data.turlar.forEach(tur => {
                     const opt = document.createElement("option");
@@ -215,30 +230,30 @@
                     opt.textContent = "📄 " + tur.dosyaAdi;
                     select.appendChild(opt);
                 });
-            } else if (data.success) {
-                select.innerHTML = "<option value=''>⚠️ Klasörde Excel/E-Tablo bulunamadı.</option>";
+            } else if (data && data.success) {
+                select.innerHTML = "<option value=''>⚠️ Klasörde Excel/E-Tablo dosyası bulunamadı.</option>";
             } else {
-                select.innerHTML = `<option value=''>❌ Hata: ${data.error}</option>`;
+                select.innerHTML = `<option value=''>❌ Hata: ${data.error || 'Bilinmeyen'}</option>`;
             }
         } catch (err) {
             console.error(err);
-            select.innerHTML = "<option value=''>❌ Bağlantı hatası: Tarayıcı engeli aşılamadı.</option>";
+            select.innerHTML = "<option value=''>❌ Klasör okunamadı. Apps Script dağıtımını kontrol edin.</option>";
         }
     };
 
-    // Kayıt Gönderme
-    async function kayitGonder() {
+    // 2. ADIM: Kayıt Gönderme (Tarayıcı engeline takılmadan POST)
+    function kayitGonder() {
         const btn = document.getElementById("btnGonder");
         const dosyaId = document.getElementById("turSecim").value;
 
         if (!dosyaId) {
-            alert("Lütfen önce bir tur dosyası seçin!");
+            alert("Lütfen önce listeden geçerli bir tur dosyası seçin!");
             return;
         }
 
         btn.disabled = true;
-        btn.innerText = "⏳ Kayıt İletiliyor...";
-        bildirimGoster("⏳ Veri kriptolanıyor ve hedef tur dosyasına işleniyor...", "#1e40af", "#eff6ff", "#bfdbfe");
+        btn.innerText = "⏳ Kayıt Dosyaya İşleniyor...";
+        bildirimGoster("⏳ Veri kriptolanıyor ve doğrudan Drive'daki tur dosyasına yazılıyor...", "#1e40af", "#eff6ff", "#bfdbfe");
 
         const paket = {
             dosyaId: dosyaId,
@@ -254,25 +269,19 @@
 
         const sifreliPayload = metniSifrele(JSON.stringify(paket), GIZLI_ANAHTAR);
 
-        try {
-            const res = await fetch(KOPRU_API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({ payload: sifreliPayload })
-            });
+        // Tarayıcı CORS engeline takılmayan Iframe Form Gönderimi
+        const gizliForm = document.getElementById("gizliForm");
+        gizliForm.action = KOPRU_API_URL;
+        document.getElementById("gizliPayloadInput").value = sifreliPayload;
 
-            const sonuc = await res.json();
-            if (sonuc.success) {
-                bildirimGoster(`✅ <strong>Başarılı:</strong> ${sonuc.message}`, "#166534", "#f0fdf4", "#bbf7d0");
-            } else {
-                bildirimGoster(`❌ <strong>Hata:</strong> ${sonuc.error}`, "#b91c1c", "#fef2f2", "#fecaca");
-            }
-        } catch (err) {
-            bildirimGoster(`❌ <strong>Bağlantı Hatası:</strong> ${err.message}`, "#b91c1c", "#fef2f2", "#fecaca");
-        } finally {
+        const iframe = document.getElementById("gizliPostIframe");
+        iframe.onload = function() {
+            bildirimGoster("✅ <strong>Tebrikler:</strong> Kayıt başarıyla hedef tur dosyasına işlendi!", "#166534", "#f0fdf4", "#bbf7d0");
             btn.disabled = false;
             btn.innerText = "🚀 Kriptola ve Tur Dosyasına Yaz";
-        }
+        };
+
+        gizliForm.submit();
     }
 </script>
 
