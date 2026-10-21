@@ -87,12 +87,42 @@
         .status-box {
             display: none;
             margin-top: 16px;
-            padding: 13px 15px;
+            padding: 14px 16px;
             border-radius: 8px;
             font-size: 13.5px;
             font-weight: 600;
             line-height: 1.4;
         }
+        .error-log-box {
+            margin-top: 10px;
+            background: #ffffff;
+            border: 1px dashed #f87171;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #991b1b;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            user-select: all;
+        }
+        .btn-copy {
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: #b91c1c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-copy:hover { background: #991b1b; }
     </style>
 </head>
 <body>
@@ -160,10 +190,10 @@
         🚀 Kriptola ve Tur Dosyasına Yaz
     </button>
 
+    <!-- HATA VE BİLDİRİM ALANI -->
     <div id="durumKutusu" class="status-box"></div>
 </div>
 
-<!-- Arka planda CORS'a takılmadan POST atan görünmez form -->
 <iframe name="gizliPostIframe" id="gizliPostIframe" style="display:none;"></iframe>
 <form id="gizliForm" method="POST" target="gizliPostIframe" style="display:none;">
     <input type="hidden" name="payload" id="gizliPayloadInput">
@@ -172,8 +202,8 @@
 <script>
     const KOPRU_API_URL = "https://script.google.com/macros/s/AKfycbw6u2YRyvbRbBwt84ovzi5oSBypsoHvGmsdnukwyVa4Nud5CRXsYltb9XgZ0ODfvMyM/exec";
     const GIZLI_ANAHTAR = "UstunbusSecretKey2026";
+    let sonHataMetni = "";
 
-    // Kriptolama Motoru (XOR + UTF8 + Base64)
     function metniSifrele(acikMetin, anahtar) {
         if (!acikMetin) return "";
         const utf8Metin = unescape(encodeURIComponent(acikMetin));
@@ -184,16 +214,47 @@
         return btoa(xorlanmis);
     }
 
-    function bildirimGoster(mesaj, renk, arkaplan, kenarlik) {
-        const durum = document.getElementById("durumKutusu");
-        durum.style.display = "block";
-        durum.style.color = renk;
-        durum.style.background = arkaplan;
-        durum.style.border = "1px solid " + kenarlik;
-        durum.innerHTML = mesaj;
+    function hataRaporuKopyala(btn) {
+        if (!sonHataMetni) return;
+        navigator.clipboard.writeText(sonHataMetni).then(() => {
+            const eski = btn.innerText;
+            btn.innerText = "✅ Kopyalandı!";
+            setTimeout(() => { btn.innerText = eski; }, 2000);
+        }).catch(() => {
+            const ta = document.createElement("textarea");
+            ta.value = sonHataMetni;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            btn.innerText = "✅ Kopyalandı!";
+            setTimeout(() => { btn.innerText = "📋 Hata Raporunu Kopyala"; }, 2000);
+        });
     }
 
-    // 1. ADIM: JSONP ile Turları Çekme (CORS'u %100 atlar)
+    function hataGoster(ozet, detay) {
+        sonHataMetni = `[YKES HATA RAPORU]\nZaman: ${new Date().toISOString()}\nÖzet: ${ozet}\nDetay: ${detay}\nAPI: ${KOPRU_API_URL}\nTarayıcı: ${navigator.userAgent}`;
+        const durum = document.getElementById("durumKutusu");
+        durum.style.display = "block";
+        durum.style.color = "#991b1b";
+        durum.style.background = "#fef2f2";
+        durum.style.border = "1px solid #fecaca";
+        durum.innerHTML = `
+            <div>❌ <strong>${ozet}</strong></div>
+            <div class="error-log-box">${detay}</div>
+            <button type="button" class="btn-copy" onclick="hataRaporuKopyala(this)">📋 Hata Raporunu Kopyala</button>
+        `;
+    }
+
+    function basariGoster(mesaj) {
+        const durum = document.getElementById("durumKutusu");
+        durum.style.display = "block";
+        durum.style.color = "#166534";
+        durum.style.background = "#f0fdf4";
+        durum.style.border = "1px solid #bbf7d0";
+        durum.innerHTML = `✅ <strong>Başarılı:</strong> ${mesaj}`;
+    }
+
     function jsonpIleGetir(url) {
         return new Promise((resolve, reject) => {
             const callbackAdi = "jsonp_cb_" + Math.round(100000 * Math.random());
@@ -205,10 +266,10 @@
                 resolve(data);
             };
 
-            script.onerror = function() {
+            script.onerror = function(e) {
                 delete window[callbackAdi];
                 if (script.parentNode) script.parentNode.removeChild(script);
-                reject(new Error("Bağlantı kurulamadı."));
+                reject(new Error("Script dosyası indirilemedi (CORS veya 404/403 engeli)."));
             };
 
             const ayirici = url.includes("?") ? "&" : "?";
@@ -217,7 +278,7 @@
         });
     }
 
-    // Sayfa açıldığında klasördeki turları doldur
+    // Sayfa açıldığında turları çek
     window.onload = async function() {
         const select = document.getElementById("turSecim");
         try {
@@ -231,29 +292,28 @@
                     select.appendChild(opt);
                 });
             } else if (data && data.success) {
-                select.innerHTML = "<option value=''>⚠️ Klasörde Excel/E-Tablo dosyası bulunamadı.</option>";
+                select.innerHTML = "<option value=''>⚠️ Klasörde Excel/E-Tablo bulunamadı.</option>";
             } else {
-                select.innerHTML = `<option value=''>❌ Hata: ${data.error || 'Bilinmeyen'}</option>`;
+                hataGoster("Sunucu Hatası", data ? (data.error || JSON.stringify(data)) : "Boş yanıt");
             }
         } catch (err) {
-            console.error(err);
-            select.innerHTML = "<option value=''>❌ Klasör okunamadı. Apps Script dağıtımını kontrol edin.</option>";
+            console.error("Detaylı Hata:", err);
+            hataGoster("Bağlantı Kurulamadı", err.stack || err.message || String(err));
+            select.innerHTML = "<option value=''>❌ Klasör turları çekilemedi (Aşağıdaki hatayı kopyalayın)</option>";
         }
     };
 
-    // 2. ADIM: Kayıt Gönderme (Tarayıcı engeline takılmadan POST)
     function kayitGonder() {
         const btn = document.getElementById("btnGonder");
         const dosyaId = document.getElementById("turSecim").value;
 
         if (!dosyaId) {
-            alert("Lütfen önce listeden geçerli bir tur dosyası seçin!");
+            alert("Lütfen önce listeden bir tur dosyası seçin!");
             return;
         }
 
         btn.disabled = true;
         btn.innerText = "⏳ Kayıt Dosyaya İşleniyor...";
-        bildirimGoster("⏳ Veri kriptolanıyor ve doğrudan Drive'daki tur dosyasına yazılıyor...", "#1e40af", "#eff6ff", "#bfdbfe");
 
         const paket = {
             dosyaId: dosyaId,
@@ -269,14 +329,13 @@
 
         const sifreliPayload = metniSifrele(JSON.stringify(paket), GIZLI_ANAHTAR);
 
-        // Tarayıcı CORS engeline takılmayan Iframe Form Gönderimi
         const gizliForm = document.getElementById("gizliForm");
         gizliForm.action = KOPRU_API_URL;
         document.getElementById("gizliPayloadInput").value = sifreliPayload;
 
         const iframe = document.getElementById("gizliPostIframe");
         iframe.onload = function() {
-            bildirimGoster("✅ <strong>Tebrikler:</strong> Kayıt başarıyla hedef tur dosyasına işlendi!", "#166534", "#f0fdf4", "#bbf7d0");
+            basariGoster("Kayıt başarıyla hedef tur dosyasına işlendi!");
             btn.disabled = false;
             btn.innerText = "🚀 Kriptola ve Tur Dosyasına Yaz";
         };
