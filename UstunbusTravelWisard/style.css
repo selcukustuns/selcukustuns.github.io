@@ -1029,3 +1029,147 @@ button:hover {
     font-size: 11.5px;
     color: #64748b;
 }
+
+#ykesCard {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --dark: #0f172a;
+            --border: #cbd5e1;
+            --bg: #f8fafc;
+        }
+        #ykesCard * { box-sizing: border-box; }
+        #ykesCard .ykes-container {
+            max-width: 1260px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        #ykesCard .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        #ykesCard h2 { margin: 0; color: var(--dark); font-size: 20px; }
+        #ykesCard .tour-select-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+        }
+        #ykesCard .split-layout {
+            display: grid;
+            grid-template-columns: 430px 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+        @media (max-width: 950px) {
+            #ykesCard .split-layout { grid-template-columns: 1fr; }
+        }
+        #ykesCard select,
+#ykesCard input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        #ykesCard .bus-wrapper {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        #ykesCard .bus-cabin {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        #ykesCard .bus-front {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed #cbd5e1;
+            font-size: 12px;
+            font-weight: 800;
+            color: #475569;
+        }
+        #ykesCard .legend-box {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        #ykesCard .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+        #ykesCard .orta-kapi-blok {
+            grid-column: span 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            border: 2px dashed #94a3b8;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #334155;
+            padding: 8px 6px;
+        }
+        #ykesCard .passenger-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        #ykesCard .passenger-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            color: #1e40af;
+        }
+        #ykesCard .btn-submit {
+            width: 100%;
+            margin-top: 15px;
+            padding: 13px;
+            background: var(--success);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        #ykesCard .btn-submit:hover:not(:disabled) { background: #15803d; }
+        #ykesCard .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        #ykesCard .status-box {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }

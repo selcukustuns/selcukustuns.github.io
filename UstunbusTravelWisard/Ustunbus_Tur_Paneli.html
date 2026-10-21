@@ -21,6 +21,7 @@
 <!-- ÜST SEKME BARI -->
 <div class="ust-panel-tabs">
     <button id="tabPersonel" class="ust-panel-tab active" onclick="panelSekmesiDegistir('personel')">👥 Çağrı Personeli Paneli</button>
+    <button id="tabYkes" class="ust-panel-tab" onclick="panelSekmesiDegistir('ykes')">🚌 Yolcu Kaydetme Sistemi (YKES)</button>
     <button id="tabTaksit" class="ust-panel-tab" onclick="panelSekmesiDegistir('taksit')">💳 Tur Taksit Tablosu</button>
     <button id="tabIban" class="ust-panel-tab" onclick="panelSekmesiDegistir('iban')">💳 İban Bilgisi</button>
     <button id="tabUetds" class="ust-panel-tab" onclick="panelSekmesiDegistir('uetds')">🚌 U-ETDS Bildirimi</button>
@@ -31,6 +32,102 @@
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
+</div>
+
+<div id="ykesCard" class="card" style="display:none; max-width: 1350px; margin: 0 auto 20px auto;">
+    <div class="ykes-container">
+    <div class="header">
+        <h2>🚌 Yolcu Kaydetme Sistemi (YKES)</h2>
+        <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:bold;">● Başarıyla Bağlandı</span>
+    </div>
+
+    <!-- TUR SEÇİMİ -->
+    <div class="tour-select-box">
+        <label for="ykes-turSecimi" style="display:block; font-size:13px; font-weight:700; color:#1e40af; margin-bottom:6px;">
+            📁 İŞLEM YAPILACAK TURU SEÇİN:
+        </label>
+        <div style="display:flex; gap:10px;">
+            <select id="ykes-turSecimi" onchange="ykesTurSecildi()" style="background:#fff; flex:1;">
+                <option value="">⏳ Turlar taranıyor...</option>
+            </select>
+            <button type="button" onclick="ykesTurlariYukle()" style="padding:8px 16px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">🔄 Yenile</button>
+        </div>
+    </div>
+
+    <div class="split-layout">
+        
+        <!-- SOL: DİNAMİK ARAÇ ŞEMASI -->
+        <div class="bus-wrapper">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:10px;">
+                <span id="ykes-aracTipiBaslik" style="font-weight:bold; font-size:13.5px; color:var(--dark);">🚐 Araç Şeması</span>
+                <span id="ykes-koltukSayac" style="font-size:12px; font-weight:700; color:#16a34a;">0 Boş</span>
+            </div>
+
+            <div class="legend-box">
+                <span class="legend-item" style="background:#ffd1dc; color:#831843; border-color:#f472b6;">🎨 Grup Renkleri</span>
+                <span class="legend-item" style="background:#fce7f3; color:#be185d; border-color:#fbcfe8;">👩 Kadın</span>
+                <span class="legend-item" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">👨 Erkek</span>
+                <span class="legend-item" style="background:#ffffff; color:#15803d; border-color:#86efac;">✅ Boş Koltuk</span>
+            </div>
+
+            <div class="bus-cabin">
+                <div class="bus-front">
+                    <span>💺 KAPTAN</span>
+                    <span style="background:#e2e8f0; padding:3px 8px; border-radius:4px; font-size:11px;">🚪 ÖN KAPI</span>
+                </div>
+                
+                <div id="ykes-krokiAlani" style="display:flex; flex-direction:column; gap:6px;">
+                    <div style="text-align:center; padding:30px 10px; color:#64748b; font-size:13px;">Lütfen bir tur seçiniz.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ: ÇOKLU YOLCU FORMU -->
+        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0; font-size:15px; color:var(--primary);">
+                    👥 Seçilen Koltuklar (<span id="ykes-seciliSayac">0</span> Kişi)
+                </h3>
+                <button type="button" onclick="ykesSecimleriTemizle()" style="font-size:11px; padding:4px 8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">Seçimi Temizle</button>
+            </div>
+
+            <!-- Toplu Durak ve Hızlı Telefon Doldurma -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px; background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe;">
+                <div>
+                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Durak:</span>
+                    <select id="ykes-topluDurakSecici" onchange="ykesTopluDurakUygula()" style="padding:6px; font-size:12px;">
+                        <option value="">Seçiniz...</option>
+                        <option value="Mersin - Vipol">Mersin - Vipol</option>
+                        <option value="Mersin - Forum">Mersin - Forum</option>
+                        <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
+                        <option value="Tarsus - Ofis">Tarsus - Ofis</option>
+                        <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
+                        <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
+                        <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
+                        <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
+                    </select>
+                </div>
+                <div>
+                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Tel No:</span>
+                    <input type="text" id="ykes-topluTelInput" placeholder="0532..." onkeyup="ykesTopluTelUygula()" style="padding:6px; font-size:12px;">
+                </div>
+            </div>
+
+            <div id="ykes-yolcuListesiFormu" style="max-height: 480px; overflow-y:auto; padding-right:5px;">
+                <div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
+                    Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
+                </div>
+            </div>
+
+            <button type="button" id="ykes-btnKaydet" onclick="ykesGrubuKaydet()" class="btn-submit" disabled>
+                💾 Yolcuyu Kaydet
+            </button>
+
+            <div id="ykes-durumKutusu" class="status-box"></div>
+        </div>
+
+    </div>
+</div>
 </div>
 
 <!-- 1. TUR TAKSİT TABLOSU KARTI -->

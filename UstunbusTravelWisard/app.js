@@ -1,6 +1,535 @@
 /* ============================================================
    OPERATÖR ERİŞİMİ (Kullanıcı: selcukustun | Şifre: selcukustun1234)
    ============================================================ */
+function ykesGetElement(id) {
+    return document.querySelector(`#ykesCard #ykes-${id}`);
+}
+
+const YKES_API_BASE = "https://ykes-drive-bridge.vercel.app";
+    let ykesAktifDosyaId = null;
+    let ykesAktifKapasiteTipi = 46;
+    let ykesMevcutKoltukListesi = [];
+    let ykesSeciliKoltuklar = [];
+
+    async function ykesTurlariYukle() {
+        const select = ykesGetElement("turSecimi");
+        select.innerHTML = '<option value="">⏳ Turlar taranıyor...</option>';
+
+        try {
+            const res = await fetch(`${YKES_API_BASE}/api/turlar`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.hata);
+
+            select.innerHTML = '<option value="">-- Lütfen Bir Tur Seçiniz --</option>';
+
+            const gruplar = {};
+            data.dosyalar.forEach(d => {
+                const k = d.klasor || "Ana Dizin";
+                if (!gruplar[k]) gruplar[k] = [];
+                gruplar[k].push(d);
+            });
+
+            for (const [kategori, dosyalar] of Object.entries(gruplar)) {
+                const group = document.createElement("optgroup");
+                group.label = `📁 ${kategori}`;
+                dosyalar.forEach(d => {
+                    const opt = document.createElement("option");
+                    opt.value = d.id;
+                    opt.innerText = d.name;
+                    group.appendChild(opt);
+                });
+                select.appendChild(group);
+            }
+        } catch (err) {
+            select.innerHTML = `<option value="">❌ Hata: ${err.message}</option>`;
+        }
+    }
+
+    async function ykesTurSecildi() {
+        const select = ykesGetElement("turSecimi");
+        ykesAktifDosyaId = select.value;
+        ykesSeciliKoltuklar = [];
+        ykesYolcuFormunuYenile();
+        if (!ykesAktifDosyaId) return;
+
+        ykesBildirimGoster("⏳ Tur ve koltuk durumu yükleniyor...", "#0369a1", "#eff6ff", "#bfdbfe");
+
+        try {
+            const res = await fetch(`${YKES_API_BASE}/api/tur-detay?id=${ykesAktifDosyaId}`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.hata);
+
+            ykesAktifKapasiteTipi = 46;
+            data.sayfalar.forEach(s => {
+                if (s.sayfa_adi.includes("41")) ykesAktifKapasiteTipi = 41;
+                if (s.sayfa_adi.includes("54")) ykesAktifKapasiteTipi = 54;
+            });
+
+            ykesGetElement("aracTipiBaslik").innerText = `🚐 ${ykesAktifKapasiteTipi} Kişilik ${ykesAktifKapasiteTipi === 41 ? '(2+1 VIP)' : '(2+2)'}`;
+
+            const krokiSayfa = data.sayfalar.find(s => s.sayfa_adi.includes(String(ykesAktifKapasiteTipi))) || data.sayfalar[0];
+            const uedtsSayfa = data.sayfalar.find(s => s.sayfa_adi.includes("UEDTS") || s.sayfa_adi.includes("UETDS"));
+
+            const cinsiyetler = {};
+            if (uedtsSayfa && uedtsSayfa.satirlar) {
+                uedtsSayfa.satirlar.forEach((satir, idx) => {
+                    if (idx >= 2) {
+                        const kNo = idx - 1;
+                        const cVal = String(satir[4]?.deger || '').trim().toUpperCase();
+                        if (cVal === 'K' || cVal.includes('KADIN')) cinsiyetler[kNo] = 'K';
+                        else if (cVal === 'E' || cVal.includes('ERKEK')) cinsiyetler[kNo] = 'E';
+                    }
+                });
+            }
+
+            const KROKI_HUC_46 = {
+                1: [17, 0], 2: [17, 1], 3: [17, 3], 4: [17, 4],
+                5: [20, 0], 6: [20, 1], 7: [20, 3], 8: [20, 4],
+                9: [23, 0], 10: [23, 1], 11: [23, 3], 12: [23, 4],
+                13: [26, 0], 14: [26, 1], 15: [26, 3], 16: [26, 4],
+                17: [29, 0], 18: [29, 1], 19: [29, 3], 20: [29, 4],
+                21: [32, 0], 22: [32, 1],
+                23: [35, 3], 24: [35, 4], 25: [35, 0], 26: [35, 1],
+                27: [38, 3], 28: [38, 4], 29: [38, 0], 30: [38, 1],
+                31: [41, 3], 32: [41, 4], 33: [41, 0], 34: [41, 1],
+                35: [44, 3], 36: [44, 4], 37: [44, 0], 38: [44, 1],
+                39: [47, 3], 40: [47, 4], 41: [47, 0], 42: [47, 1],
+                43: [50, 3], 44: [50, 4], 45: [50, 0], 46: [50, 1]
+            };
+            const KROKI_HUC_41 = {
+                1: [17, 0], 2: [17, 2], 3: [17, 3],
+                4: [20, 0], 5: [20, 2], 6: [20, 3],
+                7: [23, 0], 8: [23, 2], 9: [23, 3],
+                10: [26, 0], 11: [26, 2], 12: [26, 3],
+                13: [29, 0], 14: [29, 2], 15: [29, 3],
+                16: [32, 0], 17: [32, 2], 18: [32, 3],
+                19: [35, 0], 20: [35, 2], 21: [35, 3],
+                22: [38, 0],
+                23: [41, 0], 24: [41, 2], 25: [41, 3],
+                26: [44, 0], 27: [44, 2], 28: [44, 3],
+                29: [47, 0], 30: [47, 2], 31: [47, 3],
+                32: [50, 0], 33: [50, 2], 34: [50, 3],
+                35: [53, 0], 36: [53, 2], 37: [53, 3],
+                38: [56, 0], 39: [56, 1], 40: [56, 2], 41: [56, 3]
+            };
+            const KROKI_HUC_54 = {
+                ...KROKI_HUC_46,
+                47: [54, 3], 48: [54, 4], 49: [54, 0], 50: [54, 1],
+                51: [57, 3], 52: [57, 4], 53: [57, 0], 54: [57, 1]
+            };
+
+            let harita = KROKI_HUC_46;
+            if (ykesAktifKapasiteTipi === 41) harita = KROKI_HUC_41;
+            else if (ykesAktifKapasiteTipi === 54) harita = KROKI_HUC_54;
+
+            const isimSutunIdx = (ykesAktifKapasiteTipi === 41) ? 6 : 7;
+            const durakSutunIdx = (ykesAktifKapasiteTipi === 41) ? 10 : 11;
+            ykesMevcutKoltukListesi = [];
+
+            for (let no = 1; no <= ykesAktifKapasiteTipi; no++) {
+                let renkliMi = false;
+                let hucreRenkCss = "";
+                let rgbDegerleri = null;
+
+                if (harita[no]) {
+                    const [rIdx, cIdx] = harita[no];
+                    const hucre = krokiSayfa.satirlar[rIdx]?.[cIdx];
+                    if (hucre && hucre.renk) {
+                        const r = hucre.renk.red ?? 1;
+                        const g = hucre.renk.green ?? 1;
+                        const b = hucre.renk.blue ?? 1;
+                        if (r < 0.96 || g < 0.96 || b < 0.96) {
+                            renkliMi = true;
+                            const r255 = Math.round(r * 255);
+                            const g255 = Math.round(g * 255);
+                            const b255 = Math.round(b * 255);
+                            hucreRenkCss = `rgb(${r255}, ${g255}, ${b255})`;
+                            rgbDegerleri = { r: r255, g: g255, b: b255 };
+                        }
+                    }
+                }
+
+                const satirIdx = no + 6;
+                const isim = String(krokiSayfa.satirlar[satirIdx]?.[isimSutunIdx]?.deger || '').trim();
+                const durak = String(krokiSayfa.satirlar[satirIdx]?.[durakSutunIdx]?.deger || '').trim();
+                const doluMu = (renkliMi || isim !== '');
+
+                ykesMevcutKoltukListesi.push({
+                    no: no,
+                    dolu: doluMu,
+                    isim: isim || (renkliMi ? "Grup Kayıt" : ""),
+                    durak: durak,
+                    cinsiyet: doluMu ? (cinsiyetler[no] || 'E') : null,
+                    gercekRenk: hucreRenkCss,
+                    rgb: rgbDegerleri
+                });
+            }
+
+            ykesKrokiyiCiz(ykesMevcutKoltukListesi, ykesAktifKapasiteTipi);
+            ykesBildirimGoster(`✅ "${data.baslik}" yüklendi.`, "#166534", "#f0fdf4", "#bbf7d0");
+
+        } catch (err) {
+            ykesBildirimGoster(`❌ Hata: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
+        }
+    }
+
+    function ykesKrokiyiCiz(koltuklar, kapasite) {
+        const krokiAlani = ykesGetElement("krokiAlani");
+        krokiAlani.innerHTML = "";
+
+        let bosSayisi = 0;
+        koltuklar.forEach(k => { if (!k.dolu) bosSayisi++; });
+        ykesGetElement("koltukSayac").innerText = `${bosSayisi} Boş Koltuk`;
+
+        if (kapasite === 41) {
+            const siralama41 = [
+                { sol: [1],   sag: [2, 3] },
+                { sol: [4],   sag: [5, 6] },
+                { sol: [7],   sag: [8, 9] },
+                { sol: [10],  sag: [11, 12] },
+                { sol: [13],  sag: [14, 15] },
+                { sol: [16],  sag: [17, 18] },
+                { sol: [19],  sag: [20, 21] },
+                { sol: [22],  sag: 'kapi' },
+                { sol: [23],  sag: [24, 25] },
+                { sol: [26],  sag: [27, 28] },
+                { sol: [29],  sag: [30, 31] },
+                { sol: [32],  sag: [33, 34] },
+                { sol: [35],  sag: [36, 37] },
+                { arka: [38, 39, 40, 41] }
+            ];
+
+            siralama41.forEach(sira => {
+                const rowDiv = document.createElement("div");
+                if (sira.arka) {
+                    rowDiv.style.display = "grid";
+                    rowDiv.style.gridTemplateColumns = "1fr 1fr 1fr 1fr";
+                    rowDiv.style.gap = "6px";
+                    sira.arka.forEach(no => rowDiv.appendChild(ykesButonUret(no, koltuklar)));
+                } else {
+                    rowDiv.style.display = "grid";
+                    rowDiv.style.gridTemplateColumns = "1fr 24px 1fr 1fr";
+                    rowDiv.style.gap = "6px";
+                    rowDiv.style.alignItems = "center";
+                    rowDiv.appendChild(ykesButonUret(sira.sol[0], koltuklar));
+
+                    const koridor = document.createElement("div");
+                    koridor.style.textAlign = "center";
+                    koridor.style.color = "#94a3b8";
+                    koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
+                    rowDiv.appendChild(koridor);
+
+                    if (sira.sag === 'kapi') {
+                        const kapi = document.createElement("div");
+                        kapi.className = "orta-kapi-blok";
+                        kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
+                        rowDiv.appendChild(kapi);
+                    } else {
+                        rowDiv.appendChild(ykesButonUret(sira.sag[0], koltuklar));
+                        rowDiv.appendChild(ykesButonUret(sira.sag[1], koltuklar));
+                    }
+                }
+                krokiAlani.appendChild(rowDiv);
+            });
+            return;
+        }
+
+        const siralama2x2 = [
+            { sol: [1, 2],   sag: [3, 4] },
+            { sol: [5, 6],   sag: [7, 8] },
+            { sol: [9, 10],  sag: [11, 12] },
+            { sol: [13, 14], sag: [15, 16] },
+            { sol: [17, 18], sag: [19, 20] },
+            { sol: [21, 22], sag: 'kapi' },
+            { sol: [25, 26], sag: [23, 24] },
+            { sol: [29, 30], sag: [27, 28] },
+            { sol: [33, 34], sag: [31, 32] },
+            { sol: [37, 38], sag: [35, 36] },
+            { sol: [41, 42], sag: [39, 40] },
+            { sol: [45, 46], sag: [43, 44] }
+        ];
+
+        if (kapasite === 54) {
+            siralama2x2.push({ sol: [49, 50], sag: [47, 48] });
+            siralama2x2.push({ sol: [53, 54], sag: [51, 52] });
+        }
+
+        siralama2x2.forEach(sira => {
+            const rowDiv = document.createElement("div");
+            rowDiv.style.display = "grid";
+            rowDiv.style.gridTemplateColumns = "1fr 1fr 22px 1fr 1fr";
+            rowDiv.style.gap = "6px";
+            rowDiv.style.alignItems = "center";
+
+            rowDiv.appendChild(ykesButonUret(sira.sol[0], koltuklar));
+            rowDiv.appendChild(ykesButonUret(sira.sol[1], koltuklar));
+
+            const koridor = document.createElement("div");
+            koridor.style.textAlign = "center";
+            koridor.style.color = "#94a3b8";
+            koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
+            rowDiv.appendChild(koridor);
+
+            if (sira.sag === 'kapi') {
+                const kapi = document.createElement("div");
+                kapi.className = "orta-kapi-blok";
+                kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
+                rowDiv.appendChild(kapi);
+            } else {
+                rowDiv.appendChild(ykesButonUret(sira.sag[0], koltuklar));
+                rowDiv.appendChild(ykesButonUret(sira.sag[1], koltuklar));
+            }
+
+            krokiAlani.appendChild(rowDiv);
+        });
+    }
+
+    function ykesButonUret(kNo, koltuklar) {
+        const kVeri = koltuklar.find(x => x.no === kNo);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.id = "ykes-btnKoltuk_" + kNo;
+        btn.style.padding = "9px 0";
+        btn.style.borderRadius = "7px";
+        btn.style.fontWeight = "800";
+        btn.style.fontSize = "12px";
+
+        if (kVeri.dolu) {
+            btn.style.cursor = "not-allowed";
+            const infoText = `Koltuk ${kNo}: ${kVeri.isim}${kVeri.durak ? ' | Durak: ' + kVeri.durak : ''}`;
+            btn.title = infoText;
+
+            if (kVeri.gercekRenk && kVeri.rgb) {
+                btn.style.background = kVeri.gercekRenk;
+                btn.style.border = "1.5px solid rgba(0,0,0,0.18)";
+                const parlaklik = (kVeri.rgb.r * 299 + kVeri.rgb.g * 587 + kVeri.rgb.b * 114) / 1000;
+                btn.style.color = parlaklik > 140 ? "#0f172a" : "#ffffff";
+            } else {
+                btn.style.background = "#e2e8f0";
+                btn.style.border = "1.5px solid #cbd5e1";
+                btn.style.color = "#475569";
+            }
+
+            const cinsiyetIcon = kVeri.cinsiyet === 'K' ? '👩' : (kVeri.cinsiyet === 'E' ? '👨' : '🔒');
+            btn.innerText = `${kNo} ${cinsiyetIcon}`;
+        } else {
+            const seciliMi = ykesSeciliKoltuklar.includes(kNo);
+            if (seciliMi) {
+                btn.style.background = "#2563eb";
+                btn.style.color = "#ffffff";
+                btn.style.border = "1.5px solid #1d4ed8";
+            } else {
+                btn.style.background = "#ffffff";
+                btn.style.color = "#15803d";
+                btn.style.border = "1.5px solid #86efac";
+            }
+            btn.style.cursor = "pointer";
+            btn.innerText = String(kNo);
+            btn.onclick = () => ykesKoltukTiklandi(kNo);
+        }
+        return btn;
+    }
+
+    function ykesKoltukTiklandi(kNo) {
+        const idx = ykesSeciliKoltuklar.indexOf(kNo);
+        if (idx > -1) {
+            ykesSeciliKoltuklar.splice(idx, 1);
+        } else {
+            ykesSeciliKoltuklar.push(kNo);
+            ykesSeciliKoltuklar.sort((a, b) => a - b);
+        }
+
+        ykesMevcutKoltukListesi.forEach(k => {
+            if (!k.dolu) {
+                const b = ykesGetElement("btnKoltuk_" + k.no);
+                if (b) {
+                    if (ykesSeciliKoltuklar.includes(k.no)) {
+                        b.style.background = "#2563eb";
+                        b.style.color = "#ffffff";
+                        b.style.borderColor = "#1d4ed8";
+                    } else {
+                        b.style.background = "#ffffff";
+                        b.style.color = "#15803d";
+                        b.style.borderColor = "#86efac";
+                    }
+                }
+            }
+        });
+
+        ykesYolcuFormunuYenile();
+    }
+
+    function ykesSecimleriTemizle() {
+        ykesSeciliKoltuklar = [];
+        ykesMevcutKoltukListesi.forEach(k => {
+            if (!k.dolu) {
+                const b = ykesGetElement("btnKoltuk_" + k.no);
+                if (b) {
+                    b.style.background = "#ffffff";
+                    b.style.color = "#15803d";
+                    b.style.borderColor = "#86efac";
+                }
+            }
+        });
+        ykesYolcuFormunuYenile();
+    }
+
+    function ykesYolcuFormunuYenile() {
+        const container = ykesGetElement("yolcuListesiFormu");
+        const btnKaydet = ykesGetElement("btnKaydet");
+        const sayac = ykesGetElement("seciliSayac");
+
+        sayac.innerText = ykesSeciliKoltuklar.length;
+        btnKaydet.disabled = (ykesSeciliKoltuklar.length === 0);
+
+        if (ykesSeciliKoltuklar.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
+                Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = "";
+
+        ykesSeciliKoltuklar.forEach((kNo, index) => {
+            const card = document.createElement("div");
+            card.className = "passenger-card";
+            card.innerHTML = `
+                <div class="passenger-card-header">
+                    <span>💺 Koltuk No: ${kNo} (${index + 1}. Yolcu)</span>
+                    <button type="button" onclick="ykesKoltukTiklandi(${kNo})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">✖ Kaldır</button>
+                </div>
+                
+                <!-- Satır 1: Ad Soyad & Cinsiyet -->
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Yolcu Adı Soyadı:</label>
+                        <input type="text" id="ykes-ad_${kNo}" placeholder="Örn: Selçuk Üstün" style="font-weight:600;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Cinsiyet:</label>
+                        <select id="ykes-cins_${kNo}">
+                            <option value="E">👨 Erkek</option>
+                            <option value="K">👩 Kadın</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Satır 2: T.C. Kimlik & Doğum Tarihi (Opsiyonel) -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">T.C. Kimlik / Pasaport:</label>
+                        <input type="text" id="ykes-tc_${kNo}" maxlength="11" placeholder="11 Haneli T.C.">
+                    </div>
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Doğum Tarihi (Opsiyonel):</label>
+                        <input type="text" id="ykes-dogum_${kNo}" placeholder="GG.AA.YYYY">
+                    </div>
+                </div>
+
+                <!-- Satır 3: Telefon & Biniş Durağı -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Telefon Numarası:</label>
+                        <input type="text" id="ykes-tel_${kNo}" placeholder="0532..." value="">
+                    </div>
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Biniş Durağı:</label>
+                        <select id="ykes-durak_${kNo}">
+                            <option value="Mersin - Vipol">Mersin - Vipol</option>
+                            <option value="Mersin - Forum">Mersin - Forum</option>
+                            <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
+                            <option value="Tarsus - Ofis" selected>Tarsus - Ofis</option>
+                            <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
+                            <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
+                            <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
+                            <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function ykesTopluDurakUygula() {
+        const secilen = ykesGetElement("topluDurakSecici").value;
+        if (!secilen) return;
+        ykesSeciliKoltuklar.forEach(kNo => {
+            const el = ykesGetElement(`durak_${kNo}`);
+            if (el) el.value = secilen;
+        });
+    }
+
+    function ykesTopluTelUygula() {
+        const val = ykesGetElement("topluTelInput").value;
+        ykesSeciliKoltuklar.forEach(kNo => {
+            const el = ykesGetElement(`tel_${kNo}`);
+            if (el) el.value = val;
+        });
+    }
+
+    async function ykesGrubuKaydet() {
+        if (!ykesAktifDosyaId || ykesSeciliKoltuklar.length === 0) return;
+
+        const yolcular = [];
+        for (const kNo of ykesSeciliKoltuklar) {
+            const ad = ykesGetElement(`ad_${kNo}`)?.value.trim();
+            if (!ad) {
+                alert(`Lütfen Koltuk ${kNo} için yolcu adı girin!`);
+                ykesGetElement(`ad_${kNo}`)?.focus();
+                return;
+            }
+            yolcular.push({
+                koltuk_no: kNo,
+                ad_soyad: ad,
+                cinsiyet: ykesGetElement(`cins_${kNo}`)?.value || 'E',
+                tc_kimlik: ykesGetElement(`tc_${kNo}`)?.value.trim() || '',
+                dogum_tarihi: ykesGetElement(`dogum_${kNo}`)?.value.trim() || '',
+                telefon: ykesGetElement(`tel_${kNo}`)?.value.trim() || '-',
+                binis_duragi: ykesGetElement(`durak_${kNo}`)?.value || ''
+            });
+        }
+
+        const btn = ykesGetElement("btnKaydet");
+        btn.disabled = true;
+        ykesBildirimGoster(`⏳ ${yolcular.length} yolcu kaydediliyor...`, "#0369a1", "#eff6ff", "#bfdbfe");
+
+        try {
+            const res = await fetch(`${YKES_API_BASE}/api/grup-kaydet`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    dosya_id: ykesAktifDosyaId,
+                    kapasite: ykesAktifKapasiteTipi,
+                    yolcular: yolcular
+                })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.hata);
+
+            ykesBildirimGoster(`✅ Başarılı: ${data.mesaj}`, "#166534", "#f0fdf4", "#bbf7d0");
+
+            ykesSeciliKoltuklar = [];
+            ykesYolcuFormunuYenile();
+            ykesTurSecildi();
+
+        } catch (err) {
+            ykesBildirimGoster(`❌ Kayıt Hatası: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
+            btn.disabled = false;
+        }
+    }
+
+    function ykesBildirimGoster(mesaj, renk, arkaplan, kenarlik) {
+        const durum = ykesGetElement("durumKutusu");
+        durum.style.display = "block";
+        durum.style.color = renk;
+        durum.style.background = arkaplan;
+        durum.style.border = "1px solid " + kenarlik;
+        durum.innerHTML = mesaj;
+    }
+
+    document.addEventListener("DOMContentLoaded", ykesTurlariYukle);
 const OPERATOR_KULLANICI_ADI = "selcukustun";
 const OPERATOR_SIFRE = "selcukustun1234";
 
@@ -35,6 +564,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeCard = document.getElementById("mesafeOlcerCard");
     const kdvCard = document.getElementById("kdvHesaplayiciCard");
     const taksitCard = document.getElementById("taksitTablosuCard");
+    const ykesCard = document.getElementById("ykesCard");
     const ibanCard = document.getElementById("ibanBilgisiCard");
     const uetdsCard = document.getElementById("uetdsCard");
     const durakCard = document.getElementById("durakListesiCard");
@@ -48,6 +578,7 @@ function panelSekmesiDegistir(sekme) {
     const mesafeTab = document.getElementById("tabMesafe");
     const kdvTab = document.getElementById("tabKdv");
     const taksitTab = document.getElementById("tabTaksit");
+    const ykesTab = document.getElementById("tabYkes");
     const ibanTab = document.getElementById("tabIban");
     const uetdsTab = document.getElementById("tabUetds");
     const durakTab = document.getElementById("tabDurak");
@@ -59,6 +590,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeTab) mesafeTab.classList.remove("active");
     if (kdvTab) kdvTab.classList.remove("active");
     if (taksitTab) taksitTab.classList.remove("active");
+    if (ykesTab) ykesTab.classList.remove("active");
     if (ibanTab) ibanTab.classList.remove("active");
     if (uetdsTab) uetdsTab.classList.remove("active");
     if (durakTab) durakTab.classList.remove("active");
@@ -70,6 +602,7 @@ function panelSekmesiDegistir(sekme) {
     if (mesafeCard) mesafeCard.style.display = "none";
     if (kdvCard) kdvCard.style.display = "none";
     if (taksitCard) taksitCard.style.display = "none";
+    if (ykesCard) ykesCard.style.display = "none";
     if (ibanCard) ibanCard.style.display = "none";
     if (uetdsCard) uetdsCard.style.display = "none";
     if (durakCard) durakCard.style.display = "none";
@@ -87,6 +620,12 @@ function panelSekmesiDegistir(sekme) {
         if (taksitTab) taksitTab.classList.add("active");
         if (taksitCard) taksitCard.style.display = "block";
         taksitArayuzunuHazirla();
+        return;
+    }
+
+    if (sekme === "ykes") {
+        if (ykesTab) ykesTab.classList.add("active");
+        if (ykesCard) ykesCard.style.display = "block";
         return;
     }
 
