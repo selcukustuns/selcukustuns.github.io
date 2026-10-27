@@ -3621,7 +3621,7 @@ let REHBER_HAVUZU = {
         tcKimlik: "***********",
         ruhsatNo: "*****",
         sicilNo: "**-****",
-        bolgeler: ["AKDENİZ", "İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
+        bolgeler: ["İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
         diller: "TR(TÜRKÇE)",
         adres: "********************",
         telefon: "05** *** ** **",
