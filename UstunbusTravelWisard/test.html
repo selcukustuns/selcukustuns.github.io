@@ -710,6 +710,9 @@
             return;
         }
 
+        let basarili = false;
+
+        // 1. Önce Vercel Köprüsünü Dene
         try {
             const res = await fetch(`${BRIDGE_API_BASE}/api/rehber-bilgisi`, {
                 headers: { "Authorization": `Bearer ${pass}` }
@@ -719,30 +722,40 @@
                 const data = await res.json();
                 if (data.rehberler) {
                     REHBER_HAVUZU = data.rehberler;
-                }
-            } else {
-                if (pass === "selcukustun1234") {
-                    REHBER_HAVUZU.selcuk_ustun.tcKimlik = "48463112830";
-                    REHBER_HAVUZU.selcuk_ustun.ruhsatNo = "015675";
-                    REHBER_HAVUZU.selcuk_ustun.sicilNo = "06-1384";
-                    REHBER_HAVUZU.selcuk_ustun.adres = "ŞEHİTMUSTAFA MAH. ŞEHİT CENGİZ TOPEL CAD. İÇELLİ PASAJI NO:11/103 TARSUS/MERSİN";
-                    REHBER_HAVUZU.selcuk_ustun.telefon = "0538 747 64 64 - 0505 842 33 33";
-
-                    REHBER_HAVUZU.mustafa_postlu.tcKimlik = "28591902398";
-                    REHBER_HAVUZU.mustafa_postlu.ruhsatNo = "15829";
-                    REHBER_HAVUZU.mustafa_postlu.sicilNo = "6889";
-                    REHBER_HAVUZU.mustafa_postlu.telefon = "0530 279 08 72";
-
-                    REHBER_HAVUZU.berkan_yildirim.tcKimlik = "49375209076";
-                    REHBER_HAVUZU.berkan_yildirim.ruhsatNo = "008480";
-                    REHBER_HAVUZU.berkan_yildirim.sicilNo = "01-58-8480";
-                    REHBER_HAVUZU.berkan_yildirim.telefon = "0553 936 45 33";
-                } else {
-                    alert("❌ Hatalı Güvenlik Şifresi! Kişisel veriler gösterilemez.");
-                    return;
+                    basarili = true;
                 }
             }
+        } catch (err) {
+            console.warn("Vercel köprüsünde /api/rehber-bilgisi henüz aktif değil, yerel doğrulamaya geçiliyor.");
+        }
 
+        // 2. Vercel Endpoint Yoksa veya Hata Verdiyse Yerel Doğrulama Yap
+        if (!basarili) {
+            if (pass === "selcukustun1234") {
+                REHBER_HAVUZU.selcuk_ustun.tcKimlik = "48463112830";
+                REHBER_HAVUZU.selcuk_ustun.ruhsatNo = "015675";
+                REHBER_HAVUZU.selcuk_ustun.sicilNo = "06-1384";
+                REHBER_HAVUZU.selcuk_ustun.adres = "ŞEHİTMUSTAFA MAH. ŞEHİT CENGİZ TOPEL CAD. İÇELLİ PASAJI NO:11/103 TARSUS/MERSİN";
+                REHBER_HAVUZU.selcuk_ustun.telefon = "0538 747 64 64 - 0505 842 33 33";
+
+                REHBER_HAVUZU.mustafa_postlu.tcKimlik = "28591902398";
+                REHBER_HAVUZU.mustafa_postlu.ruhsatNo = "15829";
+                REHBER_HAVUZU.mustafa_postlu.sicilNo = "6889";
+                REHBER_HAVUZU.mustafa_postlu.telefon = "0530 279 08 72";
+
+                REHBER_HAVUZU.berkan_yildirim.tcKimlik = "49375209076";
+                REHBER_HAVUZU.berkan_yildirim.ruhsatNo = "008480";
+                REHBER_HAVUZU.berkan_yildirim.sicilNo = "01-58-8480";
+                REHBER_HAVUZU.berkan_yildirim.telefon = "0553 936 45 33";
+                
+                basarili = true;
+            } else {
+                alert("❌ Hatalı Güvenlik Şifresi! Kişisel veriler gösterilemez.");
+                return;
+            }
+        }
+
+        if (basarili) {
             guvenlikKilidiAcik = true;
             document.getElementById("kilitDurumuIcon").innerText = "🔓";
             document.getElementById("kilitDurumuMetin").innerText = "Kişisel Veri Kilidi Açık (Tüm Bilgiler Yüklendi)";
@@ -751,10 +764,6 @@
 
             rehberSecimiDegisti();
             alert("✅ T.C., Ruhsat, Sicil ve iletişim bilgileri başarıyla yüklendi.");
-
-        } catch (err) {
-            console.warn("Köprü bağlantı hatası:", err);
-            alert("Sunucuya bağlanılamadı.");
         }
     }
 
