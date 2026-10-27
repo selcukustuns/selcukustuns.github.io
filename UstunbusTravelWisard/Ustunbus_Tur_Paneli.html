@@ -29,6 +29,7 @@
     <button id="tabEvrak" class="ust-panel-tab" onclick="panelSekmesiDegistir('evrak')">🗂️ Evrak Yönetimi</button>
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
+    <button id="tabSozlesme" class="ust-panel-tab" onclick="panelSekmesiDegistir('sozlesme')">📑 Acente-Rehber Sözleşmesi</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
@@ -457,6 +458,404 @@
         <button onclick="kdvOzetiKopyala()" id="btnKdvKopyala" class="btn-blue" style="flex:1;">📋 Hesaplama Özetini Kopyala</button>
         <button onclick="kdvSifirla()" class="btn-small" style="background:#94a3b8; color:white;">Temizle</button>
     </div>
+</div>
+
+<!-- 5. ACENTE-REHBER SÖZLEŞME MODÜLÜ -->
+<div id="sozlesmeCard" style="display:none; max-width: 1050px; margin: 0 auto 20px auto;">
+<div class="sozlesme-kontrol sozlesme-no-print">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
+        <div>
+            <h2 style="margin:0; font-size:17px; color:var(--dark);">📑 Acente-Rehber Sözleşme Modülü</h2>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-main btn-green" onclick="sozlesmeyiYazdir()">
+                🖨️ Sözleşmeyi Yazdır / PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- GÜVENLİK / KİLİT AÇMA VE ÇIKIŞ BARI -->
+    <div class="auth-bar">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span id="kilitDurumuMetin" style="font-size:12.5px; font-weight:700; color:#92400e;">
+                Hassas Veriler Kilitli 🔒
+            </span>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <input type="password" id="authPassword" placeholder="Yönetici Şifresi" autocomplete="current-password" style="width:170px; padding:6px 10px; font-size:12px; margin:0;" onkeydown="if(event.key==='Enter') verileriGuvenliCoz()">
+            <button type="button" id="btnAuthGiris" class="btn-main btn-orange" onclick="verileriGuvenliCoz()" style="padding:6px 14px; font-size:12px;">
+                🔓 Kilidi Aç
+            </button>
+            <button type="button" id="btnAuthCikis" class="btn-main btn-red" onclick="guvenliOturumuKapat()" style="display:none; padding:6px 14px; font-size:12px;">
+                🔒 Çıkış Yap
+            </button>
+        </div>
+    </div>
+
+    <!-- 1. BÖLÜM: REHBER SEÇİMİ VE ODALAR -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+        <div class="form-grid-3" style="align-items:center;">
+            <div>
+                <label style="color:#1e40af;">👤 Rehber Seçimi:</label>
+                <select id="sel_rehberMod" onchange="rehberSecimiDegisti()" style="background:#fff; font-weight:700; color:#1e3a8a;">
+                    <option value="selcuk_ustun">⭐ Selçuk Üstün (ANRO)</option>
+                    <option value="mustafa_postlu">👤 Mustafa Postlu (İRO)</option>
+                    <option value="berkan_yildirim">👤 Berkan Yıldırım (ADRO)</option>
+                    <option value="manuel">✍️ Manuel Rehber Bilgisi Gir</option>
+                </select>
+            </div>
+            <div>
+                <label style="color:#1e40af;">🎓 Rehberlik Türü:</label>
+                <select id="sel_rehberTuru" onchange="rehberTuruDegisti()" style="background:#fff; font-weight:700;">
+                    <option value="bolgesel">Bölgesel Rehber</option>
+                    <option value="ulkesel">Ülkesel Rehber</option>
+                </select>
+            </div>
+            <div>
+                <label style="color:#1e40af;">🏛️ Bağlı Olduğu Oda (13 TUREB Odası):</label>
+                <select id="in_rehberOda" onchange="dokumanaYansit()" style="background:#fff; font-weight:600;">
+                    <option value="ADRO">1. ADRO - Adana Bölgesel Turist Rehberleri Odası</option>
+                    <option value="ANRO">2. ANRO - Ankara Turist Rehberleri Odası</option>
+                    <option value="ARO">3. ARO - Antalya Rehberler Odası</option>
+                    <option value="ATRO">4. ATRO - Aydın Turist Rehberleri Odası</option>
+                    <option value="BURO">5. BURO - Bursa Bölgesel Turist Rehberleri Odası</option>
+                    <option value="ÇARO">6. ÇARO - Çanakkale Bölgesel Turist Rehberleri Odası</option>
+                    <option value="GARO">7. GARO - Gaziantep Bölgesel Turist Rehberleri Odası</option>
+                    <option value="İRO">8. İRO - İstanbul Rehberler Odası</option>
+                    <option value="İZRO">9. İZRO - İzmir Turist Rehberleri Odası</option>
+                    <option value="MUTRO">10. MUTRO - Muğla Turist Rehberleri Odası</option>
+                    <option value="NERO">11. NERO - Nevşehir Turist Rehberleri Odası</option>
+                    <option value="ŞURO">12. ŞURO - Şanlıurfa Bölgesel Turist Rehberleri Odası</option>
+                    <option value="TRO">13. TRO - Trabzon Bölgesel Turist Rehberleri Odası</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="bolgeSecimAlani" style="margin-top: 10px;">
+            <label style="color:#1e40af;">🗺️ Yetkili Coğrafi Bölgeleri Seçin (7 Bölge):</label>
+            <div class="bolge-checkbox-container">
+                <label class="bolge-check-item"><input type="checkbox" value="AKDENİZ" onchange="dokumanaYansit()" checked> Akdeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="İÇ ANADOLU" onchange="dokumanaYansit()" checked> İç Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="KARADENİZ" onchange="dokumanaYansit()" checked> Karadeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="DOĞU ANADOLU" onchange="dokumanaYansit()" checked> Doğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="GÜNEYDOĞU ANADOLU" onchange="dokumanaYansit()" checked> Güneydoğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="EGE" onchange="dokumanaYansit()"> Ege</label>
+                <label class="bolge-check-item"><input type="checkbox" value="MARMARA" onchange="dokumanaYansit()"> Marmara</label>
+            </div>
+        </div>
+
+        <div id="rehberDetayFormu" style="margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+            <div>
+                <label>Rehber Ad Soyad:</label>
+                <input type="text" id="in_rehberAd" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>T.C. Kimlik No:</label>
+                <input type="text" id="in_rehberTc" maxlength="11" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Ruhsatname No:</label>
+                <input type="text" id="in_rehberRuhsat" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Sicil No:</label>
+                <input type="text" id="in_rehberSicil" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Telefon:</label>
+                <input type="text" id="in_rehberTel" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>E-Posta:</label>
+                <input type="text" id="in_rehberEposta" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Dili / Dilleri:</label>
+                <input type="text" id="in_rehberDil" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label>İkametgah Adresi:</label>
+                <input type="text" id="in_rehberAdres" autocomplete="off" oninput="dokumanaYansit()">
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. BÖLÜM: TARİH, SÜRE VE ÇARPIM HESABI -->
+    <div class="form-grid-4">
+        <div>
+            <label>Tur Başlangıç Tarihi:</label>
+            <input type="date" id="form_turBaslangic" onchange="turTarihiDegisti()">
+            
+            <div class="hizli-btn-grup">
+                <button type="button" class="hizli-btn active" id="btnSure0" onclick="turSuresiSec(0)">☀️ Günübirlik (1G)</button>
+                <button type="button" class="hizli-btn" id="btnSure1" onclick="turSuresiSec(1)">1G 2G (2G)</button>
+                <button type="button" class="hizli-btn" id="btnSure2" onclick="turSuresiSec(2)">2G 3G (3G)</button>
+                <button type="button" class="hizli-btn" id="btnSure3" onclick="turSuresiSec(3)">3G 4G (4G)</button>
+            </div>
+        </div>
+
+        <div>
+            <label>Tur Bitiş Tarihi:</label>
+            <input type="date" id="form_turBitis" onchange="turBitisTarihiDegisti()">
+
+            <label style="margin-top:6px;">Sözleşme Tanzim Tarihi:</label>
+            <input type="date" id="form_sozlesmeTarih" oninput="dokumanaYansit()">
+        </div>
+
+        <div>
+            <label style="color:#b45309;">Hizmet Türü:</label>
+            <select id="form_hizmetTuru" onchange="hizmetTuruManuelDegisti()" style="background:#fffbeb; border-color:#fde68a; font-weight:700;">
+                <option value="gunluk">A- Günlük Tur (Taban: 5.566 ₺)</option>
+                <option value="paket">C- Paket Tur (Taban: 6.708 ₺)</option>
+                <option value="transfer">B- Transfer (Taban: 2.790 ₺)</option>
+            </select>
+
+            <label style="margin-top:6px;">Günlük Yevmiye (₺):</label>
+            <input type="number" id="form_gunlukYevmiye" value="5566" oninput="yevmiyeDegisti()" style="font-weight:bold; color:#1e40af;">
+        </div>
+
+        <div>
+            <label>Toplam İş Günü:</label>
+            <input type="text" id="form_gunSayisiGosterge" value="1 Gün" readonly style="font-weight:bold; background:#e2e8f0; text-align:center;">
+
+            <label style="margin-top:6px; color:#15803d;">Toplam Tutar (₺):</label>
+            <input type="number" id="form_toplamUcret" value="5566" oninput="toplamUcretManuelDegisti()" style="font-weight:800; color:#15803d; font-size:15px;">
+        </div>
+    </div>
+
+    <div class="form-grid-3">
+        <div>
+            <label>Kişi Sayısı:</label>
+            <input type="number" id="form_kisiSayisi" value="46" oninput="dokumanaYansit()">
+        </div>
+        <div>
+            <label>Tur Programı Başlığı:</label>
+            <input type="text" id="form_turBaslik" value="KAPADOKYA TURU PROGRAMI" oninput="dokumanaYansit()">
+        </div>
+        <div>
+            <label>Müşteri Milliyeti ve Dili:</label>
+            <input type="text" id="form_dil" value="Türk / Türkçe" oninput="dokumanaYansit()">
+        </div>
+    </div>
+
+    <div>
+        <label>Gezilecek Yerler / Tur Akışı (Noktalı Alan):</label>
+        <textarea id="form_programDetay" rows="2" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, KAPADOKYA, ONYX TAŞ ATOLYESİ</textarea>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 1. SAYFA (SÖZLEŞMENİN TARAFLARI, TUR, ÜCRET TABLOSU)           -->
+<!-- ============================================================== -->
+<div class="a4-container">
+    <div class="a4-page">
+        <div class="header-top">
+            <img src="icons/ustunbuslogo.png" alt="Üstünbus Turizm" class="logo-ustunbus" onerror="this.src='icons/favicon.png';">
+            <div class="logos-right">
+                <div class="logo-box">
+                    <img src="icons/tursablogo.png" alt="TÜRSAB">
+                    <span class="t1">TÜRKİYE SEYAHAT ACENTALARI BİRLİĞİ</span>
+                    <span class="t2">ASSOCIATION OF TURKISH TRAVEL AGENCIES</span>
+                </div>
+                <div class="logo-box">
+                    <img src="icons/tureblogo.png" alt="TUREB">
+                    <span class="t1">TURİST REHBERLERİ BİRLİĞİ</span>
+                    <span class="t2">TURKISH TOURIST GUIDES ASSOCIATION</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-title">ACENTE-REHBER HİZMET SÖZLEŞMESİ</div>
+
+        <!-- 1. Sözleşmenin Tarafları -->
+        <div class="sec-header">1.Sözleşmenin Tarafları</div>
+        
+        <div class="sub-header">ACENTE</div>
+        <div class="meta-list">
+            <span class="meta-label">Unvanı</span>
+            <span class="meta-value">: ÖZ ÜSTÜNBUS TURİZM VE SEYAHAT ACENTESİ</span>
+            <span class="meta-label">TÜRSAB İşletme Belge No</span>
+            <span class="meta-value">: A-12982</span>
+            <span class="meta-label">Adresi</span>
+            <span class="meta-value">: ŞEHİTLER TEPESİ MAH. 3631 SOKAK KILINÇ APT NO:5A TARSUS/ MERSİN</span>
+            <span class="meta-label">Telefon No</span>
+            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0324 624 11 11</span>
+            <span class="meta-label">İnternet Adresi</span>
+            <span class="meta-value">: www.ustunbusturizm.com</span>
+        </div>
+
+        <div class="sub-header">REHBER</div>
+        <div class="meta-list">
+            <span class="meta-label">Adı Soyadı</span>
+            <span class="meta-value">: <strong id="doc_rehberAd"></strong></span>
+            
+            <span class="meta-label">T.C Kimlik No.</span>
+            <span class="meta-value">: <strong id="doc_rehberTc">***********</strong></span>
+            
+            <span class="meta-label">Ruhsatname No.</span>
+            <span class="meta-value">: <strong id="doc_rehberRuhsat">*****</strong></span>
+            
+            <span class="meta-label">Sicil No</span>
+            <span class="meta-value">: <strong id="doc_rehberSicil">**-****</strong></span>
+            
+            <span class="meta-label">Bölgesel Rehber İse Bölgesi/ Bölgeleri</span>
+            <span class="meta-value">: <span id="doc_rehberBolge"></span></span>
+            
+            <span class="meta-label">Dili/ Dilleri</span>
+            <span class="meta-value">: <span id="doc_rehberDil">TR(TÜRKÇE)</span></span>
+            
+            <span class="meta-label">İkametgah Adresi</span>
+            <span class="meta-value">: <span id="doc_rehberAdres">********************</span></span>
+            
+            <span class="meta-label">Ev ve Mobil Tel No. :</span>
+            <span class="meta-value">: <strong id="doc_rehberTel">05** *** ** **</strong></span>
+            
+            <span class="meta-label">E-Posta</span>
+            <span class="meta-value">: <strong id="doc_rehberEposta">***@***.com</strong></span>
+            
+            <span class="meta-label">Oda</span>
+            <span class="meta-value">: <strong id="doc_rehberOda">ANRO</strong></span>
+        </div>
+
+        <!-- 2. Rehberlik Hizmeti Verilecek Tur -->
+        <div class="sec-header">2.Rehberlik Hizmeti Verilecek Tur</div>
+        <div class="meta-list">
+            <span class="meta-label">Turun Başlangıç Ve Bitiş Tarihi</span>
+            <span class="meta-value">: <strong id="doc_turTarih">07.11.2026 - 07.11.2026</strong></span>
+            
+            <span class="meta-label">Kişi Sayısı</span>
+            <span class="meta-value">: <strong id="doc_kisiSayisi">46</strong></span>
+            
+            <span class="meta-label">Müşteri Milliyeti Ve Talep Edilen Dil/ Diller</span>
+            <span class="meta-value">: <strong id="doc_dil">Türk / Türkçe</strong></span>
+            
+            <span class="meta-label">Tur Programı*</span>
+            <span class="meta-value">: <strong id="doc_turBaslik">KAPADOKYA TURU PROGRAMI</strong></span>
+            
+            <span class="meta-label">TUR DETAYI EKTE MEVCUTTUR.</span>
+            <span class="meta-value"></span>
+        </div>
+
+        <div class="dotted-box" id="doc_programSatir1">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ,</div>
+        <div class="dotted-box" id="doc_programSatir2">KAPADOKYA, ONYX TAŞ ATOLYESİ</div>
+        <div class="dotted-box" style="min-height: 14px;"></div>
+
+        <div style="font-size: 10px; color:#111; margin-top: 8px; margin-bottom: 8px;">
+            *Taraflarca imzalanıp kaşelenmesi koşuluyla tur programı sözleşmeye eklenebilir.
+        </div>
+
+        <!-- 3. Uzlaşılan Rehberlik Hizmeti Ücreti -->
+        <div class="sec-header">3.Uzlaşılan Rehberlik Hizmeti Ücreti**</div>
+
+        <table class="fee-table">
+            <thead>
+                <tr>
+                    <th class="col-srv">Hizmet</th>
+                    <th class="col-cnt">Adet (Gün)</th>
+                    <th class="col-fee">Büyükşehir Olmayan (TL)</th>
+                    <th class="col-fee">Büyükşehir (TL)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="row_transfer">
+                    <td class="col-srv">Transfer</td>
+                    <td class="col-cnt" id="cell_cnt_transfer"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_transfer"></td>
+                </tr>
+                <tr id="row_gece">
+                    <td class="col-srv">Gece Turu</td>
+                    <td class="col-cnt" id="cell_cnt_gece"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_gece"></td>
+                </tr>
+                <tr id="row_gunluk">
+                    <td class="col-srv">Günlük Tur</td>
+                    <td class="col-cnt" id="cell_cnt_gunluk">1</td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_gunluk">5.566 TL</td>
+                </tr>
+                <tr id="row_paket">
+                    <td class="col-srv">Paket Tur</td>
+                    <td class="col-cnt" id="cell_cnt_paket"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_paket"></td>
+                </tr>
+                <tr id="row_yurtdisi">
+                    <td class="col-srv">Yurtdışı</td>
+                    <td class="col-cnt" id="cell_cnt_yurtdisi"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_yurtdisi"></td>
+                </tr>
+                <tr style="font-weight: bold; background: #f8fafc;">
+                    <td class="col-srv">Toplam</td>
+                    <td class="col-cnt" id="cell_cnt_toplam">1</td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_toplam">5.566 TL</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="font-size: 13.5px; font-weight: 700; margin-top: 8px;">
+            Toplam Rehberlik Ücreti: <span id="doc_toplamUcret" style="font-weight: 800; color: #000;">5.566 TL</span>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 2. SAYFA (HÜKÜMLER, İHBAR, İMZALAR)                            -->
+    <!-- ============================================================== -->
+    <div class="a4-page">
+        <div class="notes-p" style="margin-top: 25px;">
+            **Rehber, turu gerçekleştiren acentede bordrolu çalışan ise, maaş bordrosunun şirket kaşeli fotokopisinin veya aylık ücret hesap pusulasının aslının ibraz edilmesi halinde bu bölüm doldurulmayacaktır.
+        </div>
+
+        <div class="notes-p">
+            **Rehber, turu gerçekleştiren acentenin sahibi/ ortağı ise, ortaklık durumunu gösteren ticaret sicil gazetesinin fotokopisinin ibraz edilmesi halinde bu bölüm doldurulmayacaktır.
+        </div>
+
+        <div class="article-title" style="margin-top: 30px;">4.Ödeme Şekli</div>
+        <div style="font-size: 12px; margin-bottom: 20px; line-height: 1.6;">
+            -Banka Havalesi/ EFT<br>
+            -Nakten
+        </div>
+
+        <div class="article-title">5. Acente-Rehber Hizmet Sözleşmesi Genel Hükümleri</div>
+        <div class="article-body">
+            İşbu Acente-Rehber Hizmet Sözleşmesi, 6326 sayılı Turist Rehberliği Meslek Kanunu'nun 6/3 maddesi ile Turist Rehberliği Meslek Yönetmeliğinin 36/2 maddesi uyarınca, Rehberler Birliği tarafından resmi internet sitesinde (www.tureb.org.tr) halen yayımlanan "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile tanzim edilmiştir. Taraflar, işbu sözleşme ile birlikte "Acente Rehber Hizmet Sözleşmesi Genel Hükümler"ine de uyacaklarını kabul ve taahhüt ederler.
+        </div>
+
+        <div class="article-title">6. Fesih/ İhbar Süresi</div>
+        <div class="article-body">
+            Taraflar, rehberlik hizmetinin başlayacağı tarihten en az 3 gün önce yazılı olarak bildirmek ve "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile işbu sözleşmeyi tek taraflı olarak feshedebilirler.
+        </div>
+
+        <div style="font-size: 12px; font-weight: 700; margin-top: 22px; margin-bottom: 35px;">
+            7 .İş Bu Acente-Rehber Hizmet Sözleşmesi 2 nüsha halinde <span id="doc_imzaTarih">26.10.2026</span> tarihinde imzalanmıştır.
+        </div>
+
+        <div class="signatures-grid">
+            <div>
+                <strong>ACENTE YETKİLİSİ***</strong><br>
+                Adı Soyadı : EMİN ÜSTÜN<br>
+                Unvan :ÖZ ÜSTÜNBUS TURİZM VE SEYAHAT ACENTASI<br>
+                Görevi: ŞİRKET MÜDÜRÜ<br>
+                Kaşe ve imza:<br>
+                <div style="height: 60px;"></div>
+            </div>
+
+            <div>
+                <strong>REHBER</strong><br>
+                Adı Soyadı: <span id="doc_sigRehberAd"></span><br><br>
+                İmza:<br>
+                <div style="height: 60px;"></div>
+            </div>
+        </div>
+
+        <div class="footer-disclaimer">
+            *** Acente yetkilisinin Acente adına imza atma yetkisi olması gerekmektedir. İmza sirkülerinin gösterilmesi veya sirkülerin bir nüshasının sözleşmeye eklenmesi tavsiye edilir.
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- 4. DOSYA YÜKLEME ALANI -->

@@ -694,6 +694,7 @@ function panelSekmesiDegistir(sekme) {
     const ibanCard = document.getElementById("ibanBilgisiCard");
     const uetdsCard = document.getElementById("uetdsCard");
     const durakCard = document.getElementById("durakListesiCard");
+    const sozlesmeCard = document.getElementById("sozlesmeCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -708,6 +709,7 @@ function panelSekmesiDegistir(sekme) {
     const ibanTab = document.getElementById("tabIban");
     const uetdsTab = document.getElementById("tabUetds");
     const durakTab = document.getElementById("tabDurak");
+    const sozlesmeTab = document.getElementById("tabSozlesme");
 
     if (personelTab) personelTab.classList.remove("active");
     if (operatorTab) operatorTab.classList.remove("active");
@@ -720,6 +722,7 @@ function panelSekmesiDegistir(sekme) {
     if (ibanTab) ibanTab.classList.remove("active");
     if (uetdsTab) uetdsTab.classList.remove("active");
     if (durakTab) durakTab.classList.remove("active");
+    if (sozlesmeTab) sozlesmeTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
     if (adminCard) adminCard.style.display = "none";
@@ -732,6 +735,7 @@ function panelSekmesiDegistir(sekme) {
     if (ibanCard) ibanCard.style.display = "none";
     if (uetdsCard) uetdsCard.style.display = "none";
     if (durakCard) durakCard.style.display = "none";
+    if (sozlesmeCard) sozlesmeCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
 
@@ -781,6 +785,12 @@ function panelSekmesiDegistir(sekme) {
     if (sekme === "durak") {
         if (durakTab) durakTab.classList.add("active");
         if (durakCard) durakCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "sozlesme") {
+        if (sozlesmeTab) sozlesmeTab.classList.add("active");
+        if (sozlesmeCard) sozlesmeCard.style.display = "block";
         return;
     }
 
@@ -3586,3 +3596,455 @@ async function resmiRotaDocxOlustur() {
         alert("Word belgesi oluşturulurken hata oluştu: " + e.message);
     }
 }
+
+/* ============================================================
+   ACENTE-REHBER SÖZLEŞME MODÜLÜ
+   ============================================================ */
+const TABAN_UCRETLER = {
+    gunluk: 5566,
+    paket: 6708,
+    transfer: 2790
+};
+
+const SOZLESME_API_BASE = YKES_API_BASE; // aynı Vercel köprüsü
+
+let guvenlikKilidiAcik = false;
+let aktifSeciliGece = 0;
+let aktifHesaplananGunSayisi = 1;
+let cikisBildirimZamanlayici = null;
+
+// Şifre girilmediğinde görünen maskeli boş şablon
+let REHBER_HAVUZU = {
+    selcuk_ustun: {
+        adSoyad: "SELÇUK ÜSTÜN",
+        tur: "bolgesel",
+        tcKimlik: "***********",
+        ruhsatNo: "*****",
+        sicilNo: "**-****",
+        bolgeler: ["AKDENİZ", "İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
+        diller: "TR(TÜRKÇE)",
+        adres: "********************",
+        telefon: "05** *** ** **",
+        eposta: "selcukustun@yahoo.com",
+        oda: "ANRO"
+    },
+    mustafa_postlu: {
+        adSoyad: "MUSTAFA POSTLU",
+        tur: "bolgesel",
+        tcKimlik: "***********",
+        ruhsatNo: "*****",
+        sicilNo: "****",
+        bolgeler: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ", "İÇ ANADOLU"],
+        diller: "TR(TÜRKÇE)",
+        adres: "İSTANBUL",
+        telefon: "05** *** ** **",
+        eposta: "mustafapostlu@gmail.com",
+        oda: "İRO"
+    },
+    berkan_yildirim: {
+        adSoyad: "BERKAN YILDIRIM",
+        tur: "ulkesel",
+        tcKimlik: "***********",
+        ruhsatNo: "******",
+        sicilNo: "**-**-****",
+        bolgeler: [],
+        diller: "TR / İNG (TÜRKÇE - İNGİLİZCE)",
+        adres: "ADANA",
+        telefon: "05** *** ** **",
+        eposta: "berkanyildirim@gmail.com",
+        oda: "ADRO"
+    }
+};
+
+const ILK_MASKELI_HAVUZ = JSON.parse(JSON.stringify(REHBER_HAVUZU));
+
+function sozlesmeyiYazdir() {
+    const secilenMod = document.getElementById("sel_rehberMod").value;
+    
+    if (secilenMod !== "manuel" && !guvenlikKilidiAcik) {
+        alert("⚠️ Kişisel veriler kilitli, yazdıramazsın!\nLütfen önce yönetici şifresini girip kilidi açın veya 'Manuel Rehber Gir' modunu kullanın.");
+        document.getElementById("authPassword")?.focus();
+        return;
+    }
+
+    // Sadece sözleşme sayfaları yazdırılsın (style.css içindeki body.sozlesme-yazdir kuralları)
+    document.body.classList.add("sozlesme-yazdir");
+    const yazdirmaTemizle = () => {
+        document.body.classList.remove("sozlesme-yazdir");
+        window.removeEventListener("afterprint", yazdirmaTemizle);
+    };
+    window.addEventListener("afterprint", yazdirmaTemizle);
+    window.print();
+}
+
+async function verileriGuvenliCoz() {
+    const sifreInput = document.getElementById("authPassword");
+    const btn = document.getElementById("btnAuthGiris");
+    const pass = sifreInput.value.trim();
+
+    if (!pass) {
+        sifreInput.focus();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.className = "btn-main btn-orange";
+    btn.innerHTML = `<span class="spinner"></span> Kontrol Ediliyor...`;
+
+    try {
+        const res = await fetch(`${SOZLESME_API_BASE}/api/rehber-bilgisi`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${pass}`
+            }
+        });
+
+        if (res.status === 401) {
+            await new Promise(r => setTimeout(r, 600));
+            btn.className = "btn-main btn-danger-anim";
+            btn.textContent = "❌ Hatalı Şifre!";
+            sifreInput.value = "";
+
+            await new Promise(r => setTimeout(r, 1400));
+            btn.className = "btn-main btn-orange";
+            btn.innerHTML = "🔓 Kilidi Aç";
+            btn.disabled = false;
+            sifreInput.focus();
+            return;
+        }
+
+        if (!res.ok) {
+            throw new Error("Sunucuya bağlanılamadı (" + res.status + ")");
+        }
+
+        const data = await res.json();
+        if (data.success && data.rehberler) {
+            await new Promise(r => setTimeout(r, 600));
+            btn.className = "btn-main btn-success-anim";
+            btn.innerHTML = "✅ Giriş Onaylandı";
+
+            await new Promise(r => setTimeout(r, 900));
+
+            REHBER_HAVUZU = data.rehberler;
+            guvenlikKilidiAcik = true;
+
+            if (cikisBildirimZamanlayici) clearTimeout(cikisBildirimZamanlayici);
+            const metinEl = document.getElementById("kilitDurumuMetin");
+            metinEl.innerText = "Kişisel Veri Kilidi Açık 🔓";
+            metinEl.style.color = "#16a34a";
+            sifreInput.style.display = "none";
+            btn.style.display = "none";
+
+            document.getElementById("btnAuthCikis").style.display = "inline-flex";
+
+            rehberSecimiDegisti();
+        } else {
+            throw new Error("Geçersiz veri");
+        }
+
+    } catch (err) {
+        btn.className = "btn-main btn-danger-anim";
+        btn.textContent = "❌ Sunucu Bağlantı Hatası!";
+        await new Promise(r => setTimeout(r, 1500));
+        btn.className = "btn-main btn-orange";
+        btn.innerHTML = "🔓 Kilidi Aç";
+        btn.disabled = false;
+        console.error(err);
+    }
+}
+
+function guvenliOturumuKapat() {
+    guvenlikKilidiAcik = false;
+    REHBER_HAVUZU = JSON.parse(JSON.stringify(ILK_MASKELI_HAVUZ));
+
+    const metinEl = document.getElementById("kilitDurumuMetin");
+    metinEl.innerText = "🔒 Oturum başarıyla kapatıldı. Tüm kişisel veriler yeniden kilitlendi.";
+    metinEl.style.color = "#92400e";
+
+    if (cikisBildirimZamanlayici) clearTimeout(cikisBildirimZamanlayici);
+    cikisBildirimZamanlayici = setTimeout(() => {
+        metinEl.innerText = "Hassas Veriler Kilitli 🔒";
+        metinEl.style.color = "#92400e";
+    }, 5000);
+
+    const sifreInput = document.getElementById("authPassword");
+    sifreInput.value = "";
+    sifreInput.style.display = "inline-block";
+
+    const btnGiris = document.getElementById("btnAuthGiris");
+    btnGiris.className = "btn-main btn-orange";
+    btnGiris.innerHTML = "🔓 Kilidi Aç";
+    btnGiris.disabled = false;
+    btnGiris.style.display = "inline-flex";
+
+    document.getElementById("btnAuthCikis").style.display = "none";
+
+    rehberSecimiDegisti();
+}
+
+function rehberSecimiDegisti() {
+    const secilenMod = document.getElementById("sel_rehberMod").value;
+
+    if (secilenMod === "manuel") {
+        document.getElementById("in_rehberAd").value = "";
+        document.getElementById("in_rehberTc").value = "";
+        document.getElementById("in_rehberRuhsat").value = "";
+        document.getElementById("in_rehberSicil").value = "";
+        document.getElementById("in_rehberDil").value = "TR(TÜRKÇE)";
+        document.getElementById("in_rehberAdres").value = "";
+        document.getElementById("in_rehberTel").value = "";
+        document.getElementById("in_rehberEposta").value = "";
+        document.getElementById("in_rehberOda").selectedIndex = 0;
+        document.getElementById("sel_rehberTuru").value = "bolgesel";
+
+        document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']").forEach(cb => {
+            cb.checked = false;
+        });
+
+        rehberTuruDegisti();
+        dokumanaYansit();
+        document.getElementById("in_rehberAd").focus();
+        return;
+    }
+
+    const profil = REHBER_HAVUZU[secilenMod];
+    if (profil) {
+        document.getElementById("in_rehberAd").value = profil.adSoyad;
+        document.getElementById("in_rehberTc").value = profil.tcKimlik;
+        document.getElementById("in_rehberRuhsat").value = profil.ruhsatNo;
+        document.getElementById("in_rehberSicil").value = profil.sicilNo;
+        document.getElementById("in_rehberDil").value = profil.diller;
+        document.getElementById("in_rehberAdres").value = profil.adres;
+        document.getElementById("in_rehberTel").value = profil.telefon;
+        document.getElementById("in_rehberEposta").value = profil.eposta;
+        document.getElementById("in_rehberOda").value = profil.oda;
+        document.getElementById("sel_rehberTuru").value = profil.tur;
+
+        const checkBoxes = document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']");
+        checkBoxes.forEach(cb => {
+            cb.checked = profil.bolgeler.includes(cb.value);
+        });
+
+        rehberTuruDegisti();
+    }
+}
+
+function rehberTuruDegisti() {
+    const tur = document.getElementById("sel_rehberTuru").value;
+    const bolgeAlani = document.getElementById("bolgeSecimAlani");
+
+    if (tur === "ulkesel") {
+        bolgeAlani.style.display = "none";
+    } else {
+        bolgeAlani.style.display = "block";
+    }
+    dokumanaYansit();
+}
+
+function formatTarihTR(isoStr) {
+    if (!isoStr) return "";
+    const p = isoStr.split("-");
+    return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : isoStr;
+}
+
+function sozlesmeParaFormatla(sayi) {
+    return new Intl.NumberFormat('tr-TR').format(sayi) + " TL";
+}
+
+function toplamUcretiHesapla() {
+    const yevmiye = parseFloat(document.getElementById("form_gunlukYevmiye").value) || 0;
+    const toplamTutar = yevmiye * aktifHesaplananGunSayisi;
+    document.getElementById("form_toplamUcret").value = toplamTutar;
+    dokumanaYansit();
+}
+
+function yevmiyeDegisti() {
+    toplamUcretiHesapla();
+}
+
+function toplamUcretManuelDegisti() {
+    const toplamTutar = parseFloat(document.getElementById("form_toplamUcret").value) || 0;
+    const yeniYevmiye = Math.round(toplamTutar / (aktifHesaplananGunSayisi || 1));
+    document.getElementById("form_gunlukYevmiye").value = yeniYevmiye;
+    dokumanaYansit();
+}
+
+function hesaplaVeUygulaHizmetTuru(geceFarki) {
+    const select = document.getElementById("form_hizmetTuru");
+
+    if (geceFarki <= 0) {
+        aktifHesaplananGunSayisi = 1;
+        select.value = "gunluk";
+        document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER.gunluk;
+    } else {
+        aktifHesaplananGunSayisi = geceFarki + 1;
+        select.value = "paket";
+        document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER.paket;
+    }
+
+    document.getElementById("form_gunSayisiGosterge").value = `${aktifHesaplananGunSayisi} Gün`;
+
+    [0, 1, 2, 3].forEach(g => {
+        const btn = document.getElementById(`btnSure${g}`);
+        if (btn) btn.classList.toggle("active", g === geceFarki);
+    });
+
+    toplamUcretiHesapla();
+}
+
+function turSuresiSec(geceSayisi) {
+    aktifSeciliGece = geceSayisi;
+    const baslangicStr = document.getElementById("form_turBaslangic").value;
+    if (!baslangicStr) return;
+
+    const baslangicDate = new Date(baslangicStr);
+    const bitisDate = new Date(baslangicDate);
+    bitisDate.setDate(bitisDate.getDate() + aktifSeciliGece);
+
+    document.getElementById("form_turBitis").value = bitisDate.toISOString().split("T")[0];
+    hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+}
+
+function turTarihiDegisti() {
+    const baslangicStr = document.getElementById("form_turBaslangic").value;
+    if (!baslangicStr) return;
+
+    const baslangicDate = new Date(baslangicStr);
+    const bitisDate = new Date(baslangicDate);
+    bitisDate.setDate(bitisDate.getDate() + aktifSeciliGece);
+
+    document.getElementById("form_turBitis").value = bitisDate.toISOString().split("T")[0];
+    hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+}
+
+function turBitisTarihiDegisti() {
+    const baslangicStr = document.getElementById("form_turBaslangic").value;
+    const bitisStr = document.getElementById("form_turBitis").value;
+    if (!baslangicStr || !bitisStr) return;
+
+    const d1 = new Date(baslangicStr);
+    const d2 = new Date(bitisStr);
+    const farkGun = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    aktifSeciliGece = farkGun > 0 ? farkGun : 0;
+
+    hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+}
+
+function hizmetTuruManuelDegisti() {
+    const tur = document.getElementById("form_hizmetTuru").value;
+    document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER[tur] || 5566;
+    toplamUcretiHesapla();
+}
+
+function dokumanaYansit() {
+    const secilenMod = document.getElementById("sel_rehberMod").value;
+    const manuelMi = (secilenMod === "manuel");
+
+    const inAd = document.getElementById("in_rehberAd").value.trim();
+    const inTc = document.getElementById("in_rehberTc").value.trim();
+    const inRuhsat = document.getElementById("in_rehberRuhsat").value.trim();
+    const inSicil = document.getElementById("in_rehberSicil").value.trim();
+    const inDil = document.getElementById("in_rehberDil").value.trim();
+    const inAdres = document.getElementById("in_rehberAdres").value.trim();
+    const inTel = document.getElementById("in_rehberTel").value.trim();
+    const inEposta = document.getElementById("in_rehberEposta").value.trim();
+    const inOda = document.getElementById("in_rehberOda").value;
+
+    // Boşsa tire koyma, boş bırak
+    if (manuelMi || guvenlikKilidiAcik) {
+        document.getElementById("doc_rehberAd").innerText = inAd;
+        document.getElementById("doc_sigRehberAd").innerText = inAd;
+        document.getElementById("doc_rehberTc").innerText = inTc;
+        document.getElementById("doc_rehberRuhsat").innerText = inRuhsat;
+        document.getElementById("doc_rehberSicil").innerText = inSicil;
+        document.getElementById("doc_rehberDil").innerText = inDil;
+        document.getElementById("doc_rehberAdres").innerText = inAdres;
+        document.getElementById("doc_rehberTel").innerText = inTel;
+        document.getElementById("doc_rehberEposta").innerText = inEposta;
+    } else {
+        // Şifre girilmemiş hazır profil ise maskeli tut
+        document.getElementById("doc_rehberAd").innerText = inAd;
+        document.getElementById("doc_sigRehberAd").innerText = inAd;
+        document.getElementById("doc_rehberTc").innerText = inTc || "***********";
+        document.getElementById("doc_rehberRuhsat").innerText = inRuhsat || "*****";
+        document.getElementById("doc_rehberSicil").innerText = inSicil || "**-****";
+        document.getElementById("doc_rehberDil").innerText = inDil;
+        document.getElementById("doc_rehberAdres").innerText = inAdres || "********************";
+        document.getElementById("doc_rehberTel").innerText = inTel || "05** *** ** **";
+        document.getElementById("doc_rehberEposta").innerText = inEposta || "***@***.com";
+    }
+
+    document.getElementById("doc_rehberOda").innerText = inOda;
+
+    const rehberTuru = document.getElementById("sel_rehberTuru").value;
+    if (rehberTuru === "ulkesel") {
+        document.getElementById("doc_rehberBolge").innerText = "ÜLKESEL REHBER";
+    } else {
+        const seciliBolgeler = [];
+        document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']:checked").forEach(cb => {
+            seciliBolgeler.push(cb.value);
+        });
+        document.getElementById("doc_rehberBolge").innerText = seciliBolgeler.length > 0
+            ? `BÖLGESEL (${seciliBolgeler.join(", ")})`
+            : "";
+    }
+
+    const baslangic = formatTarihTR(document.getElementById("form_turBaslangic").value) || "07.11.2026";
+    const bitis = formatTarihTR(document.getElementById("form_turBitis").value) || baslangic;
+    document.getElementById("doc_turTarih").innerText = `${baslangic} - ${bitis}`;
+
+    document.getElementById("doc_kisiSayisi").innerText = document.getElementById("form_kisiSayisi").value || "46";
+    document.getElementById("doc_turBaslik").innerText = document.getElementById("form_turBaslik").value;
+    document.getElementById("doc_dil").innerText = document.getElementById("form_dil").value;
+
+    const toplamUcret = parseFloat(document.getElementById("form_toplamUcret").value) || 0;
+    const toplamMetin = sozlesmeParaFormatla(toplamUcret);
+    const secilenHizmet = document.getElementById("form_hizmetTuru").value;
+    const adetStr = `${aktifHesaplananGunSayisi}`;
+
+    ["transfer", "gece", "gunluk", "paket", "yurtdisi"].forEach(tur => {
+        const cellCnt = document.getElementById(`cell_cnt_${tur}`);
+        const cellFee = document.getElementById(`cell_fee_${tur}`);
+        if (cellCnt) cellCnt.innerHTML = "";
+        if (cellFee) cellFee.innerText = "";
+    });
+
+    if (secilenHizmet === "gunluk") {
+        document.getElementById("cell_cnt_gunluk").innerText = adetStr;
+        document.getElementById("cell_fee_gunluk").innerText = toplamMetin;
+    } else if (secilenHizmet === "paket") {
+        document.getElementById("cell_cnt_paket").innerText = adetStr;
+        document.getElementById("cell_fee_paket").innerText = toplamMetin;
+    } else if (secilenHizmet === "transfer") {
+        document.getElementById("cell_cnt_transfer").innerText = adetStr;
+        document.getElementById("cell_fee_transfer").innerText = toplamMetin;
+    }
+
+    document.getElementById("cell_cnt_toplam").innerText = adetStr;
+    document.getElementById("cell_fee_toplam").innerText = toplamMetin;
+    document.getElementById("doc_toplamUcret").innerText = toplamMetin;
+
+    const imzaTarih = formatTarihTR(document.getElementById("form_sozlesmeTarih").value) || "26.10.2026";
+    document.getElementById("doc_imzaTarih").innerText = imzaTarih;
+
+    const detay = document.getElementById("form_programDetay").value.trim();
+    const virgulIndex = detay.lastIndexOf(",", 75);
+    if (virgulIndex > 20 && detay.length > 70) {
+        document.getElementById("doc_programSatir1").innerText = detay.substring(0, virgulIndex + 1);
+        document.getElementById("doc_programSatir2").innerText = detay.substring(virgulIndex + 1).trim();
+    } else {
+        document.getElementById("doc_programSatir1").innerText = detay;
+        document.getElementById("doc_programSatir2").innerText = "";
+    }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    const bugun = new Date().toISOString().split("T")[0];
+    document.getElementById("form_sozlesmeTarih").value = bugun;
+    document.getElementById("form_turBaslangic").value = bugun;
+    document.getElementById("form_turBitis").value = bugun;
+
+    rehberSecimiDegisti();
+    hesaplaVeUygulaHizmetTuru(0);
+    dokumanaYansit();
+});

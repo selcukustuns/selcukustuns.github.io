@@ -1191,3 +1191,259 @@ button:hover {
             font-size: 13px;
             font-weight: 700;
         }
+
+
+/* ============================================================
+   ACENTE-REHBER SÖZLEŞME MODÜLÜ  (#sozlesmeCard)
+   Tüm kurallar #sozlesmeCard altına scope edilmiştir; diğer
+   sekmelerin label / input / button stillerini etkilemez.
+   ============================================================ */
+#sozlesmeCard,
+#sozlesmeCard * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+#sozlesmeCard { color: #111; }
+#sozlesmeCard h2 { border-bottom: none; padding-bottom: 0; }
+
+#sozlesmeCard .sozlesme-kontrol {
+    max-width: 980px;
+    margin: 0 auto 25px auto;
+    background: #ffffff;
+    padding: 22px 26px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #cbd5e1;
+}
+
+#sozlesmeCard .auth-bar {
+    background: #fffdf9;
+    border: 1px solid #fbd38d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#sozlesmeCard .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+#sozlesmeCard .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+#sozlesmeCard .form-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+
+#sozlesmeCard label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #475569;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+}
+
+#sozlesmeCard input,
+#sozlesmeCard select,
+#sozlesmeCard textarea {
+    width: 100%;
+    padding: 9px 12px;
+    margin: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13.5px;
+    background: #f8fafc;
+    outline: none;
+    transition: 0.2s;
+}
+
+#sozlesmeCard input:focus,
+#sozlesmeCard select:focus,
+#sozlesmeCard textarea:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+#sozlesmeCard .bolge-checkbox-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    background: #ffffff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    margin-top: 5px;
+}
+
+#sozlesmeCard .bolge-check-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+    margin: 0;
+}
+
+#sozlesmeCard .bolge-check-item input { width: auto; margin: 0; cursor: pointer; }
+
+#sozlesmeCard .hizli-btn-grup { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+
+#sozlesmeCard .hizli-btn {
+    background: #e2e8f0;
+    color: #1e293b;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#sozlesmeCard .hizli-btn:hover,
+#sozlesmeCard .hizli-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+#sozlesmeCard button.btn-main {
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#sozlesmeCard button.btn-main:hover { transform: translateY(-1px); opacity: 0.93; }
+#sozlesmeCard .btn-blue   { background: var(--primary); color: #fff; }
+#sozlesmeCard .btn-green  { background: #16a34a; color: #fff; }
+#sozlesmeCard .btn-orange { background: var(--warning); color: #fff; }
+#sozlesmeCard .btn-red    { background: var(--danger); color: #fff; }
+#sozlesmeCard .spinner { width: 14px; height: 14px; }
+
+/* A4 ÇİFT SAYFA TASARIMI */
+#sozlesmeCard .a4-container { max-width: 820px; margin: 0 auto; }
+
+#sozlesmeCard .a4-page {
+    background: #ffffff;
+    width: 100%;
+    min-height: 1120px;
+    padding: 40px 55px;
+    margin-bottom: 30px;
+    box-shadow: 0 0 18px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    position: relative;
+}
+
+#sozlesmeCard .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+#sozlesmeCard .logo-ustunbus { height: 100px; max-width: 380px; object-fit: contain; display: block; }
+#sozlesmeCard .logos-right { display: flex; align-items: flex-start; gap: 25px; }
+
+#sozlesmeCard .logo-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 135px;
+}
+
+#sozlesmeCard .logo-box img { height: 54px; max-width: 125px; object-fit: contain; margin-bottom: 4px; }
+#sozlesmeCard .logo-box .t1 { font-size: 8px; font-weight: 800; color: #0f172a; line-height: 1.15; text-transform: uppercase; }
+#sozlesmeCard .logo-box .t2 { font-size: 7px; font-weight: 600; color: #64748b; line-height: 1.1; margin-top: 1px; }
+
+#sozlesmeCard .doc-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 20px; color: #0f172a; }
+#sozlesmeCard .sec-header { font-size: 13px; font-weight: 700; margin-top: 12px; margin-bottom: 8px; color: #000; }
+#sozlesmeCard .sub-header { font-size: 12.5px; font-weight: 700; margin-top: 8px; margin-bottom: 6px; color: #111; }
+
+#sozlesmeCard .meta-list {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    row-gap: 4px;
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+#sozlesmeCard .meta-label { color: #111; font-weight: 500; }
+#sozlesmeCard .meta-value { color: #000; font-weight: 600; word-break: break-word; }
+
+#sozlesmeCard .dotted-box {
+    border-bottom: 1px dotted #475569;
+    padding-bottom: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    min-height: 18px;
+}
+
+#sozlesmeCard table.fee-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    font-size: 12px;
+}
+
+#sozlesmeCard table.fee-table th,
+#sozlesmeCard table.fee-table td { border: 1px solid #334155; padding: 5px 8px; height: 22px; }
+#sozlesmeCard table.fee-table th { font-weight: 700; text-align: center; }
+#sozlesmeCard table.fee-table td.col-srv { width: 32%; font-weight: 500; }
+#sozlesmeCard table.fee-table td.col-cnt { width: 16%; text-align: center; font-weight: 600; }
+#sozlesmeCard table.fee-table td.col-fee { width: 26%; text-align: right; }
+
+#sozlesmeCard .notes-p { font-size: 11.5px; line-height: 1.5; color: #111; margin-bottom: 16px; }
+#sozlesmeCard .article-title { font-size: 12px; font-weight: 700; margin-top: 14px; margin-bottom: 5px; color: #000; }
+#sozlesmeCard .article-body { font-size: 11.5px; line-height: 1.45; color: #111; text-align: justify; margin-bottom: 10px; }
+
+#sozlesmeCard .signatures-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 45px;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#sozlesmeCard .footer-disclaimer {
+    position: absolute;
+    bottom: 45px;
+    left: 55px;
+    right: 55px;
+    font-size: 10px;
+    color: #334155;
+    line-height: 1.35;
+}
+
+/* SÖZLEŞME YAZDIRMA: sadece A4 sayfalar çıkar (body.sozlesme-yazdir sınıfını JS ekler/kaldırır) */
+@media print {
+    @page { size: A4 portrait; margin: 0; }
+
+    body.sozlesme-yazdir { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+    body.sozlesme-yazdir > *:not(#sozlesmeCard) { display: none !important; }
+    body.sozlesme-yazdir #sozlesmeCard { display: block !important; max-width: 100% !important; margin: 0 !important; }
+    body.sozlesme-yazdir #sozlesmeCard .sozlesme-no-print { display: none !important; }
+    body.sozlesme-yazdir #sozlesmeCard .a4-container { max-width: 100%; margin: 0; }
+    body.sozlesme-yazdir #sozlesmeCard .a4-page {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 10mm 15mm;
+        page-break-after: always;
+        min-height: auto;
+        height: 100vh;
+    }
+    body.sozlesme-yazdir #sozlesmeCard .a4-page:last-child { page-break-after: auto; }
+}

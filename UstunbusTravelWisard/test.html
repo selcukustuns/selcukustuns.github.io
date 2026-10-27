@@ -287,6 +287,7 @@
 </head>
 <body>
 
+<!-- MODÜL GİRİŞİ: Acente-Rehber sözleşmesi görünümü ve işlem kontrolleri -->
 <!-- KONTROL PANELİ -->
 <div class="no-print">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
@@ -406,7 +407,19 @@
         </div>
     </div>
 
-    <!-- 2. BÖLÜM: TARİH, SÜRE VE ÇARPIM HESABI -->
+    <!-- 2. BÖLÜM: STANDART TUR LİSTESİ VE AKILLI ÇARPIM HESABI -->
+    <div style="margin-bottom:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+        <label style="color:#0f172a; margin-bottom:8px;">⚡ Standart Tur Programları (Tek Tıkla Yükle):</label>
+        <div class="hizli-btn-grup">
+            <button type="button" class="hizli-btn active" id="btnTur_kapadokya" onclick="hizliTurUygula('kapadokya')">🎈 Kapadokya Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_ankara" onclick="hizliTurUygula('ankara')">🏛️ Ankara Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_mardin" onclick="hizliTurUygula('mardin')">🏘️ Mardin - Midyat Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_gaziantep" onclick="hizliTurUygula('gaziantep')">🥙 Gaziantep Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_eskisehir" onclick="hizliTurUygula('eskisehir')">🚤 Eskişehir Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_sanliurfa" onclick="hizliTurUygula('sanliurfa')">🕊️ Şanlıurfa Turu</button>
+        </div>
+    </div>
+
     <div class="form-grid-4">
         <div>
             <label>Tur Başlangıç Tarihi:</label>
@@ -466,7 +479,7 @@
 
     <div>
         <label>Gezilecek Yerler / Tur Akışı (Noktalı Alan):</label>
-        <textarea id="form_programDetay" rows="2" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, KAPADOKYA, ONYX TAŞ ATOLYESİ</textarea>
+        <textarea id="form_programDetay" rows="3" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</textarea>
     </div>
 </div>
 
@@ -505,7 +518,7 @@
             <span class="meta-label">Adresi</span>
             <span class="meta-value">: ŞEHİTLER TEPESİ MAH. 3631 SOKAK KILINÇ APT NO:5A TARSUS/ MERSİN</span>
             <span class="meta-label">Telefon No</span>
-            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0324 624 11 11</span>
+            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0850 532 80 00</span>
             <span class="meta-label">İnternet Adresi</span>
             <span class="meta-value">: www.ustunbusturizm.com</span>
         </div>
@@ -563,7 +576,7 @@
         </div>
 
         <div class="dotted-box" id="doc_programSatir1">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ,</div>
-        <div class="dotted-box" id="doc_programSatir2">KAPADOKYA, ONYX TAŞ ATOLYESİ</div>
+        <div class="dotted-box" id="doc_programSatir2">ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</div>
         <div class="dotted-box" style="min-height: 14px;"></div>
 
         <div style="font-size: 10px; color:#111; margin-top: 8px; margin-bottom: 8px;">
@@ -684,6 +697,7 @@
 </div>
 
 <script>
+    /* 1. SABİTLER: ücretler, API adresi ve rehber/turna ait başlangıç verileri */
     const TABAN_UCRETLER = {
         gunluk: 5566,
         paket: 6708,
@@ -742,6 +756,58 @@
 
     const ILK_MASKELI_HAVUZ = JSON.parse(JSON.stringify(REHBER_HAVUZU));
 
+    // STANDART TUR PROGRAMI ŞABLONLARI
+    const STANDART_TURLAR = {
+        kapadokya: {
+            baslik: "KAPADOKYA TURU PROGRAMI",
+            detay: "GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI",
+            gece: 0
+        },
+        ankara: {
+            baslik: "ANKARA KÜLTÜR TURU PROGRAMI",
+            detay: "KURTULUŞ SAVAŞI MÜZESİ (I. TBMM BİNASI), CUMHURİYET MÜZESİ (II. TBMM BİNASI), ETNOĞRAFYA MÜZESİ, ANITKABİR",
+            gece: 0
+        },
+        mardin: {
+            baslik: "MARDİN & MİDYAT KÜLTÜR TURU",
+            detay: "MİDYAT KONUKEVİ (SILA KONAĞI), TARİHİ SOKAKLAR, TELKARİCİLER ÇARŞISI, DEYRULZAFARAN MANASTIRI VEYA MOR GABRİEL MANASTIRI, KASIMİYE MEDRESESİ, ESKİ MARDİN EVLERİ, TARİHİ ULU CAMİİ",
+            gece: 0
+        },
+        gaziantep: {
+            baslik: "GAZİANTEP KÜLTÜR VE LEZZET TURU",
+            detay: "GAZİANTEP HAYVANAT BAHÇESİ, ZEUGMA MOZAİK MÜZESİ , PANORAMA 25 ARALIK MÜZESİ, TARİHİ BAKIRCILAR ÇARŞISI VE ALMECİ PAZARI",
+            gece: 0
+        },
+        eskisehir: {
+            baslik: "ESKİŞEHİR KÜLTÜR TURU PROGRAMI",
+            detay: "TARİHİ ODUNPAZARI EVLERİ, KURŞUNLU KÜLLİYESİ VE CAM ATÖLYELERİ, YILMAZ BÜYÜKERŞEN BALMUMU HEYKELLER MÜZESİ, PORSUK ÇAYI TEKNE TURU, SAZOVA PARKI (MASAL ŞATOSU)",
+            gece: 0
+        },
+        sanliurfa: {
+            baslik: "ŞANLIURFA & GÖBEKLİTEPE TURU",
+            detay: "GÖBEKLİTEPE ÖREN YERİ, BALIKLIGÖL (HALİL-ÜR RAHMAN), AYN ZELİHA GÖLÜ, RIZVANİYE CAMİİ, ŞANLIURFA ARKEOLOJİ MÜZESİ, TARİHİ KAPALI ÇARŞI VE GÜMRÜK HANI",
+            gece: 0
+        }
+    };
+
+    function hizliTurUygula(turKey) {
+        const tur = STANDART_TURLAR[turKey];
+        if (!tur) return;
+
+        document.getElementById("form_turBaslik").value = tur.baslik;
+        document.getElementById("form_programDetay").value = tur.detay;
+
+        // Buton stillerini güncelle
+        document.querySelectorAll(".hizli-btn-grup .hizli-btn").forEach(b => {
+            if (b.id && b.id.startsWith("btnTur_")) b.classList.remove("active");
+        });
+        const aktifBtn = document.getElementById(`btnTur_${turKey}`);
+        if (aktifBtn) aktifBtn.classList.add("active");
+
+        turSuresiSec(tur.gece);
+    }
+
+    /* 2. EYLEMLER: yazdırma, kilit açma/kapatma ve güvenli oturum işlemleri */
     function sozlesmeyiYazdir() {
         const secilenMod = document.getElementById("sel_rehberMod").value;
         
@@ -859,6 +925,7 @@
         rehberSecimiDegisti();
     }
 
+    /* 3. FORM VE HESAPLAMA: rehber/turna seçimi, tarih ve ücret hesaplamaları */
     function rehberSecimiDegisti() {
         const secilenMod = document.getElementById("sel_rehberMod").value;
 
@@ -1013,6 +1080,7 @@
         toplamUcretiHesapla();
     }
 
+    /* 4. BELGEYE YANSITMA: form değerlerini sözleşme ve imza alanlarına aktarma */
     function dokumanaYansit() {
         const secilenMod = document.getElementById("sel_rehberMod").value;
         const manuelMi = (secilenMod === "manuel");
@@ -1027,7 +1095,7 @@
         const inEposta = document.getElementById("in_rehberEposta").value.trim();
         const inOda = document.getElementById("in_rehberOda").value;
 
-        // Boşsa tire koyma, boş bırak
+        // Manuel modda veya kilit açıksa maske uygulama, kullanıcının girdiğini aynen bas (boşsa boş kalsın)
         if (manuelMi || guvenlikKilidiAcik) {
             document.getElementById("doc_rehberAd").innerText = inAd;
             document.getElementById("doc_sigRehberAd").innerText = inAd;
@@ -1115,6 +1183,7 @@
         }
     }
 
+    /* 5. BAŞLANGIÇ: varsayılan tarihler, ilk rehber seçimi ve ilk belge çıktısı */
     window.addEventListener("DOMContentLoaded", () => {
         const bugun = new Date().toISOString().split("T")[0];
         document.getElementById("form_sozlesmeTarih").value = bugun;
