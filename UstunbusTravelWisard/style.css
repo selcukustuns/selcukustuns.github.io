@@ -66,6 +66,11 @@ body {
     font-weight: 700;
 }
 
+.iban-bank-label {
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
 .iban-copy-box {
     display: flex;
     align-items: center;

@@ -3658,6 +3658,57 @@ let REHBER_HAVUZU = {
 
 const ILK_MASKELI_HAVUZ = JSON.parse(JSON.stringify(REHBER_HAVUZU));
 
+// STANDART TUR PROGRAMI ŞABLONLARI
+const STANDART_TURLAR = {
+    kapadokya: {
+        baslik: "KAPADOKYA TURU PROGRAMI",
+        detay: "GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI",
+        gece: 0
+    },
+    ankara: {
+        baslik: "ANKARA TURU PROGRAMI",
+        detay: "KURTULUŞ SAVAŞI MÜZESİ (I. TBMM BİNASI), CUMHURİYET MÜZESİ (II. TBMM BİNASI), ETNOĞRAFYA MÜZESİ, ANITKABİR",
+        gece: 0
+    },
+    mardin: {
+        baslik: "MARDİN & MİDYAT TURU PROGRAMI",
+        detay: "MİDYAT KONUKEVİ (SILA KONAĞI), TARİHİ SOKAKLAR, TELKARİCİLER ÇARŞISI, DEYRULZAFARAN MANASTIRI VEYA MOR GABRİEL MANASTIRI, KASIMİYE MEDRESESİ, ESKİ MARDİN EVLERİ, TARİHİ ULU CAMİİ",
+        gece: 0
+    },
+    gaziantep: {
+        baslik: "GAZİANTEP TURU PROGRAMI",
+        detay: "GAZİANTEP HAYVANAT BAHÇESİ, ZEUGMA MOZAİK MÜZESİ , PANORAMA 25 ARALIK MÜZESİ, TARİHİ BAKIRCILAR ÇARŞISI VE ALMECİ PAZARI",
+        gece: 0
+    },
+    eskisehir: {
+        baslik: "ESKİŞEHİR TURU PROGRAMI",
+        detay: "TARİHİ ODUNPAZARI EVLERİ, KURŞUNLU KÜLLİYESİ VE CAM ATÖLYELERİ, YILMAZ BÜYÜKERŞEN BALMUMU HEYKELLER MÜZESİ, PORSUK ÇAYI TEKNE TURU, SAZOVA PARKI (MASAL ŞATOSU)",
+        gece: 0
+    },
+    sanliurfa: {
+        baslik: "ŞANLIURFA TURU PROGRAMI",
+        detay: "GÖBEKLİTEPE ÖREN YERİ, BALIKLIGÖL (HALİL-ÜR RAHMAN), AYN ZELİHA GÖLÜ, RIZVANİYE CAMİİ, ŞANLIURFA ARKEOLOJİ MÜZESİ, TARİHİ KAPALI ÇARŞI VE GÜMRÜK HANI",
+        gece: 0
+    }
+};
+
+function hizliTurUygula(turKey) {
+    const tur = STANDART_TURLAR[turKey];
+    if (!tur) return;
+
+    document.getElementById("form_turBaslik").value = tur.baslik;
+    document.getElementById("form_programDetay").value = tur.detay;
+
+    // Buton stillerini güncelle
+    document.querySelectorAll("#sozlesmeCard .hizli-btn-grup .hizli-btn").forEach(b => {
+        if (b.id && b.id.startsWith("btnTur_")) b.classList.remove("active");
+    });
+    const aktifBtn = document.getElementById(`btnTur_${turKey}`);
+    if (aktifBtn) aktifBtn.classList.add("active");
+
+    turSuresiSec(tur.gece);
+}
+
 function sozlesmeyiYazdir() {
     const secilenMod = document.getElementById("sel_rehberMod").value;
     

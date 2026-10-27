@@ -257,9 +257,16 @@
                     <button type="button" class="iban-copy-button" onclick="ibanBilgisiKopyala('ibanCompanyName', this)">Kopyala</button>
                 </div>
 
-                <div class="iban-copy-box iban-number-box">
+                <div class="iban-company-label iban-bank-label">Akbank</div>
+                <div class="iban-copy-box">
                     <span class="iban-number" id="ibanAccountNumber">TR65 0004 6000 7488 8000 0096 26</span>
                     <button type="button" class="iban-copy-button" onclick="ibanBilgisiKopyala('ibanAccountNumber', this, true)">Kopyala</button>
+                </div>
+
+                <div class="iban-company-label iban-bank-label">Ziraat Bankası</div>
+                <div class="iban-copy-box iban-number-box">
+                    <span class="iban-number" id="ibanAccountNumberZiraat">TR76 0001 0023 2574 8483 3350 01</span>
+                    <button type="button" class="iban-copy-button" onclick="ibanBilgisiKopyala('ibanAccountNumberZiraat', this, true)">Kopyala</button>
                 </div>
             </div>
 
@@ -580,7 +587,19 @@
         </div>
     </div>
 
-    <!-- 2. BÖLÜM: TARİH, SÜRE VE ÇARPIM HESABI -->
+    <!-- 2. BÖLÜM: STANDART TUR LİSTESİ VE AKILLI ÇARPIM HESABI -->
+    <div style="margin-bottom:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+        <label style="color:#0f172a; margin-bottom:8px;">⚡ Standart Tur Programları (Tek Tıkla Yükle):</label>
+        <div class="hizli-btn-grup">
+            <button type="button" class="hizli-btn active" id="btnTur_kapadokya" onclick="hizliTurUygula('kapadokya')">🎈 Kapadokya Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_ankara" onclick="hizliTurUygula('ankara')">🏛️ Ankara Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_mardin" onclick="hizliTurUygula('mardin')">🏘️ Mardin - Midyat Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_gaziantep" onclick="hizliTurUygula('gaziantep')">🥙 Gaziantep Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_eskisehir" onclick="hizliTurUygula('eskisehir')">🚤 Eskişehir Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_sanliurfa" onclick="hizliTurUygula('sanliurfa')">🕊️ Şanlıurfa Turu</button>
+        </div>
+    </div>
+
     <div class="form-grid-4">
         <div>
             <label>Tur Başlangıç Tarihi:</label>
@@ -640,7 +659,7 @@
 
     <div>
         <label>Gezilecek Yerler / Tur Akışı (Noktalı Alan):</label>
-        <textarea id="form_programDetay" rows="2" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, KAPADOKYA, ONYX TAŞ ATOLYESİ</textarea>
+        <textarea id="form_programDetay" rows="3" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</textarea>
     </div>
 </div>
 
@@ -679,7 +698,7 @@
             <span class="meta-label">Adresi</span>
             <span class="meta-value">: ŞEHİTLER TEPESİ MAH. 3631 SOKAK KILINÇ APT NO:5A TARSUS/ MERSİN</span>
             <span class="meta-label">Telefon No</span>
-            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0324 624 11 11</span>
+            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0850 532 80 00</span>
             <span class="meta-label">İnternet Adresi</span>
             <span class="meta-value">: www.ustunbusturizm.com</span>
         </div>
@@ -737,7 +756,7 @@
         </div>
 
         <div class="dotted-box" id="doc_programSatir1">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ,</div>
-        <div class="dotted-box" id="doc_programSatir2">KAPADOKYA, ONYX TAŞ ATOLYESİ</div>
+        <div class="dotted-box" id="doc_programSatir2">ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</div>
         <div class="dotted-box" style="min-height: 14px;"></div>
 
         <div style="font-size: 10px; color:#111; margin-top: 8px; margin-bottom: 8px;">
