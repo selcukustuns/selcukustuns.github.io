@@ -28,6 +28,7 @@
             border: 1px solid #cbd5e1;
         }
 
+        /* GÜVENLİK VE GİRİŞ BARI */
         .auth-bar {
             background: #fffdf9;
             border: 1px solid #fbd38d;
@@ -131,8 +132,41 @@
         .btn-blue { background: var(--primary); color: #fff; }
         .btn-green { background: #16a34a; color: #fff; }
         .btn-orange { background: var(--warning); color: #fff; }
+        .btn-red { background: var(--danger); color: #fff; }
 
-        /* A4 ÇİFT SAYFA RESMİ ŞABLON TASARIMI */
+        /* YKES SPINNER VE ANİMASYON STİLLERİ */
+        @keyframes buttonSpinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: buttonSpinner 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .btn-success-anim {
+            background-color: var(--success) !important;
+            pointer-events: none;
+            transform: scale(1.02);
+            color: #fff !important;
+        }
+
+        .btn-danger-anim {
+            background-color: var(--danger) !important;
+            pointer-events: none;
+            transform: scale(1.02);
+            color: #fff !important;
+        }
+
+        /* A4 ÇİFT SAYFA TASARIMI */
         .a4-container { max-width: 820px; margin: 0 auto; }
 
         .a4-page {
@@ -154,7 +188,7 @@
             margin-bottom: 22px;
         }
 
-        .logo-ustunbus { height: 82px; max-width: 320px; object-fit: contain; display: block; }
+        .logo-ustunbus { height: 100px; max-width: 380px; object-fit: contain; display: block; }
         .logos-right { display: flex; align-items: flex-start; gap: 25px; }
 
         .logo-box {
@@ -258,27 +292,28 @@
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
         <div>
             <h2 style="margin:0; font-size:17px; color:var(--dark);">📑 Acente-Rehber Sözleşme Modülü</h2>
-            <span style="font-size:12px; color:#64748b;">Güvenli Mod: GitHub açık kaynakta hiçbir kişisel T.C., Ruhsat veya Sicil No yer almaz.</span>
         </div>
         <div style="display:flex; gap:8px;">
-            <button type="button" class="btn-main btn-green" onclick="window.print()">
+            <button type="button" class="btn-main btn-green" onclick="sozlesmeyiYazdir()">
                 🖨️ Sözleşmeyi Yazdır / PDF
             </button>
         </div>
     </div>
 
-    <!-- GÜVENLİK / KİLİT AÇMA BARI -->
+    <!-- GÜVENLİK / KİLİT AÇMA VE ÇIKIŞ BARI -->
     <div class="auth-bar">
         <div style="display:flex; align-items:center; gap:8px;">
-            <span id="kilitDurumuIcon">🔒</span>
             <span id="kilitDurumuMetin" style="font-size:12.5px; font-weight:700; color:#92400e;">
-                Hassas Veriler Kilitli (T.C., Ruhsat, Sicil ve İletişim Maskeli)
+                Hassas Veriler Kilitli 🔒
             </span>
         </div>
-        <div style="display:flex; gap:6px;">
-            <input type="password" id="authPassword" placeholder="Yönetici Şifresi" style="width:180px; padding:6px 10px; font-size:12px; margin:0;" onkeydown="if(event.key==='Enter') verileriGuvenliCoz()">
-            <button type="button" class="btn-main btn-orange" onclick="verileriGuvenliCoz()" style="padding:6px 12px; font-size:12px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+            <input type="password" id="authPassword" placeholder="Yönetici Şifresi" autocomplete="current-password" style="width:170px; padding:6px 10px; font-size:12px; margin:0;" onkeydown="if(event.key==='Enter') verileriGuvenliCoz()">
+            <button type="button" id="btnAuthGiris" class="btn-main btn-orange" onclick="verileriGuvenliCoz()" style="padding:6px 14px; font-size:12px;">
                 🔓 Kilidi Aç
+            </button>
+            <button type="button" id="btnAuthCikis" class="btn-main btn-red" onclick="guvenliOturumuKapat()" style="display:none; padding:6px 14px; font-size:12px;">
+                🔒 Çıkış Yap
             </button>
         </div>
     </div>
@@ -338,35 +373,35 @@
         <div id="rehberDetayFormu" style="margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
             <div>
                 <label>Rehber Ad Soyad:</label>
-                <input type="text" id="in_rehberAd" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberAd" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>T.C. Kimlik No:</label>
-                <input type="text" id="in_rehberTc" maxlength="11" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberTc" maxlength="11" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>Ruhsatname No:</label>
-                <input type="text" id="in_rehberRuhsat" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberRuhsat" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>Sicil No:</label>
-                <input type="text" id="in_rehberSicil" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberSicil" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>Telefon:</label>
-                <input type="text" id="in_rehberTel" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberTel" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>E-Posta:</label>
-                <input type="text" id="in_rehberEposta" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberEposta" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div>
                 <label>Dili / Dilleri:</label>
-                <input type="text" id="in_rehberDil" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberDil" autocomplete="off" oninput="dokumanaYansit()">
             </div>
             <div style="grid-column: 1 / -1;">
                 <label>İkametgah Adresi:</label>
-                <input type="text" id="in_rehberAdres" oninput="dokumanaYansit()">
+                <input type="text" id="in_rehberAdres" autocomplete="off" oninput="dokumanaYansit()">
             </div>
         </div>
     </div>
@@ -478,7 +513,7 @@
         <div class="sub-header">REHBER</div>
         <div class="meta-list">
             <span class="meta-label">Adı Soyadı</span>
-            <span class="meta-value">: <strong id="doc_rehberAd">-</strong></span>
+            <span class="meta-value">: <strong id="doc_rehberAd"></strong></span>
             
             <span class="meta-label">T.C Kimlik No.</span>
             <span class="meta-value">: <strong id="doc_rehberTc">***********</strong></span>
@@ -490,7 +525,7 @@
             <span class="meta-value">: <strong id="doc_rehberSicil">**-****</strong></span>
             
             <span class="meta-label">Bölgesel Rehber İse Bölgesi/ Bölgeleri</span>
-            <span class="meta-value">: <span id="doc_rehberBolge">-</span></span>
+            <span class="meta-value">: <span id="doc_rehberBolge"></span></span>
             
             <span class="meta-label">Dili/ Dilleri</span>
             <span class="meta-value">: <span id="doc_rehberDil">TR(TÜRKÇE)</span></span>
@@ -597,31 +632,31 @@
     <!-- ============================================================== -->
     <div class="a4-page">
         <div class="notes-p" style="margin-top: 25px;">
-            **Rehber, turu gerçekleştiren acentede bordrolu çalışan ise, maaş bordrosunun şirket kaşeli fotokopisinin veya aylık ücret hesap pusulasının aslının ibraz edilmesi halinde bu bölüm doldurulmayacaktır[cite: 5, 8].
+            **Rehber, turu gerçekleştiren acentede bordrolu çalışan ise, maaş bordrosunun şirket kaşeli fotokopisinin veya aylık ücret hesap pusulasının aslının ibraz edilmesi halinde bu bölüm doldurulmayacaktır.
         </div>
 
         <div class="notes-p">
-            **Rehber, turu gerçekleştiren acentenin sahibi/ ortağı ise, ortaklık durumunu gösteren ticaret sicil gazetesinin fotokopisinin ibraz edilmesi halinde bu bölüm doldurulmayacaktır[cite: 5, 8].
+            **Rehber, turu gerçekleştiren acentenin sahibi/ ortağı ise, ortaklık durumunu gösteren ticaret sicil gazetesinin fotokopisinin ibraz edilmesi halinde bu bölüm doldurulmayacaktır.
         </div>
 
         <div class="article-title" style="margin-top: 30px;">4.Ödeme Şekli</div>
         <div style="font-size: 12px; margin-bottom: 20px; line-height: 1.6;">
             -Banka Havalesi/ EFT<br>
-            -Nakten[cite: 5, 8]
+            -Nakten
         </div>
 
         <div class="article-title">5. Acente-Rehber Hizmet Sözleşmesi Genel Hükümleri</div>
         <div class="article-body">
-            İşbu Acente-Rehber Hizmet Sözleşmesi, 6326 sayılı Turist Rehberliği Meslek Kanunu'nun 6/3 maddesi ile Turist Rehberliği Meslek Yönetmeliğinin 36/2 maddesi uyarınca, Rehberler Birliği tarafından resmi internet sitesinde (www.tureb.org.tr) halen yayımlanan "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile tanzim edilmiştir[cite: 5, 8]. Taraflar, işbu sözleşme ile birlikte "Acente Rehber Hizmet Sözleşmesi Genel Hükümler"ine de uyacaklarını kabul ve taahhüt ederler[cite: 5, 8].
+            İşbu Acente-Rehber Hizmet Sözleşmesi, 6326 sayılı Turist Rehberliği Meslek Kanunu'nun 6/3 maddesi ile Turist Rehberliği Meslek Yönetmeliğinin 36/2 maddesi uyarınca, Rehberler Birliği tarafından resmi internet sitesinde (www.tureb.org.tr) halen yayımlanan "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile tanzim edilmiştir. Taraflar, işbu sözleşme ile birlikte "Acente Rehber Hizmet Sözleşmesi Genel Hükümler"ine de uyacaklarını kabul ve taahhüt ederler.
         </div>
 
         <div class="article-title">6. Fesih/ İhbar Süresi</div>
         <div class="article-body">
-            Taraflar, rehberlik hizmetinin başlayacağı tarihten en az 3 gün önce yazılı olarak bildirmek ve "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile işbu sözleşmeyi tek taraflı olarak feshedebilirler[cite: 5, 8].
+            Taraflar, rehberlik hizmetinin başlayacağı tarihten en az 3 gün önce yazılı olarak bildirmek ve "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile işbu sözleşmeyi tek taraflı olarak feshedebilirler.
         </div>
 
         <div style="font-size: 12px; font-weight: 700; margin-top: 22px; margin-bottom: 35px;">
-            7 .İş Bu Acente-Rehber Hizmet Sözleşmesi 2 nüsha halinde <span id="doc_imzaTarih">26.10.2026</span> tarihinde imzalanmıştır[cite: 5, 8].
+            7 .İş Bu Acente-Rehber Hizmet Sözleşmesi 2 nüsha halinde <span id="doc_imzaTarih">26.10.2026</span> tarihinde imzalanmıştır.
         </div>
 
         <div class="signatures-grid">
@@ -636,14 +671,14 @@
 
             <div>
                 <strong>REHBER</strong><br>
-                Adı Soyadı: <span id="doc_sigRehberAd">-</span><br><br>
+                Adı Soyadı: <span id="doc_sigRehberAd"></span><br><br>
                 İmza:<br>
                 <div style="height: 60px;"></div>
             </div>
         </div>
 
         <div class="footer-disclaimer">
-            *** Acente yetkilisinin Acente adına imza atma yetkisi olması gerekmektedir[cite: 5, 8]. İmza sirkülerinin gösterilmesi veya sirkülerin bir nüshasının sözleşmeye eklenmesi tavsiye edilir[cite: 5, 8].
+            *** Acente yetkilisinin Acente adına imza atma yetkisi olması gerekmektedir. İmza sirkülerinin gösterilmesi veya sirkülerin bir nüshasının sözleşmeye eklenmesi tavsiye edilir.
         </div>
     </div>
 </div>
@@ -660,8 +695,9 @@
     let guvenlikKilidiAcik = false;
     let aktifSeciliGece = 0;
     let aktifHesaplananGunSayisi = 1;
+    let cikisBildirimZamanlayici = null;
 
-    // Şifre girilmediğinde görünen maskeli şablon
+    // Şifre girilmediğinde görünen maskeli boş şablon
     let REHBER_HAVUZU = {
         selcuk_ustun: {
             adSoyad: "SELÇUK ÜSTÜN",
@@ -704,16 +740,33 @@
         }
     };
 
-    async function verileriGuvenliCoz() {
-        const pass = document.getElementById("authPassword").value.trim();
-        if (!pass) {
-            alert("Lütfen güvenlik şifrenizi girin!");
+    const ILK_MASKELI_HAVUZ = JSON.parse(JSON.stringify(REHBER_HAVUZU));
+
+    function sozlesmeyiYazdir() {
+        const secilenMod = document.getElementById("sel_rehberMod").value;
+        
+        if (secilenMod !== "manuel" && !guvenlikKilidiAcik) {
+            alert("⚠️ Kişisel veriler kilitli, yazdıramazsın!\nLütfen önce yönetici şifresini girip kilidi açın veya 'Manuel Rehber Gir' modunu kullanın.");
+            document.getElementById("authPassword")?.focus();
             return;
         }
 
-        const btn = event?.target || document.querySelector(".auth-bar button");
-        const eskiMetin = btn ? btn.innerText : "";
-        if (btn) { btn.disabled = true; btn.innerText = "⏳ Kontrol Ediliyor..."; }
+        window.print();
+    }
+
+    async function verileriGuvenliCoz() {
+        const sifreInput = document.getElementById("authPassword");
+        const btn = document.getElementById("btnAuthGiris");
+        const pass = sifreInput.value.trim();
+
+        if (!pass) {
+            sifreInput.focus();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.className = "btn-main btn-orange";
+        btn.innerHTML = `<span class="spinner"></span> Kontrol Ediliyor...`;
 
         try {
             const res = await fetch(`${BRIDGE_API_BASE}/api/rehber-bilgisi`, {
@@ -724,34 +777,86 @@
             });
 
             if (res.status === 401) {
-                alert("❌ Hatalı Şifre! Veriler sunucudan çekilemedi.");
+                await new Promise(r => setTimeout(r, 600));
+                btn.className = "btn-main btn-danger-anim";
+                btn.textContent = "❌ Hatalı Şifre!";
+                sifreInput.value = "";
+
+                await new Promise(r => setTimeout(r, 1400));
+                btn.className = "btn-main btn-orange";
+                btn.innerHTML = "🔓 Kilidi Aç";
+                btn.disabled = false;
+                sifreInput.focus();
                 return;
             }
 
             if (!res.ok) {
-                throw new Error("Sunucu bağlantı hatası (" + res.status + ")");
+                throw new Error("Sunucuya bağlanılamadı (" + res.status + ")");
             }
 
             const data = await res.json();
             if (data.success && data.rehberler) {
+                await new Promise(r => setTimeout(r, 600));
+                btn.className = "btn-main btn-success-anim";
+                btn.innerHTML = "✅ Giriş Onaylandı";
+
+                await new Promise(r => setTimeout(r, 900));
+
                 REHBER_HAVUZU = data.rehberler;
                 guvenlikKilidiAcik = true;
 
-                document.getElementById("kilitDurumuIcon").innerText = "🔓";
-                document.getElementById("kilitDurumuMetin").innerText = "Kişisel Veri Kilidi Açık (Vercel'den Güvenle Çekildi)";
-                document.getElementById("kilitDurumuMetin").style.color = "#16a34a";
-                document.getElementById("authPassword").style.display = "none";
-                if (btn) btn.style.display = "none";
+                if (cikisBildirimZamanlayici) clearTimeout(cikisBildirimZamanlayici);
+                const metinEl = document.getElementById("kilitDurumuMetin");
+                metinEl.innerText = "Kişisel Veri Kilidi Açık 🔓";
+                metinEl.style.color = "#16a34a";
+                sifreInput.style.display = "none";
+                btn.style.display = "none";
+
+                document.getElementById("btnAuthCikis").style.display = "inline-flex";
 
                 rehberSecimiDegisti();
-                alert("✅ Tüm T.C., Ruhsat, Sicil ve iletişim verileri Vercel Köprüsü'nden başarıyla yüklendi.");
+            } else {
+                throw new Error("Geçersiz veri");
             }
+
         } catch (err) {
-            alert("❌ Bağlantı Hatası: Vercel endpoint'ine ulaşılamadı. Lütfen Vercel dağıtımınızı kontrol edin.");
+            btn.className = "btn-main btn-danger-anim";
+            btn.textContent = "❌ Sunucu Bağlantı Hatası!";
+            await new Promise(r => setTimeout(r, 1500));
+            btn.className = "btn-main btn-orange";
+            btn.innerHTML = "🔓 Kilidi Aç";
+            btn.disabled = false;
             console.error(err);
-        } finally {
-            if (btn && !guvenlikKilidiAcik) { btn.disabled = false; btn.innerText = eskiMetin; }
         }
+    }
+
+    function guvenliOturumuKapat() {
+        guvenlikKilidiAcik = false;
+        REHBER_HAVUZU = JSON.parse(JSON.stringify(ILK_MASKELI_HAVUZ));
+
+        const metinEl = document.getElementById("kilitDurumuMetin");
+        metinEl.innerText = "🔒 Oturum başarıyla kapatıldı. Tüm kişisel veriler yeniden kilitlendi.";
+        metinEl.style.color = "#92400e";
+
+        if (cikisBildirimZamanlayici) clearTimeout(cikisBildirimZamanlayici);
+        cikisBildirimZamanlayici = setTimeout(() => {
+            metinEl.innerText = "Hassas Veriler Kilitli 🔒";
+            metinEl.style.color = "#92400e";
+        }, 5000);
+
+        const sifreInput = document.getElementById("authPassword");
+        sifreInput.value = "";
+        sifreInput.style.display = "inline-block";
+
+        const btnGiris = document.getElementById("btnAuthGiris");
+        btnGiris.className = "btn-main btn-orange";
+        btnGiris.innerHTML = "🔓 Kilidi Aç";
+        btnGiris.disabled = false;
+        btnGiris.style.display = "inline-flex";
+
+        document.getElementById("btnAuthCikis").style.display = "none";
+
+        rehberSecimiDegisti();
     }
 
     function rehberSecimiDegisti() {
@@ -909,17 +1014,44 @@
     }
 
     function dokumanaYansit() {
-        const ad = document.getElementById("in_rehberAd").value;
-        document.getElementById("doc_rehberAd").innerText = ad || "-";
-        document.getElementById("doc_sigRehberAd").innerText = ad || "-";
-        document.getElementById("doc_rehberTc").innerText = document.getElementById("in_rehberTc").value || "***********";
-        document.getElementById("doc_rehberRuhsat").innerText = document.getElementById("in_rehberRuhsat").value || "*****";
-        document.getElementById("doc_rehberSicil").innerText = document.getElementById("in_rehberSicil").value || "**-****";
-        document.getElementById("doc_rehberDil").innerText = document.getElementById("in_rehberDil").value;
-        document.getElementById("doc_rehberAdres").innerText = document.getElementById("in_rehberAdres").value || "********************";
-        document.getElementById("doc_rehberTel").innerText = document.getElementById("in_rehberTel").value || "05** *** ** **";
-        document.getElementById("doc_rehberEposta").innerText = document.getElementById("in_rehberEposta").value || "***@***.com";
-        document.getElementById("doc_rehberOda").innerText = document.getElementById("in_rehberOda").value;
+        const secilenMod = document.getElementById("sel_rehberMod").value;
+        const manuelMi = (secilenMod === "manuel");
+
+        const inAd = document.getElementById("in_rehberAd").value.trim();
+        const inTc = document.getElementById("in_rehberTc").value.trim();
+        const inRuhsat = document.getElementById("in_rehberRuhsat").value.trim();
+        const inSicil = document.getElementById("in_rehberSicil").value.trim();
+        const inDil = document.getElementById("in_rehberDil").value.trim();
+        const inAdres = document.getElementById("in_rehberAdres").value.trim();
+        const inTel = document.getElementById("in_rehberTel").value.trim();
+        const inEposta = document.getElementById("in_rehberEposta").value.trim();
+        const inOda = document.getElementById("in_rehberOda").value;
+
+        // Boşsa tire koyma, boş bırak
+        if (manuelMi || guvenlikKilidiAcik) {
+            document.getElementById("doc_rehberAd").innerText = inAd;
+            document.getElementById("doc_sigRehberAd").innerText = inAd;
+            document.getElementById("doc_rehberTc").innerText = inTc;
+            document.getElementById("doc_rehberRuhsat").innerText = inRuhsat;
+            document.getElementById("doc_rehberSicil").innerText = inSicil;
+            document.getElementById("doc_rehberDil").innerText = inDil;
+            document.getElementById("doc_rehberAdres").innerText = inAdres;
+            document.getElementById("doc_rehberTel").innerText = inTel;
+            document.getElementById("doc_rehberEposta").innerText = inEposta;
+        } else {
+            // Şifre girilmemiş hazır profil ise maskeli tut
+            document.getElementById("doc_rehberAd").innerText = inAd;
+            document.getElementById("doc_sigRehberAd").innerText = inAd;
+            document.getElementById("doc_rehberTc").innerText = inTc || "***********";
+            document.getElementById("doc_rehberRuhsat").innerText = inRuhsat || "*****";
+            document.getElementById("doc_rehberSicil").innerText = inSicil || "**-****";
+            document.getElementById("doc_rehberDil").innerText = inDil;
+            document.getElementById("doc_rehberAdres").innerText = inAdres || "********************";
+            document.getElementById("doc_rehberTel").innerText = inTel || "05** *** ** **";
+            document.getElementById("doc_rehberEposta").innerText = inEposta || "***@***.com";
+        }
+
+        document.getElementById("doc_rehberOda").innerText = inOda;
 
         const rehberTuru = document.getElementById("sel_rehberTuru").value;
         if (rehberTuru === "ulkesel") {
@@ -931,7 +1063,7 @@
             });
             document.getElementById("doc_rehberBolge").innerText = seciliBolgeler.length > 0
                 ? `BÖLGESEL (${seciliBolgeler.join(", ")})`
-                : "BÖLGESEL";
+                : "";
         }
 
         const baslangic = formatTarihTR(document.getElementById("form_turBaslangic").value) || "07.11.2026";
