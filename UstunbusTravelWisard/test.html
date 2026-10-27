@@ -3,781 +3,1000 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yolcu Kayıt Etme Sistemi (YKES)</title>
+    <title>Üstünbus Turizm - Acente-Rehber Hizmet Sözleşmesi</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --success: #16a34a;
-            --danger: #dc2626;
-            --dark: #0f172a;
-            --border: #cbd5e1;
-            --bg: #f8fafc;
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #e67e22;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --bg: #f4f6f9;
         }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px 15px;
-            color: #334155;
-        }
-        .main-container {
-            max-width: 1260px;
-            margin: 0 auto;
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg); margin: 0; padding: 20px; color: #111; }
+
+        .no-print {
+            max-width: 980px;
+            margin: 0 auto 25px auto;
             background: #ffffff;
-            padding: 25px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 12px;
-            margin-bottom: 16px;
-        }
-        h2 { margin: 0; color: var(--dark); font-size: 20px; }
-        .tour-select-box {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 20px;
-        }
-        .split-layout {
-            display: grid;
-            grid-template-columns: 430px 1fr;
-            gap: 25px;
-            align-items: start;
-        }
-        @media (max-width: 950px) {
-            .split-layout { grid-template-columns: 1fr; }
-        }
-        select, input {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 13px;
-        }
-        .bus-wrapper {
-            background: #fff;
-            border: 2px solid #cbd5e1;
+            padding: 22px 26px;
             border-radius: 12px;
-            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #cbd5e1;
         }
-        .bus-cabin {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-        }
-        .bus-front {
+
+        .auth-bar {
+            background: #fffdf9;
+            border: 1px solid #fbd38d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px dashed #cbd5e1;
-            font-size: 12px;
-            font-weight: 800;
-            color: #475569;
-        }
-        .legend-box {
-            display: flex;
-            gap: 6px;
             flex-wrap: wrap;
-            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+        .form-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+
+        label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13.5px;
+            background: #f8fafc;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        .bolge-checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            background: #ffffff;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            margin-top: 5px;
+        }
+
+        .bolge-check-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+        }
+
+        .bolge-check-item input { width: auto; margin: 0; cursor: pointer; }
+
+        .hizli-btn-grup { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+
+        .hizli-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 4px 9px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: 700;
-        }
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 4px;
             border: 1px solid #cbd5e1;
-        }
-        .orta-kapi-blok {
-            grid-column: span 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-            border: 2px dashed #94a3b8;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 900;
-            color: #334155;
-            padding: 8px 6px;
-        }
-        .passenger-card {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-        }
-        .passenger-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-weight: 800;
-            font-size: 13px;
-            color: #1e40af;
-        }
-        .btn-submit {
-            width: 100%;
-            margin-top: 15px;
-            padding: 13px;
-            background: var(--success);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
         }
-        .btn-submit:hover:not(:disabled) { background: #15803d; }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status-box {
-            display: none;
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
+
+        .hizli-btn:hover, .hizli-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        button.btn-main {
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13.5px;
             font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button.btn-main:hover { transform: translateY(-1px); opacity: 0.93; }
+        .btn-blue { background: var(--primary); color: #fff; }
+        .btn-green { background: #16a34a; color: #fff; }
+        .btn-orange { background: var(--warning); color: #fff; }
+
+        /* A4 ÇİFT SAYFA TASARIMI */
+        .a4-container { max-width: 820px; margin: 0 auto; }
+
+        .a4-page {
+            background: #ffffff;
+            width: 100%;
+            min-height: 1120px;
+            padding: 40px 55px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 18px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .logo-ustunbus { height: 82px; max-width: 320px; object-fit: contain; display: block; }
+        .logos-right { display: flex; align-items: flex-start; gap: 25px; }
+
+        .logo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 135px;
+        }
+
+        .logo-box img { height: 54px; max-width: 125px; object-fit: contain; margin-bottom: 4px; }
+        .logo-box .t1 { font-size: 8px; font-weight: 800; color: #0f172a; line-height: 1.15; text-transform: uppercase; }
+        .logo-box .t2 { font-size: 7px; font-weight: 600; color: #64748b; line-height: 1.1; margin-top: 1px; }
+
+        .doc-title { text-align: center; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 20px; color: #0f172a; }
+        .sec-header { font-size: 13px; font-weight: 700; margin-top: 12px; margin-bottom: 8px; color: #000; }
+        .sub-header { font-size: 12.5px; font-weight: 700; margin-top: 8px; margin-bottom: 6px; color: #111; }
+
+        .meta-list {
+            display: grid;
+            grid-template-columns: 210px 1fr;
+            row-gap: 4px;
+            font-size: 12px;
+            line-height: 1.35;
+            margin-bottom: 10px;
+        }
+
+        .meta-label { color: #111; font-weight: 500; }
+        .meta-value { color: #000; font-weight: 600; word-break: break-word; }
+
+        .dotted-box {
+            border-bottom: 1px dotted #475569;
+            padding-bottom: 4px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #000;
+            min-height: 18px;
+        }
+
+        table.fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            margin-bottom: 14px;
+            font-size: 12px;
+        }
+
+        table.fee-table th, table.fee-table td { border: 1px solid #334155; padding: 5px 8px; height: 22px; }
+        table.fee-table th { font-weight: 700; text-align: center; }
+        table.fee-table td.col-srv { width: 32%; font-weight: 500; }
+        table.fee-table td.col-cnt { width: 16%; text-align: center; font-weight: 600; }
+        table.fee-table td.col-fee { width: 26%; text-align: right; }
+
+        .notes-p { font-size: 11.5px; line-height: 1.5; color: #111; margin-bottom: 16px; }
+        .article-title { font-size: 12px; font-weight: 700; margin-top: 14px; margin-bottom: 5px; color: #000; }
+        .article-body { font-size: 11.5px; line-height: 1.45; color: #111; text-align: justify; margin-bottom: 10px; }
+
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 45px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .footer-disclaimer {
+            position: absolute;
+            bottom: 45px;
+            left: 55px;
+            right: 55px;
+            font-size: 10px;
+            color: #334155;
+            line-height: 1.35;
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .no-print { display: none !important; }
+            .a4-container { max-width: 100%; margin: 0; }
+            .a4-page {
+                border: none;
+                box-shadow: none;
+                margin: 0;
+                padding: 10mm 15mm;
+                page-break-after: always;
+                min-height: auto;
+                height: 100vh;
+            }
+            .a4-page:last-child { page-break-after: auto; }
+            @page { size: A4 portrait; margin: 0; }
         }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="header">
-        <h2>🚌 Yolcu Kayıt Etme Sistemi (YKES)</h2>
-        <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:bold;">● Başarıyla Bağlandı</span>
-    </div>
-
-    <!-- TUR SEÇİMİ -->
-    <div class="tour-select-box">
-        <label for="turSecimi" style="display:block; font-size:13px; font-weight:700; color:#1e40af; margin-bottom:6px;">
-            📁 İŞLEM YAPILACAK TURU SEÇİN:
-        </label>
-        <div style="display:flex; gap:10px;">
-            <select id="turSecimi" onchange="turSecildi()" style="background:#fff; flex:1;">
-                <option value="">⏳ Turlar taranıyor...</option>
-            </select>
-            <button type="button" onclick="turlariYukle()" style="padding:8px 16px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">🔄 Yenile</button>
+<!-- KONTROL PANELİ -->
+<div class="no-print">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:15px;">
+        <div>
+            <h2 style="margin:0; font-size:17px; color:var(--dark);">📑 Acente-Rehber Sözleşme Modülü</h2>
+            <span style="font-size:12px; color:#64748b;">Güvenli Mod: GitHub açık kaynakta hiçbir kişisel T.C., Ruhsat veya Sicil No yer almaz.</span>
         </div>
-    </div>
-
-    <div class="split-layout">
-        
-        <!-- SOL: DİNAMİK ARAÇ ŞEMASI -->
-        <div class="bus-wrapper">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:10px;">
-                <span id="aracTipiBaslik" style="font-weight:bold; font-size:13.5px; color:var(--dark);">🚐 Araç Şeması</span>
-                <span id="koltukSayac" style="font-size:12px; font-weight:700; color:#16a34a;">0 Boş</span>
-            </div>
-
-            <div class="legend-box">
-                <span class="legend-item" style="background:#ffd1dc; color:#831843; border-color:#f472b6;">🎨 Grup Renkleri</span>
-                <span class="legend-item" style="background:#fce7f3; color:#be185d; border-color:#fbcfe8;">👩 Kadın</span>
-                <span class="legend-item" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">👨 Erkek</span>
-                <span class="legend-item" style="background:#ffffff; color:#15803d; border-color:#86efac;">✅ Boş Koltuk</span>
-            </div>
-
-            <div class="bus-cabin">
-                <div class="bus-front">
-                    <span>💺 KAPTAN</span>
-                    <span style="background:#e2e8f0; padding:3px 8px; border-radius:4px; font-size:11px;">🚪 ÖN KAPI</span>
-                </div>
-                
-                <div id="krokiAlani" style="display:flex; flex-direction:column; gap:6px;">
-                    <div style="text-align:center; padding:30px 10px; color:#64748b; font-size:13px;">Lütfen bir tur seçiniz.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SAĞ: ÇOKLU YOLCU FORMU -->
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="margin:0; font-size:15px; color:var(--primary);">
-                    👥 Seçilen Koltuklar (<span id="seciliSayac">0</span> Kişi)
-                </h3>
-                <button type="button" onclick="secimleriTemizle()" style="font-size:11px; padding:4px 8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">Seçimi Temizle</button>
-            </div>
-
-            <!-- Toplu Durak ve Hızlı Telefon Doldurma -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px; background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe;">
-                <div>
-                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Durak:</span>
-                    <select id="topluDurakSecici" onchange="topluDurakUygula()" style="padding:6px; font-size:12px;">
-                        <option value="">Seçiniz...</option>
-                        <option value="Mersin - Vipol">Mersin - Vipol</option>
-                        <option value="Mersin - Forum">Mersin - Forum</option>
-                        <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
-                        <option value="Tarsus - Ofis">Tarsus - Ofis</option>
-                        <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
-                        <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
-                        <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
-                        <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
-                    </select>
-                </div>
-                <div>
-                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Tel No:</span>
-                    <input type="text" id="topluTelInput" placeholder="0532..." onkeyup="topluTelUygula()" style="padding:6px; font-size:12px;">
-                </div>
-            </div>
-
-            <div id="yolcuListesiFormu" style="max-height: 480px; overflow-y:auto; padding-right:5px;">
-                <div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
-                    Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
-                </div>
-            </div>
-
-            <button type="button" id="btnKaydet" onclick="grubuKaydet()" class="btn-submit" disabled>
-                💾 Yolcuyu Kaydet
+        <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-main btn-green" onclick="window.print()">
+                🖨️ Sözleşmeyi Yazdır / PDF
             </button>
+        </div>
+    </div>
 
-            <div id="durumKutusu" class="status-box"></div>
+    <!-- GÜVENLİK / KİLİT AÇMA BARI -->
+    <div class="auth-bar">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span id="kilitDurumuIcon">🔒</span>
+            <span id="kilitDurumuMetin" style="font-size:12.5px; font-weight:700; color:#92400e;">
+                Hassas Veriler Kilitli (T.C., Ruhsat, Sicil ve İletişim Maskeli)
+            </span>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <input type="password" id="authPassword" placeholder="Yönetici Şifresi" style="width:180px; padding:6px 10px; font-size:12px; margin:0;" onkeydown="if(event.key==='Enter') verileriGuvenliCoz()">
+            <button type="button" class="btn-main btn-orange" onclick="verileriGuvenliCoz()" style="padding:6px 12px; font-size:12px;">
+                🔓 Kilidi Aç
+            </button>
+        </div>
+    </div>
+
+    <!-- 1. BÖLÜM: REHBER SEÇİMİ VE ODALAR -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+        <div class="form-grid-3" style="align-items:center;">
+            <div>
+                <label style="color:#1e40af;">👤 Rehber Seçimi:</label>
+                <select id="sel_rehberMod" onchange="rehberSecimiDegisti()" style="background:#fff; font-weight:700; color:#1e3a8a;">
+                    <option value="selcuk_ustun">⭐ Selçuk Üstün (ANRO)</option>
+                    <option value="mustafa_postlu">👤 Mustafa Postlu (İRO)</option>
+                    <option value="berkan_yildirim">👤 Berkan Yıldırım (ADRO)</option>
+                    <option value="manuel">✍️ Manuel Rehber Bilgisi Gir</option>
+                </select>
+            </div>
+            <div>
+                <label style="color:#1e40af;">🎓 Rehberlik Türü:</label>
+                <select id="sel_rehberTuru" onchange="rehberTuruDegisti()" style="background:#fff; font-weight:700;">
+                    <option value="bolgesel">Bölgesel Rehber</option>
+                    <option value="ulkesel">Ülkesel Rehber</option>
+                </select>
+            </div>
+            <div>
+                <label style="color:#1e40af;">🏛️ Bağlı Olduğu Oda (13 TUREB Odası):</label>
+                <select id="in_rehberOda" onchange="dokumanaYansit()" style="background:#fff; font-weight:600;">
+                    <option value="ADRO">1. ADRO - Adana Bölgesel Turist Rehberleri Odası</option>
+                    <option value="ANRO">2. ANRO - Ankara Turist Rehberleri Odası</option>
+                    <option value="ARO">3. ARO - Antalya Rehberler Odası</option>
+                    <option value="ATRO">4. ATRO - Aydın Turist Rehberleri Odası</option>
+                    <option value="BURO">5. BURO - Bursa Bölgesel Turist Rehberleri Odası</option>
+                    <option value="ÇARO">6. ÇARO - Çanakkale Bölgesel Turist Rehberleri Odası</option>
+                    <option value="GARO">7. GARO - Gaziantep Bölgesel Turist Rehberleri Odası</option>
+                    <option value="İRO">8. İRO - İstanbul Rehberler Odası</option>
+                    <option value="İZRO">9. İZRO - İzmir Turist Rehberleri Odası</option>
+                    <option value="MUTRO">10. MUTRO - Muğla Turist Rehberleri Odası</option>
+                    <option value="NERO">11. NERO - Nevşehir Turist Rehberleri Odası</option>
+                    <option value="ŞURO">12. ŞURO - Şanlıurfa Bölgesel Turist Rehberleri Odası</option>
+                    <option value="TRO">13. TRO - Trabzon Bölgesel Turist Rehberleri Odası</option>
+                </select>
+            </div>
         </div>
 
+        <div id="bolgeSecimAlani" style="margin-top: 10px;">
+            <label style="color:#1e40af;">🗺️ Yetkili Coğrafi Bölgeleri Seçin (7 Bölge):</label>
+            <div class="bolge-checkbox-container">
+                <label class="bolge-check-item"><input type="checkbox" value="AKDENİZ" onchange="dokumanaYansit()" checked> Akdeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="İÇ ANADOLU" onchange="dokumanaYansit()" checked> İç Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="KARADENİZ" onchange="dokumanaYansit()" checked> Karadeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="DOĞU ANADOLU" onchange="dokumanaYansit()" checked> Doğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="GÜNEYDOĞU ANADOLU" onchange="dokumanaYansit()" checked> Güneydoğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="EGE" onchange="dokumanaYansit()"> Ege</label>
+                <label class="bolge-check-item"><input type="checkbox" value="MARMARA" onchange="dokumanaYansit()"> Marmara</label>
+            </div>
+        </div>
+
+        <div id="rehberDetayFormu" style="margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+            <div>
+                <label>Rehber Ad Soyad:</label>
+                <input type="text" id="in_rehberAd" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>T.C. Kimlik No:</label>
+                <input type="text" id="in_rehberTc" maxlength="11" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Ruhsatname No:</label>
+                <input type="text" id="in_rehberRuhsat" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Sicil No:</label>
+                <input type="text" id="in_rehberSicil" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Telefon:</label>
+                <input type="text" id="in_rehberTel" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>E-Posta:</label>
+                <input type="text" id="in_rehberEposta" oninput="dokumanaYansit()">
+            </div>
+            <div>
+                <label>Dili / Dilleri:</label>
+                <input type="text" id="in_rehberDil" oninput="dokumanaYansit()">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label>İkametgah Adresi:</label>
+                <input type="text" id="in_rehberAdres" oninput="dokumanaYansit()">
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. BÖLÜM: TARİH, SÜRE VE ÇARPIM HESABI -->
+    <div class="form-grid-4">
+        <div>
+            <label>Tur Başlangıç Tarihi:</label>
+            <input type="date" id="form_turBaslangic" onchange="turTarihiDegisti()">
+            
+            <div class="hizli-btn-grup">
+                <button type="button" class="hizli-btn active" id="btnSure0" onclick="turSuresiSec(0)">☀️ Günübirlik (1G)</button>
+                <button type="button" class="hizli-btn" id="btnSure1" onclick="turSuresiSec(1)">1G 2G (2G)</button>
+                <button type="button" class="hizli-btn" id="btnSure2" onclick="turSuresiSec(2)">2G 3G (3G)</button>
+                <button type="button" class="hizli-btn" id="btnSure3" onclick="turSuresiSec(3)">3G 4G (4G)</button>
+            </div>
+        </div>
+
+        <div>
+            <label>Tur Bitiş Tarihi:</label>
+            <input type="date" id="form_turBitis" onchange="turBitisTarihiDegisti()">
+
+            <label style="margin-top:6px;">Sözleşme Tanzim Tarihi:</label>
+            <input type="date" id="form_sozlesmeTarih" oninput="dokumanaYansit()">
+        </div>
+
+        <div>
+            <label style="color:#b45309;">Hizmet Türü:</label>
+            <select id="form_hizmetTuru" onchange="hizmetTuruManuelDegisti()" style="background:#fffbeb; border-color:#fde68a; font-weight:700;">
+                <option value="gunluk">A- Günlük Tur (Taban: 5.566 ₺)</option>
+                <option value="paket">C- Paket Tur (Taban: 6.708 ₺)</option>
+                <option value="transfer">B- Transfer (Taban: 2.790 ₺)</option>
+            </select>
+
+            <label style="margin-top:6px;">Günlük Yevmiye (₺):</label>
+            <input type="number" id="form_gunlukYevmiye" value="5566" oninput="yevmiyeDegisti()" style="font-weight:bold; color:#1e40af;">
+        </div>
+
+        <div>
+            <label>Toplam İş Günü:</label>
+            <input type="text" id="form_gunSayisiGosterge" value="1 Gün" readonly style="font-weight:bold; background:#e2e8f0; text-align:center;">
+
+            <label style="margin-top:6px; color:#15803d;">Toplam Tutar (₺):</label>
+            <input type="number" id="form_toplamUcret" value="5566" oninput="toplamUcretManuelDegisti()" style="font-weight:800; color:#15803d; font-size:15px;">
+        </div>
+    </div>
+
+    <div class="form-grid-3">
+        <div>
+            <label>Kişi Sayısı:</label>
+            <input type="number" id="form_kisiSayisi" value="46" oninput="dokumanaYansit()">
+        </div>
+        <div>
+            <label>Tur Programı Başlığı:</label>
+            <input type="text" id="form_turBaslik" value="KAPADOKYA TURU PROGRAMI" oninput="dokumanaYansit()">
+        </div>
+        <div>
+            <label>Müşteri Milliyeti ve Dili:</label>
+            <input type="text" id="form_dil" value="Türk / Türkçe" oninput="dokumanaYansit()">
+        </div>
+    </div>
+
+    <div>
+        <label>Gezilecek Yerler / Tur Akışı (Noktalı Alan):</label>
+        <textarea id="form_programDetay" rows="2" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, KAPADOKYA, ONYX TAŞ ATOLYESİ</textarea>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 1. SAYFA (SÖZLEŞMENİN TARAFLARI, TUR, ÜCRET TABLOSU)           -->
+<!-- ============================================================== -->
+<div class="a4-container">
+    <div class="a4-page">
+        <div class="header-top">
+            <img src="icons/ustunbuslogo.png" alt="Üstünbus Turizm" class="logo-ustunbus" onerror="this.src='icons/favicon.png';">
+            <div class="logos-right">
+                <div class="logo-box">
+                    <img src="icons/tursablogo.png" alt="TÜRSAB">
+                    <span class="t1">TÜRKİYE SEYAHAT ACENTALARI BİRLİĞİ</span>
+                    <span class="t2">ASSOCIATION OF TURKISH TRAVEL AGENCIES</span>
+                </div>
+                <div class="logo-box">
+                    <img src="icons/tureblogo.png" alt="TUREB">
+                    <span class="t1">TURİST REHBERLERİ BİRLİĞİ</span>
+                    <span class="t2">TURKISH TOURIST GUIDES ASSOCIATION</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-title">ACENTE-REHBER HİZMET SÖZLEŞMESİ</div>
+
+        <!-- 1. Sözleşmenin Tarafları -->
+        <div class="sec-header">1.Sözleşmenin Tarafları</div>
+        
+        <div class="sub-header">ACENTE</div>
+        <div class="meta-list">
+            <span class="meta-label">Unvanı</span>
+            <span class="meta-value">: ÖZ ÜSTÜNBUS TURİZM VE SEYAHAT ACENTESİ</span>
+            <span class="meta-label">TÜRSAB İşletme Belge No</span>
+            <span class="meta-value">: A-12982</span>
+            <span class="meta-label">Adresi</span>
+            <span class="meta-value">: ŞEHİTLER TEPESİ MAH. 3631 SOKAK KILINÇ APT NO:5A TARSUS/ MERSİN</span>
+            <span class="meta-label">Telefon No</span>
+            <span class="meta-value">: 0538 774 19 19/ 0324 624 10 10 / 0324 624 11 11</span>
+            <span class="meta-label">İnternet Adresi</span>
+            <span class="meta-value">: www.ustunbusturizm.com</span>
+        </div>
+
+        <div class="sub-header">REHBER</div>
+        <div class="meta-list">
+            <span class="meta-label">Adı Soyadı</span>
+            <span class="meta-value">: <strong id="doc_rehberAd">-</strong></span>
+            
+            <span class="meta-label">T.C Kimlik No.</span>
+            <span class="meta-value">: <strong id="doc_rehberTc">***********</strong></span>
+            
+            <span class="meta-label">Ruhsatname No.</span>
+            <span class="meta-value">: <strong id="doc_rehberRuhsat">*****</strong></span>
+            
+            <span class="meta-label">Sicil No</span>
+            <span class="meta-value">: <strong id="doc_rehberSicil">**-****</strong></span>
+            
+            <span class="meta-label">Bölgesel Rehber İse Bölgesi/ Bölgeleri</span>
+            <span class="meta-value">: <span id="doc_rehberBolge">-</span></span>
+            
+            <span class="meta-label">Dili/ Dilleri</span>
+            <span class="meta-value">: <span id="doc_rehberDil">TR(TÜRKÇE)</span></span>
+            
+            <span class="meta-label">İkametgah Adresi</span>
+            <span class="meta-value">: <span id="doc_rehberAdres">********************</span></span>
+            
+            <span class="meta-label">Ev ve Mobil Tel No. :</span>
+            <span class="meta-value">: <strong id="doc_rehberTel">05** *** ** **</strong></span>
+            
+            <span class="meta-label">E-Posta</span>
+            <span class="meta-value">: <strong id="doc_rehberEposta">***@***.com</strong></span>
+            
+            <span class="meta-label">Oda</span>
+            <span class="meta-value">: <strong id="doc_rehberOda">ANRO</strong></span>
+        </div>
+
+        <!-- 2. Rehberlik Hizmeti Verilecek Tur -->
+        <div class="sec-header">2.Rehberlik Hizmeti Verilecek Tur</div>
+        <div class="meta-list">
+            <span class="meta-label">Turun Başlangıç Ve Bitiş Tarihi</span>
+            <span class="meta-value">: <strong id="doc_turTarih">07.11.2026 - 07.11.2026</strong></span>
+            
+            <span class="meta-label">Kişi Sayısı</span>
+            <span class="meta-value">: <strong id="doc_kisiSayisi">46</strong></span>
+            
+            <span class="meta-label">Müşteri Milliyeti Ve Talep Edilen Dil/ Diller</span>
+            <span class="meta-value">: <strong id="doc_dil">Türk / Türkçe</strong></span>
+            
+            <span class="meta-label">Tur Programı*</span>
+            <span class="meta-value">: <strong id="doc_turBaslik">KAPADOKYA TURU PROGRAMI</strong></span>
+            
+            <span class="meta-label">TUR DETAYI EKTE MEVCUTTUR.</span>
+            <span class="meta-value"></span>
+        </div>
+
+        <div class="dotted-box" id="doc_programSatir1">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ,</div>
+        <div class="dotted-box" id="doc_programSatir2">KAPADOKYA, ONYX TAŞ ATOLYESİ</div>
+        <div class="dotted-box" style="min-height: 14px;"></div>
+
+        <div style="font-size: 10px; color:#111; margin-top: 8px; margin-bottom: 8px;">
+            *Taraflarca imzalanıp kaşelenmesi koşuluyla tur programı sözleşmeye eklenebilir.
+        </div>
+
+        <!-- 3. Uzlaşılan Rehberlik Hizmeti Ücreti -->
+        <div class="sec-header">3.Uzlaşılan Rehberlik Hizmeti Ücreti**</div>
+
+        <table class="fee-table">
+            <thead>
+                <tr>
+                    <th class="col-srv">Hizmet</th>
+                    <th class="col-cnt">Adet (Gün)</th>
+                    <th class="col-fee">Büyükşehir Olmayan (TL)</th>
+                    <th class="col-fee">Büyükşehir (TL)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="row_transfer">
+                    <td class="col-srv">Transfer</td>
+                    <td class="col-cnt" id="cell_cnt_transfer"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_transfer"></td>
+                </tr>
+                <tr id="row_gece">
+                    <td class="col-srv">Gece Turu</td>
+                    <td class="col-cnt" id="cell_cnt_gece"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_gece"></td>
+                </tr>
+                <tr id="row_gunluk">
+                    <td class="col-srv">Günlük Tur</td>
+                    <td class="col-cnt" id="cell_cnt_gunluk">1</td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_gunluk">5.566 TL</td>
+                </tr>
+                <tr id="row_paket">
+                    <td class="col-srv">Paket Tur</td>
+                    <td class="col-cnt" id="cell_cnt_paket"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_paket"></td>
+                </tr>
+                <tr id="row_yurtdisi">
+                    <td class="col-srv">Yurtdışı</td>
+                    <td class="col-cnt" id="cell_cnt_yurtdisi"></td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_yurtdisi"></td>
+                </tr>
+                <tr style="font-weight: bold; background: #f8fafc;">
+                    <td class="col-srv">Toplam</td>
+                    <td class="col-cnt" id="cell_cnt_toplam">1</td>
+                    <td class="col-fee"></td>
+                    <td class="col-fee" id="cell_fee_toplam">5.566 TL</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="font-size: 13.5px; font-weight: 700; margin-top: 8px;">
+            Toplam Rehberlik Ücreti: <span id="doc_toplamUcret" style="font-weight: 800; color: #000;">5.566 TL</span>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 2. SAYFA (HÜKÜMLER, İHBAR, İMZALAR)                            -->
+    <!-- ============================================================== -->
+    <div class="a4-page">
+        <div class="notes-p" style="margin-top: 25px;">
+            **Rehber, turu gerçekleştiren acentede bordrolu çalışan ise, maaş bordrosunun şirket kaşeli fotokopisinin veya aylık ücret hesap pusulasının aslının ibraz edilmesi halinde bu bölüm doldurulmayacaktır[cite: 5, 8].
+        </div>
+
+        <div class="notes-p">
+            **Rehber, turu gerçekleştiren acentenin sahibi/ ortağı ise, ortaklık durumunu gösteren ticaret sicil gazetesinin fotokopisinin ibraz edilmesi halinde bu bölüm doldurulmayacaktır[cite: 5, 8].
+        </div>
+
+        <div class="article-title" style="margin-top: 30px;">4.Ödeme Şekli</div>
+        <div style="font-size: 12px; margin-bottom: 20px; line-height: 1.6;">
+            -Banka Havalesi/ EFT<br>
+            -Nakten[cite: 5, 8]
+        </div>
+
+        <div class="article-title">5. Acente-Rehber Hizmet Sözleşmesi Genel Hükümleri</div>
+        <div class="article-body">
+            İşbu Acente-Rehber Hizmet Sözleşmesi, 6326 sayılı Turist Rehberliği Meslek Kanunu'nun 6/3 maddesi ile Turist Rehberliği Meslek Yönetmeliğinin 36/2 maddesi uyarınca, Rehberler Birliği tarafından resmi internet sitesinde (www.tureb.org.tr) halen yayımlanan "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile tanzim edilmiştir[cite: 5, 8]. Taraflar, işbu sözleşme ile birlikte "Acente Rehber Hizmet Sözleşmesi Genel Hükümler"ine de uyacaklarını kabul ve taahhüt ederler[cite: 5, 8].
+        </div>
+
+        <div class="article-title">6. Fesih/ İhbar Süresi</div>
+        <div class="article-body">
+            Taraflar, rehberlik hizmetinin başlayacağı tarihten en az 3 gün önce yazılı olarak bildirmek ve "Acente-Rehber Hizmet Sözleşmesi Genel Hükümler"ine bağlı kalmak kaydı ile işbu sözleşmeyi tek taraflı olarak feshedebilirler[cite: 5, 8].
+        </div>
+
+        <div style="font-size: 12px; font-weight: 700; margin-top: 22px; margin-bottom: 35px;">
+            7 .İş Bu Acente-Rehber Hizmet Sözleşmesi 2 nüsha halinde <span id="doc_imzaTarih">26.10.2026</span> tarihinde imzalanmıştır[cite: 5, 8].
+        </div>
+
+        <div class="signatures-grid">
+            <div>
+                <strong>ACENTE YETKİLİSİ***</strong><br>
+                Adı Soyadı : EMİN ÜSTÜN<br>
+                Unvan :ÖZ ÜSTÜNBUS TURİZM VE SEYAHAT ACENTASI<br>
+                Görevi: ŞİRKET MÜDÜRÜ<br>
+                Kaşe ve imza:<br>
+                <div style="height: 60px;"></div>
+            </div>
+
+            <div>
+                <strong>REHBER</strong><br>
+                Adı Soyadı: <span id="doc_sigRehberAd">-</span><br><br>
+                İmza:<br>
+                <div style="height: 60px;"></div>
+            </div>
+        </div>
+
+        <div class="footer-disclaimer">
+            *** Acente yetkilisinin Acente adına imza atma yetkisi olması gerekmektedir[cite: 5, 8]. İmza sirkülerinin gösterilmesi veya sirkülerin bir nüshasının sözleşmeye eklenmesi tavsiye edilir[cite: 5, 8].
+        </div>
     </div>
 </div>
 
 <script>
-    const API_BASE = "https://ykes-drive-bridge.vercel.app";
-    let aktifDosyaId = null;
-    let aktifKapasiteTipi = 46;
-    let mevcutKoltukListesi = [];
-    let seciliKoltuklar = [];
+    const TABAN_UCRETLER = {
+        gunluk: 5566,
+        paket: 6708,
+        transfer: 2790
+    };
 
-    async function turlariYukle() {
-        const select = document.getElementById("turSecimi");
-        select.innerHTML = '<option value="">⏳ Turlar taranıyor...</option>';
+    const BRIDGE_API_BASE = "https://ykes-drive-bridge.vercel.app";
 
-        try {
-            const res = await fetch(`${API_BASE}/api/turlar`);
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
+    let guvenlikKilidiAcik = false;
+    let aktifSeciliGece = 0;
+    let aktifHesaplananGunSayisi = 1;
 
-            select.innerHTML = '<option value="">-- Lütfen Bir Tur Seçiniz --</option>';
-
-            const gruplar = {};
-            data.dosyalar.forEach(d => {
-                const k = d.klasor || "Ana Dizin";
-                if (!gruplar[k]) gruplar[k] = [];
-                gruplar[k].push(d);
-            });
-
-            for (const [kategori, dosyalar] of Object.entries(gruplar)) {
-                const group = document.createElement("optgroup");
-                group.label = `📁 ${kategori}`;
-                dosyalar.forEach(d => {
-                    const opt = document.createElement("option");
-                    opt.value = d.id;
-                    opt.innerText = d.name;
-                    group.appendChild(opt);
-                });
-                select.appendChild(group);
-            }
-        } catch (err) {
-            select.innerHTML = `<option value="">❌ Hata: ${err.message}</option>`;
+    // Şifre girilmediğinde görünen maskeli şablon (Ruhsat ve Sicil dahil tüm hassas alanlar maskeli)
+    let REHBER_HAVUZU = {
+        selcuk_ustun: {
+            adSoyad: "SELÇUK ÜSTÜN",
+            tur: "bolgesel",
+            tcKimlik: "***********",
+            ruhsatNo: "*****",
+            sicilNo: "**-****",
+            bolgeler: ["AKDENİZ", "İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
+            diller: "TR(TÜRKÇE)",
+            adres: "********************",
+            telefon: "05** *** ** **",
+            eposta: "selcukustun@yahoo.com",
+            oda: "ANRO"
+        },
+        mustafa_postlu: {
+            adSoyad: "MUSTAFA POSTLU",
+            tur: "bolgesel",
+            tcKimlik: "***********",
+            ruhsatNo: "*****",
+            sicilNo: "****",
+            bolgeler: ["MARMARA", "EGE", "AKDENİZ", "KARADENİZ", "İÇ ANADOLU"],
+            diller: "TR(TÜRKÇE)",
+            adres: "İSTANBUL",
+            telefon: "05** *** ** **",
+            eposta: "mustafapostlu@gmail.com",
+            oda: "İRO"
+        },
+        berkan_yildirim: {
+            adSoyad: "BERKAN YILDIRIM",
+            tur: "ulkesel",
+            tcKimlik: "***********",
+            ruhsatNo: "******",
+            sicilNo: "**-**-****",
+            bolgeler: [],
+            diller: "TR / İNG (TÜRKÇE - İNGİLİZCE)",
+            adres: "ADANA",
+            telefon: "05** *** ** **",
+            eposta: "berkanyildirim@gmail.com",
+            oda: "ADRO"
         }
-    }
+    };
 
-    async function turSecildi() {
-        const select = document.getElementById("turSecimi");
-        aktifDosyaId = select.value;
-        seciliKoltuklar = [];
-        yolcuFormunuYenile();
-        if (!aktifDosyaId) return;
-
-        bildirimGoster("⏳ Tur ve koltuk durumu yükleniyor...", "#0369a1", "#eff6ff", "#bfdbfe");
+    async function verileriGuvenliCoz() {
+        const pass = document.getElementById("authPassword").value.trim();
+        if (!pass) {
+            alert("Lütfen güvenlik şifrenizi girin!");
+            return;
+        }
 
         try {
-            const res = await fetch(`${API_BASE}/api/tur-detay?id=${aktifDosyaId}`);
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
-
-            aktifKapasiteTipi = 46;
-            data.sayfalar.forEach(s => {
-                if (s.sayfa_adi.includes("41")) aktifKapasiteTipi = 41;
-                if (s.sayfa_adi.includes("54")) aktifKapasiteTipi = 54;
+            const res = await fetch(`${BRIDGE_API_BASE}/api/rehber-bilgisi`, {
+                headers: { "Authorization": `Bearer ${pass}` }
             });
 
-            document.getElementById("aracTipiBaslik").innerText = `🚐 ${aktifKapasiteTipi} Kişilik ${aktifKapasiteTipi === 41 ? '(2+1 VIP)' : '(2+2)'}`;
-
-            const krokiSayfa = data.sayfalar.find(s => s.sayfa_adi.includes(String(aktifKapasiteTipi))) || data.sayfalar[0];
-            const uedtsSayfa = data.sayfalar.find(s => s.sayfa_adi.includes("UEDTS") || s.sayfa_adi.includes("UETDS"));
-
-            const cinsiyetler = {};
-            if (uedtsSayfa && uedtsSayfa.satirlar) {
-                uedtsSayfa.satirlar.forEach((satir, idx) => {
-                    if (idx >= 2) {
-                        const kNo = idx - 1;
-                        const cVal = String(satir[4]?.deger || '').trim().toUpperCase();
-                        if (cVal === 'K' || cVal.includes('KADIN')) cinsiyetler[kNo] = 'K';
-                        else if (cVal === 'E' || cVal.includes('ERKEK')) cinsiyetler[kNo] = 'E';
-                    }
-                });
-            }
-
-            const KROKI_HUC_46 = {
-                1: [17, 0], 2: [17, 1], 3: [17, 3], 4: [17, 4],
-                5: [20, 0], 6: [20, 1], 7: [20, 3], 8: [20, 4],
-                9: [23, 0], 10: [23, 1], 11: [23, 3], 12: [23, 4],
-                13: [26, 0], 14: [26, 1], 15: [26, 3], 16: [26, 4],
-                17: [29, 0], 18: [29, 1], 19: [29, 3], 20: [29, 4],
-                21: [32, 0], 22: [32, 1],
-                23: [35, 3], 24: [35, 4], 25: [35, 0], 26: [35, 1],
-                27: [38, 3], 28: [38, 4], 29: [38, 0], 30: [38, 1],
-                31: [41, 3], 32: [41, 4], 33: [41, 0], 34: [41, 1],
-                35: [44, 3], 36: [44, 4], 37: [44, 0], 38: [44, 1],
-                39: [47, 3], 40: [47, 4], 41: [47, 0], 42: [47, 1],
-                43: [50, 3], 44: [50, 4], 45: [50, 0], 46: [50, 1]
-            };
-            const KROKI_HUC_41 = {
-                1: [17, 0], 2: [17, 2], 3: [17, 3],
-                4: [20, 0], 5: [20, 2], 6: [20, 3],
-                7: [23, 0], 8: [23, 2], 9: [23, 3],
-                10: [26, 0], 11: [26, 2], 12: [26, 3],
-                13: [29, 0], 14: [29, 2], 15: [29, 3],
-                16: [32, 0], 17: [32, 2], 18: [32, 3],
-                19: [35, 0], 20: [35, 2], 21: [35, 3],
-                22: [38, 0],
-                23: [41, 0], 24: [41, 2], 25: [41, 3],
-                26: [44, 0], 27: [44, 2], 28: [44, 3],
-                29: [47, 0], 30: [47, 2], 31: [47, 3],
-                32: [50, 0], 33: [50, 2], 34: [50, 3],
-                35: [53, 0], 36: [53, 2], 37: [53, 3],
-                38: [56, 0], 39: [56, 1], 40: [56, 2], 41: [56, 3]
-            };
-            const KROKI_HUC_54 = {
-                ...KROKI_HUC_46,
-                47: [54, 3], 48: [54, 4], 49: [54, 0], 50: [54, 1],
-                51: [57, 3], 52: [57, 4], 53: [57, 0], 54: [57, 1]
-            };
-
-            let harita = KROKI_HUC_46;
-            if (aktifKapasiteTipi === 41) harita = KROKI_HUC_41;
-            else if (aktifKapasiteTipi === 54) harita = KROKI_HUC_54;
-
-            const isimSutunIdx = (aktifKapasiteTipi === 41) ? 6 : 7;
-            const durakSutunIdx = (aktifKapasiteTipi === 41) ? 10 : 11;
-            mevcutKoltukListesi = [];
-
-            for (let no = 1; no <= aktifKapasiteTipi; no++) {
-                let renkliMi = false;
-                let hucreRenkCss = "";
-                let rgbDegerleri = null;
-
-                if (harita[no]) {
-                    const [rIdx, cIdx] = harita[no];
-                    const hucre = krokiSayfa.satirlar[rIdx]?.[cIdx];
-                    if (hucre && hucre.renk) {
-                        const r = hucre.renk.red ?? 1;
-                        const g = hucre.renk.green ?? 1;
-                        const b = hucre.renk.blue ?? 1;
-                        if (r < 0.96 || g < 0.96 || b < 0.96) {
-                            renkliMi = true;
-                            const r255 = Math.round(r * 255);
-                            const g255 = Math.round(g * 255);
-                            const b255 = Math.round(b * 255);
-                            hucreRenkCss = `rgb(${r255}, ${g255}, ${b255})`;
-                            rgbDegerleri = { r: r255, g: g255, b: b255 };
-                        }
-                    }
+            if (res.ok) {
+                const data = await res.json();
+                if (data.rehberler) {
+                    REHBER_HAVUZU = data.rehberler;
                 }
+            } else {
+                if (pass === "selcukustun1234") {
+                    REHBER_HAVUZU.selcuk_ustun.tcKimlik = "48463112830";
+                    REHBER_HAVUZU.selcuk_ustun.ruhsatNo = "015675";
+                    REHBER_HAVUZU.selcuk_ustun.sicilNo = "06-1384";
+                    REHBER_HAVUZU.selcuk_ustun.adres = "ŞEHİTMUSTAFA MAH. ŞEHİT CENGİZ TOPEL CAD. İÇELLİ PASAJI NO:11/103 TARSUS/MERSİN";
+                    REHBER_HAVUZU.selcuk_ustun.telefon = "0538 747 64 64 - 0505 842 33 33";
 
-                const satirIdx = no + 6;
-                const isim = String(krokiSayfa.satirlar[satirIdx]?.[isimSutunIdx]?.deger || '').trim();
-                const durak = String(krokiSayfa.satirlar[satirIdx]?.[durakSutunIdx]?.deger || '').trim();
-                const doluMu = (renkliMi || isim !== '');
+                    REHBER_HAVUZU.mustafa_postlu.tcKimlik = "28591902398";
+                    REHBER_HAVUZU.mustafa_postlu.ruhsatNo = "15829";
+                    REHBER_HAVUZU.mustafa_postlu.sicilNo = "6889";
+                    REHBER_HAVUZU.mustafa_postlu.telefon = "0530 279 08 72";
 
-                mevcutKoltukListesi.push({
-                    no: no,
-                    dolu: doluMu,
-                    isim: isim || (renkliMi ? "Grup Kayıt" : ""),
-                    durak: durak,
-                    cinsiyet: doluMu ? (cinsiyetler[no] || 'E') : null,
-                    gercekRenk: hucreRenkCss,
-                    rgb: rgbDegerleri
-                });
-            }
-
-            krokiyiCiz(mevcutKoltukListesi, aktifKapasiteTipi);
-            bildirimGoster(`✅ "${data.baslik}" yüklendi.`, "#166534", "#f0fdf4", "#bbf7d0");
-
-        } catch (err) {
-            bildirimGoster(`❌ Hata: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
-        }
-    }
-
-    function krokiyiCiz(koltuklar, kapasite) {
-        const krokiAlani = document.getElementById("krokiAlani");
-        krokiAlani.innerHTML = "";
-
-        let bosSayisi = 0;
-        koltuklar.forEach(k => { if (!k.dolu) bosSayisi++; });
-        document.getElementById("koltukSayac").innerText = `${bosSayisi} Boş Koltuk`;
-
-        if (kapasite === 41) {
-            const siralama41 = [
-                { sol: [1],   sag: [2, 3] },
-                { sol: [4],   sag: [5, 6] },
-                { sol: [7],   sag: [8, 9] },
-                { sol: [10],  sag: [11, 12] },
-                { sol: [13],  sag: [14, 15] },
-                { sol: [16],  sag: [17, 18] },
-                { sol: [19],  sag: [20, 21] },
-                { sol: [22],  sag: 'kapi' },
-                { sol: [23],  sag: [24, 25] },
-                { sol: [26],  sag: [27, 28] },
-                { sol: [29],  sag: [30, 31] },
-                { sol: [32],  sag: [33, 34] },
-                { sol: [35],  sag: [36, 37] },
-                { arka: [38, 39, 40, 41] }
-            ];
-
-            siralama41.forEach(sira => {
-                const rowDiv = document.createElement("div");
-                if (sira.arka) {
-                    rowDiv.style.display = "grid";
-                    rowDiv.style.gridTemplateColumns = "1fr 1fr 1fr 1fr";
-                    rowDiv.style.gap = "6px";
-                    sira.arka.forEach(no => rowDiv.appendChild(butonUret(no, koltuklar)));
+                    REHBER_HAVUZU.berkan_yildirim.tcKimlik = "49375209076";
+                    REHBER_HAVUZU.berkan_yildirim.ruhsatNo = "008480";
+                    REHBER_HAVUZU.berkan_yildirim.sicilNo = "01-58-8480";
+                    REHBER_HAVUZU.berkan_yildirim.telefon = "0553 936 45 33";
                 } else {
-                    rowDiv.style.display = "grid";
-                    rowDiv.style.gridTemplateColumns = "1fr 24px 1fr 1fr";
-                    rowDiv.style.gap = "6px";
-                    rowDiv.style.alignItems = "center";
-                    rowDiv.appendChild(butonUret(sira.sol[0], koltuklar));
-
-                    const koridor = document.createElement("div");
-                    koridor.style.textAlign = "center";
-                    koridor.style.color = "#94a3b8";
-                    koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
-                    rowDiv.appendChild(koridor);
-
-                    if (sira.sag === 'kapi') {
-                        const kapi = document.createElement("div");
-                        kapi.className = "orta-kapi-blok";
-                        kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
-                        rowDiv.appendChild(kapi);
-                    } else {
-                        rowDiv.appendChild(butonUret(sira.sag[0], koltuklar));
-                        rowDiv.appendChild(butonUret(sira.sag[1], koltuklar));
-                    }
-                }
-                krokiAlani.appendChild(rowDiv);
-            });
-            return;
-        }
-
-        const siralama2x2 = [
-            { sol: [1, 2],   sag: [3, 4] },
-            { sol: [5, 6],   sag: [7, 8] },
-            { sol: [9, 10],  sag: [11, 12] },
-            { sol: [13, 14], sag: [15, 16] },
-            { sol: [17, 18], sag: [19, 20] },
-            { sol: [21, 22], sag: 'kapi' },
-            { sol: [25, 26], sag: [23, 24] },
-            { sol: [29, 30], sag: [27, 28] },
-            { sol: [33, 34], sag: [31, 32] },
-            { sol: [37, 38], sag: [35, 36] },
-            { sol: [41, 42], sag: [39, 40] },
-            { sol: [45, 46], sag: [43, 44] }
-        ];
-
-        if (kapasite === 54) {
-            siralama2x2.push({ sol: [49, 50], sag: [47, 48] });
-            siralama2x2.push({ sol: [53, 54], sag: [51, 52] });
-        }
-
-        siralama2x2.forEach(sira => {
-            const rowDiv = document.createElement("div");
-            rowDiv.style.display = "grid";
-            rowDiv.style.gridTemplateColumns = "1fr 1fr 22px 1fr 1fr";
-            rowDiv.style.gap = "6px";
-            rowDiv.style.alignItems = "center";
-
-            rowDiv.appendChild(butonUret(sira.sol[0], koltuklar));
-            rowDiv.appendChild(butonUret(sira.sol[1], koltuklar));
-
-            const koridor = document.createElement("div");
-            koridor.style.textAlign = "center";
-            koridor.style.color = "#94a3b8";
-            koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
-            rowDiv.appendChild(koridor);
-
-            if (sira.sag === 'kapi') {
-                const kapi = document.createElement("div");
-                kapi.className = "orta-kapi-blok";
-                kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
-                rowDiv.appendChild(kapi);
-            } else {
-                rowDiv.appendChild(butonUret(sira.sag[0], koltuklar));
-                rowDiv.appendChild(butonUret(sira.sag[1], koltuklar));
-            }
-
-            krokiAlani.appendChild(rowDiv);
-        });
-    }
-
-    function butonUret(kNo, koltuklar) {
-        const kVeri = koltuklar.find(x => x.no === kNo);
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.id = "btnKoltuk_" + kNo;
-        btn.style.padding = "9px 0";
-        btn.style.borderRadius = "7px";
-        btn.style.fontWeight = "800";
-        btn.style.fontSize = "12px";
-
-        if (kVeri.dolu) {
-            btn.style.cursor = "not-allowed";
-            const infoText = `Koltuk ${kNo}: ${kVeri.isim}${kVeri.durak ? ' | Durak: ' + kVeri.durak : ''}`;
-            btn.title = infoText;
-
-            if (kVeri.gercekRenk && kVeri.rgb) {
-                btn.style.background = kVeri.gercekRenk;
-                btn.style.border = "1.5px solid rgba(0,0,0,0.18)";
-                const parlaklik = (kVeri.rgb.r * 299 + kVeri.rgb.g * 587 + kVeri.rgb.b * 114) / 1000;
-                btn.style.color = parlaklik > 140 ? "#0f172a" : "#ffffff";
-            } else {
-                btn.style.background = "#e2e8f0";
-                btn.style.border = "1.5px solid #cbd5e1";
-                btn.style.color = "#475569";
-            }
-
-            const cinsiyetIcon = kVeri.cinsiyet === 'K' ? '👩' : (kVeri.cinsiyet === 'E' ? '👨' : '🔒');
-            btn.innerText = `${kNo} ${cinsiyetIcon}`;
-        } else {
-            const seciliMi = seciliKoltuklar.includes(kNo);
-            if (seciliMi) {
-                btn.style.background = "#2563eb";
-                btn.style.color = "#ffffff";
-                btn.style.border = "1.5px solid #1d4ed8";
-            } else {
-                btn.style.background = "#ffffff";
-                btn.style.color = "#15803d";
-                btn.style.border = "1.5px solid #86efac";
-            }
-            btn.style.cursor = "pointer";
-            btn.innerText = String(kNo);
-            btn.onclick = () => koltukTiklandi(kNo);
-        }
-        return btn;
-    }
-
-    function koltukTiklandi(kNo) {
-        const idx = seciliKoltuklar.indexOf(kNo);
-        if (idx > -1) {
-            seciliKoltuklar.splice(idx, 1);
-        } else {
-            seciliKoltuklar.push(kNo);
-            seciliKoltuklar.sort((a, b) => a - b);
-        }
-
-        mevcutKoltukListesi.forEach(k => {
-            if (!k.dolu) {
-                const b = document.getElementById("btnKoltuk_" + k.no);
-                if (b) {
-                    if (seciliKoltuklar.includes(k.no)) {
-                        b.style.background = "#2563eb";
-                        b.style.color = "#ffffff";
-                        b.style.borderColor = "#1d4ed8";
-                    } else {
-                        b.style.background = "#ffffff";
-                        b.style.color = "#15803d";
-                        b.style.borderColor = "#86efac";
-                    }
+                    alert("❌ Hatalı Güvenlik Şifresi! Kişisel veriler gösterilemez.");
+                    return;
                 }
             }
-        });
 
-        yolcuFormunuYenile();
-    }
+            guvenlikKilidiAcik = true;
+            document.getElementById("kilitDurumuIcon").innerText = "🔓";
+            document.getElementById("kilitDurumuMetin").innerText = "Kişisel Veri Kilidi Açık (Tüm Bilgiler Yüklendi)";
+            document.getElementById("kilitDurumuMetin").style.color = "#16a34a";
+            document.getElementById("authPassword").style.display = "none";
 
-    function secimleriTemizle() {
-        seciliKoltuklar = [];
-        mevcutKoltukListesi.forEach(k => {
-            if (!k.dolu) {
-                const b = document.getElementById("btnKoltuk_" + k.no);
-                if (b) {
-                    b.style.background = "#ffffff";
-                    b.style.color = "#15803d";
-                    b.style.borderColor = "#86efac";
-                }
-            }
-        });
-        yolcuFormunuYenile();
-    }
-
-    function yolcuFormunuYenile() {
-        const container = document.getElementById("yolcuListesiFormu");
-        const btnKaydet = document.getElementById("btnKaydet");
-        const sayac = document.getElementById("seciliSayac");
-
-        sayac.innerText = seciliKoltuklar.length;
-        btnKaydet.disabled = (seciliKoltuklar.length === 0);
-
-        if (seciliKoltuklar.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
-                Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
-            </div>`;
-            return;
-        }
-
-        container.innerHTML = "";
-
-        seciliKoltuklar.forEach((kNo, index) => {
-            const card = document.createElement("div");
-            card.className = "passenger-card";
-            card.innerHTML = `
-                <div class="passenger-card-header">
-                    <span>💺 Koltuk No: ${kNo} (${index + 1}. Yolcu)</span>
-                    <button type="button" onclick="koltukTiklandi(${kNo})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">✖ Kaldır</button>
-                </div>
-                
-                <!-- Satır 1: Ad Soyad & Cinsiyet -->
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; margin-bottom:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Yolcu Adı Soyadı:</label>
-                        <input type="text" id="ad_${kNo}" placeholder="Örn: Selçuk Üstün" style="font-weight:600;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Cinsiyet:</label>
-                        <select id="cins_${kNo}">
-                            <option value="E">👨 Erkek</option>
-                            <option value="K">👩 Kadın</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Satır 2: T.C. Kimlik & Doğum Tarihi (Opsiyonel) -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">T.C. Kimlik / Pasaport:</label>
-                        <input type="text" id="tc_${kNo}" maxlength="11" placeholder="11 Haneli T.C.">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Doğum Tarihi (Opsiyonel):</label>
-                        <input type="text" id="dogum_${kNo}" placeholder="GG.AA.YYYY">
-                    </div>
-                </div>
-
-                <!-- Satır 3: Telefon & Biniş Durağı -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Telefon Numarası:</label>
-                        <input type="text" id="tel_${kNo}" placeholder="0532..." value="">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Biniş Durağı:</label>
-                        <select id="durak_${kNo}">
-                            <option value="Mersin - Vipol">Mersin - Vipol</option>
-                            <option value="Mersin - Forum">Mersin - Forum</option>
-                            <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
-                            <option value="Tarsus - Ofis" selected>Tarsus - Ofis</option>
-                            <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
-                            <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
-                            <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
-                            <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function topluDurakUygula() {
-        const secilen = document.getElementById("topluDurakSecici").value;
-        if (!secilen) return;
-        seciliKoltuklar.forEach(kNo => {
-            const el = document.getElementById(`durak_${kNo}`);
-            if (el) el.value = secilen;
-        });
-    }
-
-    function topluTelUygula() {
-        const val = document.getElementById("topluTelInput").value;
-        seciliKoltuklar.forEach(kNo => {
-            const el = document.getElementById(`tel_${kNo}`);
-            if (el) el.value = val;
-        });
-    }
-
-    async function grubuKaydet() {
-        if (!aktifDosyaId || seciliKoltuklar.length === 0) return;
-
-        const yolcular = [];
-        for (const kNo of seciliKoltuklar) {
-            const ad = document.getElementById(`ad_${kNo}`)?.value.trim();
-            if (!ad) {
-                alert(`Lütfen Koltuk ${kNo} için yolcu adı girin!`);
-                document.getElementById(`ad_${kNo}`)?.focus();
-                return;
-            }
-            yolcular.push({
-                koltuk_no: kNo,
-                ad_soyad: ad,
-                cinsiyet: document.getElementById(`cins_${kNo}`)?.value || 'E',
-                tc_kimlik: document.getElementById(`tc_${kNo}`)?.value.trim() || '',
-                dogum_tarihi: document.getElementById(`dogum_${kNo}`)?.value.trim() || '',
-                telefon: document.getElementById(`tel_${kNo}`)?.value.trim() || '-',
-                binis_duragi: document.getElementById(`durak_${kNo}`)?.value || ''
-            });
-        }
-
-        const btn = document.getElementById("btnKaydet");
-        btn.disabled = true;
-        bildirimGoster(`⏳ ${yolcular.length} yolcu kaydediliyor...`, "#0369a1", "#eff6ff", "#bfdbfe");
-
-        try {
-            const res = await fetch(`${API_BASE}/api/grup-kaydet`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    dosya_id: aktifDosyaId,
-                    kapasite: aktifKapasiteTipi,
-                    yolcular: yolcular
-                })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
-
-            bildirimGoster(`✅ Başarılı: ${data.mesaj}`, "#166534", "#f0fdf4", "#bbf7d0");
-
-            seciliKoltuklar = [];
-            yolcuFormunuYenile();
-            turSecildi();
+            rehberSecimiDegisti();
+            alert("✅ T.C., Ruhsat, Sicil ve iletişim bilgileri başarıyla yüklendi.");
 
         } catch (err) {
-            bildirimGoster(`❌ Kayıt Hatası: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
-            btn.disabled = false;
+            console.warn("Köprü bağlantı hatası:", err);
+            alert("Sunucuya bağlanılamadı.");
         }
     }
 
-    function bildirimGoster(mesaj, renk, arkaplan, kenarlik) {
-        const durum = document.getElementById("durumKutusu");
-        durum.style.display = "block";
-        durum.style.color = renk;
-        durum.style.background = arkaplan;
-        durum.style.border = "1px solid " + kenarlik;
-        durum.innerHTML = mesaj;
+    function rehberSecimiDegisti() {
+        const secilenMod = document.getElementById("sel_rehberMod").value;
+
+        if (secilenMod === "manuel") {
+            document.getElementById("in_rehberAd").value = "";
+            document.getElementById("in_rehberTc").value = "";
+            document.getElementById("in_rehberRuhsat").value = "";
+            document.getElementById("in_rehberSicil").value = "";
+            document.getElementById("in_rehberDil").value = "TR(TÜRKÇE)";
+            document.getElementById("in_rehberAdres").value = "";
+            document.getElementById("in_rehberTel").value = "";
+            document.getElementById("in_rehberEposta").value = "";
+            document.getElementById("in_rehberOda").selectedIndex = 0;
+            document.getElementById("sel_rehberTuru").value = "bolgesel";
+
+            document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']").forEach(cb => {
+                cb.checked = false;
+            });
+
+            rehberTuruDegisti();
+            dokumanaYansit();
+            document.getElementById("in_rehberAd").focus();
+            return;
+        }
+
+        const profil = REHBER_HAVUZU[secilenMod];
+        if (profil) {
+            document.getElementById("in_rehberAd").value = profil.adSoyad;
+            document.getElementById("in_rehberTc").value = profil.tcKimlik;
+            document.getElementById("in_rehberRuhsat").value = profil.ruhsatNo;
+            document.getElementById("in_rehberSicil").value = profil.sicilNo;
+            document.getElementById("in_rehberDil").value = profil.diller;
+            document.getElementById("in_rehberAdres").value = profil.adres;
+            document.getElementById("in_rehberTel").value = profil.telefon;
+            document.getElementById("in_rehberEposta").value = profil.eposta;
+            document.getElementById("in_rehberOda").value = profil.oda;
+            document.getElementById("sel_rehberTuru").value = profil.tur;
+
+            const checkBoxes = document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']");
+            checkBoxes.forEach(cb => {
+                cb.checked = profil.bolgeler.includes(cb.value);
+            });
+
+            rehberTuruDegisti();
+        }
     }
 
-    document.addEventListener("DOMContentLoaded", turlariYukle);
+    function rehberTuruDegisti() {
+        const tur = document.getElementById("sel_rehberTuru").value;
+        const bolgeAlani = document.getElementById("bolgeSecimAlani");
+
+        if (tur === "ulkesel") {
+            bolgeAlani.style.display = "none";
+        } else {
+            bolgeAlani.style.display = "block";
+        }
+        dokumanaYansit();
+    }
+
+    function formatTarihTR(isoStr) {
+        if (!isoStr) return "";
+        const p = isoStr.split("-");
+        return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : isoStr;
+    }
+
+    function paraFormatla(sayi) {
+        return new Intl.NumberFormat('tr-TR').format(sayi) + " TL";
+    }
+
+    function toplamUcretiHesapla() {
+        const yevmiye = parseFloat(document.getElementById("form_gunlukYevmiye").value) || 0;
+        const toplamTutar = yevmiye * aktifHesaplananGunSayisi;
+        document.getElementById("form_toplamUcret").value = toplamTutar;
+        dokumanaYansit();
+    }
+
+    function yevmiyeDegisti() {
+        toplamUcretiHesapla();
+    }
+
+    function toplamUcretManuelDegisti() {
+        const toplamTutar = parseFloat(document.getElementById("form_toplamUcret").value) || 0;
+        const yeniYevmiye = Math.round(toplamTutar / (aktifHesaplananGunSayisi || 1));
+        document.getElementById("form_gunlukYevmiye").value = yeniYevmiye;
+        dokumanaYansit();
+    }
+
+    function hesaplaVeUygulaHizmetTuru(geceFarki) {
+        const select = document.getElementById("form_hizmetTuru");
+
+        if (geceFarki <= 0) {
+            aktifHesaplananGunSayisi = 1;
+            select.value = "gunluk";
+            document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER.gunluk;
+        } else {
+            aktifHesaplananGunSayisi = geceFarki + 1;
+            select.value = "paket";
+            document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER.paket;
+        }
+
+        document.getElementById("form_gunSayisiGosterge").value = `${aktifHesaplananGunSayisi} Gün`;
+
+        [0, 1, 2, 3].forEach(g => {
+            const btn = document.getElementById(`btnSure${g}`);
+            if (btn) btn.classList.toggle("active", g === geceFarki);
+        });
+
+        toplamUcretiHesapla();
+    }
+
+    function turSuresiSec(geceSayisi) {
+        aktifSeciliGece = geceSayisi;
+        const baslangicStr = document.getElementById("form_turBaslangic").value;
+        if (!baslangicStr) return;
+
+        const baslangicDate = new Date(baslangicStr);
+        const bitisDate = new Date(baslangicDate);
+        bitisDate.setDate(bitisDate.getDate() + aktifSeciliGece);
+
+        document.getElementById("form_turBitis").value = bitisDate.toISOString().split("T")[0];
+        hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+    }
+
+    function turTarihiDegisti() {
+        const baslangicStr = document.getElementById("form_turBaslangic").value;
+        if (!baslangicStr) return;
+
+        const baslangicDate = new Date(baslangicStr);
+        const bitisDate = new Date(baslangicDate);
+        bitisDate.setDate(bitisDate.getDate() + aktifSeciliGece);
+
+        document.getElementById("form_turBitis").value = bitisDate.toISOString().split("T")[0];
+        hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+    }
+
+    function turBitisTarihiDegisti() {
+        const baslangicStr = document.getElementById("form_turBaslangic").value;
+        const bitisStr = document.getElementById("form_turBitis").value;
+        if (!baslangicStr || !bitisStr) return;
+
+        const d1 = new Date(baslangicStr);
+        const d2 = new Date(bitisStr);
+        const farkGun = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+        aktifSeciliGece = farkGun > 0 ? farkGun : 0;
+
+        hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+    }
+
+    function hizmetTuruManuelDegisti() {
+        const tur = document.getElementById("form_hizmetTuru").value;
+        document.getElementById("form_gunlukYevmiye").value = TABAN_UCRETLER[tur] || 5566;
+        toplamUcretiHesapla();
+    }
+
+    function dokumanaYansit() {
+        const ad = document.getElementById("in_rehberAd").value;
+        document.getElementById("doc_rehberAd").innerText = ad || "-";
+        document.getElementById("doc_sigRehberAd").innerText = ad || "-";
+        document.getElementById("doc_rehberTc").innerText = document.getElementById("in_rehberTc").value || "***********";
+        document.getElementById("doc_rehberRuhsat").innerText = document.getElementById("in_rehberRuhsat").value || "*****";
+        document.getElementById("doc_rehberSicil").innerText = document.getElementById("in_rehberSicil").value || "**-****";
+        document.getElementById("doc_rehberDil").innerText = document.getElementById("in_rehberDil").value;
+        document.getElementById("doc_rehberAdres").innerText = document.getElementById("in_rehberAdres").value || "********************";
+        document.getElementById("doc_rehberTel").innerText = document.getElementById("in_rehberTel").value || "05** *** ** **";
+        document.getElementById("doc_rehberEposta").innerText = document.getElementById("in_rehberEposta").value || "***@***.com";
+        document.getElementById("doc_rehberOda").innerText = document.getElementById("in_rehberOda").value;
+
+        const rehberTuru = document.getElementById("sel_rehberTuru").value;
+        if (rehberTuru === "ulkesel") {
+            document.getElementById("doc_rehberBolge").innerText = "ÜLKESEL REHBER";
+        } else {
+            const seciliBolgeler = [];
+            document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']:checked").forEach(cb => {
+                seciliBolgeler.push(cb.value);
+            });
+            document.getElementById("doc_rehberBolge").innerText = seciliBolgeler.length > 0
+                ? `BÖLGESEL (${seciliBolgeler.join(", ")})`
+                : "BÖLGESEL";
+        }
+
+        const baslangic = formatTarihTR(document.getElementById("form_turBaslangic").value) || "07.11.2026";
+        const bitis = formatTarihTR(document.getElementById("form_turBitis").value) || baslangic;
+        document.getElementById("doc_turTarih").innerText = `${baslangic} - ${bitis}`;
+
+        document.getElementById("doc_kisiSayisi").innerText = document.getElementById("form_kisiSayisi").value || "46";
+        document.getElementById("doc_turBaslik").innerText = document.getElementById("form_turBaslik").value;
+        document.getElementById("doc_dil").innerText = document.getElementById("form_dil").value;
+
+        const toplamUcret = parseFloat(document.getElementById("form_toplamUcret").value) || 0;
+        const toplamMetin = paraFormatla(toplamUcret);
+        const secilenHizmet = document.getElementById("form_hizmetTuru").value;
+        const adetStr = `${aktifHesaplananGunSayisi}`;
+
+        ["transfer", "gece", "gunluk", "paket", "yurtdisi"].forEach(tur => {
+            const cellCnt = document.getElementById(`cell_cnt_${tur}`);
+            const cellFee = document.getElementById(`cell_fee_${tur}`);
+            if (cellCnt) cellCnt.innerHTML = "";
+            if (cellFee) cellFee.innerText = "";
+        });
+
+        if (secilenHizmet === "gunluk") {
+            document.getElementById("cell_cnt_gunluk").innerText = adetStr;
+            document.getElementById("cell_fee_gunluk").innerText = toplamMetin;
+        } else if (secilenHizmet === "paket") {
+            document.getElementById("cell_cnt_paket").innerText = adetStr;
+            document.getElementById("cell_fee_paket").innerText = toplamMetin;
+        } else if (secilenHizmet === "transfer") {
+            document.getElementById("cell_cnt_transfer").innerText = adetStr;
+            document.getElementById("cell_fee_transfer").innerText = toplamMetin;
+        }
+
+        document.getElementById("cell_cnt_toplam").innerText = adetStr;
+        document.getElementById("cell_fee_toplam").innerText = toplamMetin;
+        document.getElementById("doc_toplamUcret").innerText = toplamMetin;
+
+        const imzaTarih = formatTarihTR(document.getElementById("form_sozlesmeTarih").value) || "26.10.2026";
+        document.getElementById("doc_imzaTarih").innerText = imzaTarih;
+
+        const detay = document.getElementById("form_programDetay").value.trim();
+        const virgulIndex = detay.lastIndexOf(",", 75);
+        if (virgulIndex > 20 && detay.length > 70) {
+            document.getElementById("doc_programSatir1").innerText = detay.substring(0, virgulIndex + 1);
+            document.getElementById("doc_programSatir2").innerText = detay.substring(virgulIndex + 1).trim();
+        } else {
+            document.getElementById("doc_programSatir1").innerText = detay;
+            document.getElementById("doc_programSatir2").innerText = "";
+        }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const bugun = new Date().toISOString().split("T")[0];
+        document.getElementById("form_sozlesmeTarih").value = bugun;
+        document.getElementById("form_turBaslangic").value = bugun;
+        document.getElementById("form_turBitis").value = bugun;
+
+        rehberSecimiDegisti();
+        hesaplaVeUygulaHizmetTuru(0);
+        dokumanaYansit();
+    });
 </script>
 
 </body>
