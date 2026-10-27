@@ -3638,7 +3638,7 @@ let REHBER_HAVUZU = {
         diller: "TR(TÜRKÇE)",
         adres: "İSTANBUL",
         telefon: "05** *** ** **",
-        eposta: "mustafapostlu@gmail.com",
+        eposta: "mustafapostlu0@gmail.com",
         oda: "İRO"
     },
     berkan_yildirim: {
@@ -3649,7 +3649,7 @@ let REHBER_HAVUZU = {
         sicilNo: "**-**-****",
         bolgeler: [],
         diller: "TR / İNG (TÜRKÇE - İNGİLİZCE)",
-        adres: "ADANA",
+        adres: "MERSİN/TARSUS",
         telefon: "05** *** ** **",
         eposta: "berkanyildirim@gmail.com",
         oda: "ADRO"
