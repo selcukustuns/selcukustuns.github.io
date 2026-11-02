@@ -26,7 +26,7 @@
         
         .box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
         .box h3 { margin-top: 0; font-size: 15px; color: var(--dark); }
-        textarea { width: 100%; height: 140px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 13px; resize: vertical; outline: none; }
+        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 13px; resize: vertical; outline: none; }
         textarea:focus { border-color: var(--primary); }
         
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
@@ -57,7 +57,7 @@
         .tc-bad { background: #fee2e2; color: var(--danger); }
         .tc-warn { background: #fef3c7; color: var(--warning); }
 
-        /* ================= MODAL / POP-UP STİLLERİ ================= */
+        /* MODAL / POP-UP STİLLERİ */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -119,14 +119,8 @@
             justify-content: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideDown {
-            from { transform: translateY(-20px) scale(0.95); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { transform: translateY(-20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -139,8 +133,8 @@
     
     <div class="grid-2">
         <div class="box">
-            <h3>📝 WhatsApp / Metin Yapıştır</h3>
-            <textarea id="rawTextInput" placeholder="WhatsApp'tan gelen listeyi yapıştırın..."></textarea>
+            <h3>📝 WhatsApp / Excel'den Kopyala-Yapıştır</h3>
+            <textarea id="rawTextInput" placeholder="WhatsApp'tan gelen listeyi veya Excel'den kopyaladığınız satırları buraya yapıştırın..."></textarea>
             <div class="btn-group">
                 <button type="button" class="btn-blue" onclick="metniAyristir()">⚡ Metni Ayrıştır</button>
             </div>
@@ -197,13 +191,13 @@
     </div>
 </div>
 
-<!-- ORTADA ÇIKAN ŞIK POP-UP (MODAL) UYARISI -->
+<!-- POP-UP MODAL -->
 <div id="hataliTcModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-icon">⚠️</div>
         <div class="modal-title">Hatalı T.C. Kimlik No Bulundu!</div>
         <p class="modal-desc" id="modalAciklama">
-            Listede 11 haneli olmayan veya geçersiz <strong>1</strong> adet T.C. kimlik numarası tespit edildi.<br><br>
+            Listede 11 haneli olmayan veya geçersiz T.C. kimlik numarası tespit edildi.<br><br>
             Hatalı kayıtlar listeden <strong>temizlenip</strong> U-ETDS dosyası indirilsin mi?
         </p>
         <div class="modal-actions">
@@ -227,11 +221,9 @@ const ERKEK_ISIMLERI = new Set([
     "ZAFER", "YAVUZ", "SEDAT", "BÜLENT", "BİLAL", "CİHAN", "ERKAN"
 ]);
 
-// Cinsiyet Tespit Motoru: Eşleşmezse otomatik Kadın (K)
 function akilliCinsiyetTahmin(ad) {
     if (!ad) return { cinsiyet: "K", belirsiz: true };
     const ilkIsim = ad.trim().split(" ")[0].toLocaleUpperCase('tr-TR');
-    
     if (ERKEK_ISIMLERI.has(ilkIsim)) {
         return { cinsiyet: "E", belirsiz: false };
     }
@@ -246,6 +238,146 @@ function metinTemizleVeNormallestir(str) {
         .trim();
 }
 
+// 1. METİN AYRIŞTIRICI (Excel Kopya-Yapıştır ve Serbest Metin Uyumlu)
+function metniAyristir() {
+    const raw = document.getElementById("rawTextInput").value.trim();
+    if (!raw) return alert("Lütfen metin girin!");
+
+    const satirlar = raw.split("\n").filter(s => s.trim() !== "");
+    const liste = [];
+
+    satirlar.forEach(satir => {
+        let text = satir.trim();
+        const upperRaw = metinTemizleVeNormallestir(text);
+
+        // A) Başlık satırı kontrolü: "AD SOYAD", "TC", "TEL", "KİMLİK" geçiyorsa atla
+        if ((upperRaw.includes("AD") || upperRaw.includes("SOYAD")) && (upperRaw.includes("TC") || upperRaw.includes("TEL") || upperRaw.includes("KIMLIK"))) {
+            return;
+        }
+
+        // B) Excel'den Tab (\t) ile kopyalanmışsa
+        if (satir.includes("\t")) {
+            const cols = satir.split("\t").map(c => c.trim()).filter(c => c !== "");
+            let adSoyadCol = "";
+            let tcCol = "";
+            let telCol = "-";
+            let cinsCol = "";
+
+            cols.forEach(c => {
+                const digits = c.replace(/\D/g, "");
+                const cUpper = c.toUpperCase();
+
+                if (digits.length === 11 && !tcCol) {
+                    tcCol = digits;
+                } else if ((digits.length === 10 || (digits.length === 11 && digits.startsWith("0"))) && telCol === "-") {
+                    telCol = digits;
+                } else if (/^\d{1,3}$/.test(c) && !adSoyadCol) {
+                    // Sıra no (1, 2, 3...)
+                    return;
+                } else if (["K", "KADIN", "BAYAN", "E", "ERKEK", "BAY"].includes(cUpper)) {
+                    cinsCol = cUpper.startsWith("E") ? "E" : "K";
+                } else if (/[a-zA-ZçğıöşüÇĞİÖŞÜ]/.test(c) && !adSoyadCol) {
+                    adSoyadCol = c;
+                }
+            });
+
+            if (adSoyadCol || tcCol) {
+                const parcalar = adSoyadCol.split(" ").filter(p => p.trim() !== "");
+                let isim = "", soyisim = "";
+                if (parcalar.length > 1) {
+                    soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
+                    isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
+                } else if (parcalar.length === 1) {
+                    isim = parcalar[0].toLocaleUpperCase('tr-TR');
+                }
+
+                let cinsiyet = cinsCol;
+                let cinsiyetBelirsiz = false;
+                if (!cinsiyet) {
+                    const tahmin = akilliCinsiyetTahmin(isim);
+                    cinsiyet = tahmin.cinsiyet;
+                    cinsiyetBelirsiz = tahmin.belirsiz;
+                }
+
+                liste.push({
+                    ulke: "TR",
+                    isim: isim,
+                    soyisim: soyisim,
+                    tc: tcCol,
+                    cinsiyet: cinsiyet,
+                    cinsiyetBelirsiz: cinsiyetBelirsiz,
+                    telefon: telCol
+                });
+                return;
+            }
+        }
+
+        // C) Düz Serbest Metin İşleme
+        let tc = "";
+        const tcMatch = text.match(/\b\d{11}\b/);
+        if (tcMatch) {
+            tc = tcMatch[0];
+            text = text.replace(tc, " ");
+        }
+
+        let tel = "-";
+        const telMatch = text.match(/(?:(?:\+90)|0)?\s?5\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}/);
+        if (telMatch) {
+            tel = telMatch[0].replace(/\D/g, "");
+            text = text.replace(telMatch[0], " ");
+        }
+
+        let cinsiyet = "";
+        if (/\b(E|ERKEK|BAY|M)\b/i.test(text)) {
+            cinsiyet = "E";
+            text = text.replace(/\b(E|ERKEK|BAY|M)\b/i, " ");
+        } else if (/\b(K|KADIN|BAYAN|KIZ|F)\b/i.test(text)) {
+            cinsiyet = "K";
+            text = text.replace(/\b(K|KADIN|BAYAN|KIZ|F)\b/i, " ");
+        }
+
+        let temiz = text.replace(/^\d+[\.\-\)]\s*/, "")
+                        .replace(/[(),\-:;]/g, " ")
+                        .replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ\s]/g, "")
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+        if (["REHBER", "ACENTA", "ACENTE", "KAPTAN", "ŞOFÖR"].some(k => temiz.toUpperCase().includes(k))) return;
+
+        const parcalar = temiz.split(" ").filter(p => p.trim() !== "");
+        let isim = "", soyisim = "";
+        if (parcalar.length > 1) {
+            soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
+            isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
+        } else if (parcalar.length === 1 && parcalar[0]) {
+            isim = parcalar[0].toLocaleUpperCase('tr-TR');
+        }
+
+        if (!isim && !tc) return;
+
+        let cinsiyetBelirsiz = false;
+        if (!cinsiyet) {
+            const tahmin = akilliCinsiyetTahmin(isim);
+            cinsiyet = tahmin.cinsiyet;
+            cinsiyetBelirsiz = tahmin.belirsiz;
+        }
+
+        liste.push({
+            ulke: "TR",
+            isim: isim,
+            soyisim: soyisim,
+            tc: tc,
+            cinsiyet: cinsiyet,
+            cinsiyetBelirsiz: cinsiyetBelirsiz,
+            telefon: tel
+        });
+    });
+
+    AYRISMIS_YOLCULAR = liste;
+    tabloyuCiz();
+}
+
+// 2. EXCEL DOSYASI AYRIŞTIRICI
 function excelDosyasiAyristir() {
     const fileInput = document.getElementById("excelFileInput");
     if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen bir Excel dosyası seçin!");
@@ -306,7 +438,7 @@ function excelDosyasiAyristir() {
 
             if (cAdTek !== -1 && (!cSoyadAyri || cSoyadAyri === -1)) {
                 const tamAd = String(r[cAdTek] || "").trim().replace(/\s+/g, ' ');
-                const parcalar = tamAd.split(" ");
+                const parcalar = tamAd.split(" ").filter(p => p.trim() !== "");
                 if (parcalar.length > 1) {
                     soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
                     isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
@@ -352,80 +484,7 @@ function excelDosyasiAyristir() {
     reader.readAsArrayBuffer(fileInput.files[0]);
 }
 
-function metniAyristir() {
-    const raw = document.getElementById("rawTextInput").value.trim();
-    if (!raw) return alert("Lütfen metin girin!");
-
-    const satirlar = raw.split("\n").filter(s => s.trim() !== "");
-    const liste = [];
-
-    satirlar.forEach(satir => {
-        let text = satir.trim();
-
-        let tc = "";
-        const tcMatch = text.match(/\b\d{11}\b/);
-        if (tcMatch) {
-            tc = tcMatch[0];
-            text = text.replace(tc, " ");
-        }
-
-        let tel = "-";
-        const telMatch = text.match(/(?:(?:\+90)|0)?\s?5\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}/);
-        if (telMatch) {
-            tel = telMatch[0].replace(/\D/g, "");
-            text = text.replace(telMatch[0], " ");
-        }
-
-        let cinsiyet = "";
-        if (/\b(E|ERKEK|BAY|M)\b/i.test(text)) {
-            cinsiyet = "E";
-            text = text.replace(/\b(E|ERKEK|BAY|M)\b/i, " ");
-        } else if (/\b(K|KADIN|BAYAN|KIZ|F)\b/i.test(text)) {
-            cinsiyet = "K";
-            text = text.replace(/\b(K|KADIN|BAYAN|KIZ|F)\b/i, " ");
-        }
-
-        let temiz = text.replace(/^\d+[\.\-\)]\s*/, "")
-                        .replace(/[(),\-:;]/g, " ")
-                        .replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ\s]/g, "")
-                        .replace(/\s+/g, " ")
-                        .trim();
-
-        if (["REHBER", "ACENTA", "ACENTE", "KAPTAN", "ŞOFÖR"].some(k => temiz.toUpperCase().includes(k))) return;
-
-        const parcalar = temiz.split(" ");
-        let isim = "", soyisim = "";
-        if (parcalar.length > 1) {
-            soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
-            isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
-        } else if (parcalar.length === 1 && parcalar[0]) {
-            isim = parcalar[0].toLocaleUpperCase('tr-TR');
-        }
-
-        if (!isim && !tc) return;
-
-        let cinsiyetBelirsiz = false;
-        if (!cinsiyet) {
-            const tahmin = akilliCinsiyetTahmin(isim);
-            cinsiyet = tahmin.cinsiyet;
-            cinsiyetBelirsiz = tahmin.belirsiz;
-        }
-
-        liste.push({
-            ulke: "TR",
-            isim: isim,
-            soyisim: soyisim,
-            tc: tc,
-            cinsiyet: cinsiyet,
-            cinsiyetBelirsiz: cinsiyetBelirsiz,
-            telefon: tel
-        });
-    });
-
-    AYRISMIS_YOLCULAR = liste;
-    tabloyuCiz();
-}
-
+// 3. TABLO ÇİZİMİ
 function tabloyuCiz() {
     const tbody = document.getElementById("yolcuGovde");
     tbody.innerHTML = "";
@@ -505,7 +564,7 @@ function istatistikGuncelle() {
     document.getElementById("btnExcelIndir").disabled = (AYRISMIS_YOLCULAR.length === 0);
 }
 
-// ================= MODAL / POP-UP VE İNDİRME MANTIĞI =================
+// 4. POP-UP VE İNDİRME FONKSİYONLARI
 function modalAc(hataliSayisi) {
     document.getElementById("modalAciklama").innerHTML = `
         Listede 11 haneli olmayan veya geçersiz <strong>${hataliSayisi}</strong> adet T.C. kimlik numarası tespit edildi.<br><br>
@@ -522,7 +581,6 @@ function modalKapat() {
 function uetdsIndirmeTetikle() {
     if (AYRISMIS_YOLCULAR.length === 0) return;
 
-    // Hatalı T.C. kontrolü
     const hataliList = AYRISMIS_YOLCULAR.filter(y => !/^\d{11}$/.test(y.tc));
 
     if (hataliList.length > 0) {
@@ -534,14 +592,8 @@ function uetdsIndirmeTetikle() {
 
 function hatalilariTemizleVeIndir() {
     modalKapat();
-    
-    // Yalnızca geçerli 11 haneli T.C.'ye sahip olanları filtrele
     AYRISMIS_YOLCULAR = AYRISMIS_YOLCULAR.filter(y => /^\d{11}$/.test(y.tc));
-    
-    // Tabloyu ve istatistikleri güncelle
     tabloyuCiz();
-    
-    // Temizlenen listeyi doğrudan indir
     dosyayiExcelYapVeIndir(AYRISMIS_YOLCULAR);
 }
 
