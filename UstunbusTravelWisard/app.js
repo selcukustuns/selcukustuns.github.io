@@ -3621,7 +3621,7 @@ let REHBER_HAVUZU = {
         tcKimlik: "***********",
         ruhsatNo: "*****",
         sicilNo: "**-****",
-        bolgeler: ["İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
+        bolgeler: ["AKDENİZ", "İÇ ANADOLU", "KARADENİZ", "DOĞU ANADOLU", "GÜNEYDOĞU ANADOLU"],
         diller: "TR(TÜRKÇE)",
         adres: "********************",
         telefon: "05** *** ** **",
@@ -3638,7 +3638,7 @@ let REHBER_HAVUZU = {
         diller: "TR(TÜRKÇE)",
         adres: "İSTANBUL",
         telefon: "05** *** ** **",
-        eposta: "mustafapostlu0@gmail.com",
+        eposta: "mustafapostlu@gmail.com",
         oda: "İRO"
     },
     berkan_yildirim: {
@@ -3649,7 +3649,7 @@ let REHBER_HAVUZU = {
         sicilNo: "**-**-****",
         bolgeler: [],
         diller: "TR / İNG (TÜRKÇE - İNGİLİZCE)",
-        adres: "MERSİN/TARSUS",
+        adres: "ADANA",
         telefon: "05** *** ** **",
         eposta: "berkanyildirim@gmail.com",
         oda: "ADRO"
@@ -3666,27 +3666,27 @@ const STANDART_TURLAR = {
         gece: 0
     },
     ankara: {
-        baslik: "ANKARA TURU PROGRAMI",
+        baslik: "ANKARA KÜLTÜR TURU PROGRAMI",
         detay: "KURTULUŞ SAVAŞI MÜZESİ (I. TBMM BİNASI), CUMHURİYET MÜZESİ (II. TBMM BİNASI), ETNOĞRAFYA MÜZESİ, ANITKABİR",
         gece: 0
     },
     mardin: {
-        baslik: "MARDİN & MİDYAT TURU PROGRAMI",
+        baslik: "MARDİN & MİDYAT KÜLTÜR TURU",
         detay: "MİDYAT KONUKEVİ (SILA KONAĞI), TARİHİ SOKAKLAR, TELKARİCİLER ÇARŞISI, DEYRULZAFARAN MANASTIRI VEYA MOR GABRİEL MANASTIRI, KASIMİYE MEDRESESİ, ESKİ MARDİN EVLERİ, TARİHİ ULU CAMİİ",
         gece: 0
     },
     gaziantep: {
-        baslik: "GAZİANTEP TURU PROGRAMI",
+        baslik: "GAZİANTEP KÜLTÜR VE LEZZET TURU",
         detay: "GAZİANTEP HAYVANAT BAHÇESİ, ZEUGMA MOZAİK MÜZESİ , PANORAMA 25 ARALIK MÜZESİ, TARİHİ BAKIRCILAR ÇARŞISI VE ALMECİ PAZARI",
         gece: 0
     },
     eskisehir: {
-        baslik: "ESKİŞEHİR TURU PROGRAMI",
+        baslik: "ESKİŞEHİR KÜLTÜR TURU PROGRAMI",
         detay: "TARİHİ ODUNPAZARI EVLERİ, KURŞUNLU KÜLLİYESİ VE CAM ATÖLYELERİ, YILMAZ BÜYÜKERŞEN BALMUMU HEYKELLER MÜZESİ, PORSUK ÇAYI TEKNE TURU, SAZOVA PARKI (MASAL ŞATOSU)",
         gece: 0
     },
     sanliurfa: {
-        baslik: "ŞANLIURFA TURU PROGRAMI",
+        baslik: "ŞANLIURFA & GÖBEKLİTEPE TURU",
         detay: "GÖBEKLİTEPE ÖREN YERİ, BALIKLIGÖL (HALİL-ÜR RAHMAN), AYN ZELİHA GÖLÜ, RIZVANİYE CAMİİ, ŞANLIURFA ARKEOLOJİ MÜZESİ, TARİHİ KAPALI ÇARŞI VE GÜMRÜK HANI",
         gece: 0
     }
@@ -3833,7 +3833,7 @@ function guvenliOturumuKapat() {
     rehberSecimiDegisti();
 }
 
-function rehberSecimiDegisti() {
+function rehberSecimiDegisti(kullaniciSecti = false) {
     const secilenMod = document.getElementById("sel_rehberMod").value;
 
     if (secilenMod === "manuel") {
@@ -3851,6 +3851,16 @@ function rehberSecimiDegisti() {
         document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']").forEach(cb => {
             cb.checked = false;
         });
+
+        // Kullanıcı "Manuel Rehber" seçtiyse tur başlığı ve gezilecek yerler de boşalsın
+        // (kilit aç/kapat gibi otomatik çağrılarda kullanıcının yazdığı tur bilgisi silinmez)
+        if (kullaniciSecti) {
+            document.getElementById("form_turBaslik").value = "";
+            document.getElementById("form_programDetay").value = "";
+            document.querySelectorAll("#sozlesmeCard .hizli-btn-grup .hizli-btn").forEach(b => {
+                if (b.id && b.id.startsWith("btnTur_")) b.classList.remove("active");
+            });
+        }
 
         rehberTuruDegisti();
         dokumanaYansit();
@@ -3878,6 +3888,19 @@ function rehberSecimiDegisti() {
 
         rehberTuruDegisti();
     }
+}
+
+function bolgeSecimiDegisti() {
+    const kutular = Array.from(document.querySelectorAll("#bolgeSecimAlani input[type='checkbox']"));
+    const hepsiSecili = kutular.length === 7 && kutular.every(cb => cb.checked);
+
+    if (hepsiSecili) {
+        // 7 bölgenin tamamı seçildiyse rehber otomatik olarak Ülkesel olur
+        document.getElementById("sel_rehberTuru").value = "ulkesel";
+        rehberTuruDegisti();
+        return;
+    }
+    dokumanaYansit();
 }
 
 function rehberTuruDegisti() {
@@ -3946,7 +3969,10 @@ function hesaplaVeUygulaHizmetTuru(geceFarki) {
 function turSuresiSec(geceSayisi) {
     aktifSeciliGece = geceSayisi;
     const baslangicStr = document.getElementById("form_turBaslangic").value;
-    if (!baslangicStr) return;
+    if (!baslangicStr) {
+        hesaplaVeUygulaHizmetTuru(aktifSeciliGece);
+        return;
+    }
 
     const baslangicDate = new Date(baslangicStr);
     const bitisDate = new Date(baslangicDate);
@@ -3958,7 +3984,10 @@ function turSuresiSec(geceSayisi) {
 
 function turTarihiDegisti() {
     const baslangicStr = document.getElementById("form_turBaslangic").value;
-    if (!baslangicStr) return;
+    if (!baslangicStr) {
+        dokumanaYansit();
+        return;
+    }
 
     const baslangicDate = new Date(baslangicStr);
     const bitisDate = new Date(baslangicDate);
@@ -3971,7 +4000,10 @@ function turTarihiDegisti() {
 function turBitisTarihiDegisti() {
     const baslangicStr = document.getElementById("form_turBaslangic").value;
     const bitisStr = document.getElementById("form_turBitis").value;
-    if (!baslangicStr || !bitisStr) return;
+    if (!baslangicStr || !bitisStr) {
+        dokumanaYansit();
+        return;
+    }
 
     const d1 = new Date(baslangicStr);
     const d2 = new Date(bitisStr);
@@ -4040,9 +4072,12 @@ function dokumanaYansit() {
             : "";
     }
 
-    const baslangic = formatTarihTR(document.getElementById("form_turBaslangic").value) || "07.11.2026";
-    const bitis = formatTarihTR(document.getElementById("form_turBitis").value) || baslangic;
-    document.getElementById("doc_turTarih").innerText = `${baslangic} - ${bitis}`;
+    // Tarihlerin ikisi de boşsa sözleşmede tarih alanı boş kalır
+    const baslangic = formatTarihTR(document.getElementById("form_turBaslangic").value);
+    const bitis = formatTarihTR(document.getElementById("form_turBitis").value);
+    document.getElementById("doc_turTarih").innerText = (!baslangic && !bitis)
+        ? ""
+        : `${baslangic || bitis} - ${bitis || baslangic}`;
 
     document.getElementById("doc_kisiSayisi").innerText = document.getElementById("form_kisiSayisi").value || "46";
     document.getElementById("doc_turBaslik").innerText = document.getElementById("form_turBaslik").value;

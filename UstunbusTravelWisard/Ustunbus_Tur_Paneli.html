@@ -504,7 +504,7 @@
         <div class="form-grid-3" style="align-items:center;">
             <div>
                 <label style="color:#1e40af;">👤 Rehber Seçimi:</label>
-                <select id="sel_rehberMod" onchange="rehberSecimiDegisti()" style="background:#fff; font-weight:700; color:#1e3a8a;">
+                <select id="sel_rehberMod" onchange="rehberSecimiDegisti(true)" style="background:#fff; font-weight:700; color:#1e3a8a;">
                     <option value="selcuk_ustun">⭐ Selçuk Üstün (ANRO)</option>
                     <option value="mustafa_postlu">👤 Mustafa Postlu (İRO)</option>
                     <option value="berkan_yildirim">👤 Berkan Yıldırım (ADRO)</option>
@@ -521,6 +521,7 @@
             <div>
                 <label style="color:#1e40af;">🏛️ Bağlı Olduğu Oda (13 TUREB Odası):</label>
                 <select id="in_rehberOda" onchange="dokumanaYansit()" style="background:#fff; font-weight:600;">
+                    <option value="">Oda Bilgisi Seçin</option>
                     <option value="ADRO">1. ADRO - Adana Bölgesel Turist Rehberleri Odası</option>
                     <option value="ANRO">2. ANRO - Ankara Turist Rehberleri Odası</option>
                     <option value="ARO">3. ARO - Antalya Rehberler Odası</option>
@@ -541,13 +542,13 @@
         <div id="bolgeSecimAlani" style="margin-top: 10px;">
             <label style="color:#1e40af;">🗺️ Yetkili Coğrafi Bölgeleri Seçin (7 Bölge):</label>
             <div class="bolge-checkbox-container">
-                <label class="bolge-check-item"><input type="checkbox" value="AKDENİZ" onchange="dokumanaYansit()" checked> Akdeniz</label>
-                <label class="bolge-check-item"><input type="checkbox" value="İÇ ANADOLU" onchange="dokumanaYansit()" checked> İç Anadolu</label>
-                <label class="bolge-check-item"><input type="checkbox" value="KARADENİZ" onchange="dokumanaYansit()" checked> Karadeniz</label>
-                <label class="bolge-check-item"><input type="checkbox" value="DOĞU ANADOLU" onchange="dokumanaYansit()" checked> Doğu Anadolu</label>
-                <label class="bolge-check-item"><input type="checkbox" value="GÜNEYDOĞU ANADOLU" onchange="dokumanaYansit()" checked> Güneydoğu Anadolu</label>
-                <label class="bolge-check-item"><input type="checkbox" value="EGE" onchange="dokumanaYansit()"> Ege</label>
-                <label class="bolge-check-item"><input type="checkbox" value="MARMARA" onchange="dokumanaYansit()"> Marmara</label>
+                <label class="bolge-check-item"><input type="checkbox" value="AKDENİZ" onchange="bolgeSecimiDegisti()" checked> Akdeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="İÇ ANADOLU" onchange="bolgeSecimiDegisti()" checked> İç Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="KARADENİZ" onchange="bolgeSecimiDegisti()" checked> Karadeniz</label>
+                <label class="bolge-check-item"><input type="checkbox" value="DOĞU ANADOLU" onchange="bolgeSecimiDegisti()" checked> Doğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="GÜNEYDOĞU ANADOLU" onchange="bolgeSecimiDegisti()" checked> Güneydoğu Anadolu</label>
+                <label class="bolge-check-item"><input type="checkbox" value="EGE" onchange="bolgeSecimiDegisti()"> Ege</label>
+                <label class="bolge-check-item"><input type="checkbox" value="MARMARA" onchange="bolgeSecimiDegisti()"> Marmara</label>
             </div>
         </div>
 
@@ -591,7 +592,7 @@
     <div style="margin-bottom:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
         <label style="color:#0f172a; margin-bottom:8px;">⚡ Standart Tur Programları (Tek Tıkla Yükle):</label>
         <div class="hizli-btn-grup">
-            <button type="button" class="hizli-btn active" id="btnTur_kapadokya" onclick="hizliTurUygula('kapadokya')">🎈 Kapadokya Turu</button>
+            <button type="button" class="hizli-btn" id="btnTur_kapadokya" onclick="hizliTurUygula('kapadokya')">🎈 Kapadokya Turu</button>
             <button type="button" class="hizli-btn" id="btnTur_ankara" onclick="hizliTurUygula('ankara')">🏛️ Ankara Turu</button>
             <button type="button" class="hizli-btn" id="btnTur_mardin" onclick="hizliTurUygula('mardin')">🏘️ Mardin - Midyat Turu</button>
             <button type="button" class="hizli-btn" id="btnTur_gaziantep" onclick="hizliTurUygula('gaziantep')">🥙 Gaziantep Turu</button>
@@ -649,7 +650,7 @@
         </div>
         <div>
             <label>Tur Programı Başlığı:</label>
-            <input type="text" id="form_turBaslik" value="KAPADOKYA TURU PROGRAMI" oninput="dokumanaYansit()">
+            <input type="text" id="form_turBaslik" value="" oninput="dokumanaYansit()">
         </div>
         <div>
             <label>Müşteri Milliyeti ve Dili:</label>
@@ -659,7 +660,7 @@
 
     <div>
         <label>Gezilecek Yerler / Tur Akışı (Noktalı Alan):</label>
-        <textarea id="form_programDetay" rows="3" oninput="dokumanaYansit()">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ, ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</textarea>
+        <textarea id="form_programDetay" rows="3" oninput="dokumanaYansit()"></textarea>
     </div>
 </div>
 
@@ -740,7 +741,7 @@
         <div class="sec-header">2.Rehberlik Hizmeti Verilecek Tur</div>
         <div class="meta-list">
             <span class="meta-label">Turun Başlangıç Ve Bitiş Tarihi</span>
-            <span class="meta-value">: <strong id="doc_turTarih">07.11.2026 - 07.11.2026</strong></span>
+            <span class="meta-value">: <strong id="doc_turTarih"></strong></span>
             
             <span class="meta-label">Kişi Sayısı</span>
             <span class="meta-value">: <strong id="doc_kisiSayisi">46</strong></span>
@@ -749,14 +750,14 @@
             <span class="meta-value">: <strong id="doc_dil">Türk / Türkçe</strong></span>
             
             <span class="meta-label">Tur Programı*</span>
-            <span class="meta-value">: <strong id="doc_turBaslik">KAPADOKYA TURU PROGRAMI</strong></span>
+            <span class="meta-value">: <strong id="doc_turBaslik"></strong></span>
             
             <span class="meta-label">TUR DETAYI EKTE MEVCUTTUR.</span>
             <span class="meta-value"></span>
         </div>
 
-        <div class="dotted-box" id="doc_programSatir1">GÜVERCİNLİK VADİSİ, AŞK VADİSİ, YER ALTI ŞEHRİ, DERVENT VADİSİ,</div>
-        <div class="dotted-box" id="doc_programSatir2">ONYX TAŞ ATÖLYESİ, PAŞABAĞLARI</div>
+        <div class="dotted-box" id="doc_programSatir1"></div>
+        <div class="dotted-box" id="doc_programSatir2"></div>
         <div class="dotted-box" style="min-height: 14px;"></div>
 
         <div style="font-size: 10px; color:#111; margin-top: 8px; margin-bottom: 8px;">
@@ -854,7 +855,7 @@
 
         <div class="signatures-grid">
             <div>
-                <strong>ACENTE YETKİLİSİ</strong><br>
+                <strong>ACENTE YETKİLİSİ***</strong><br>
                 Adı Soyadı : EMİN ÜSTÜN<br>
                 Unvan :ÖZ ÜSTÜNBUS TURİZM VE SEYAHAT ACENTASI<br>
                 Görevi: ŞİRKET MÜDÜRÜ<br>
