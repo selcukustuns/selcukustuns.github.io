@@ -4294,13 +4294,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     window.akOrnek = function () {
         const s = (k, v) => { $(k).value = v; };
-        s("carrier", "Akdeniz Lüks Turizm Taşımacılık - Ahmet Akdeniz"); s("cid", "29104829102");
-        s("cphone", "0 (532) 412 88 90"); s("caddr", "Şehitler Cad. No:18 Akdeniz / MERSİN");
-        s("plate", "33 TUR 789"); s("brand", "Mercedes-Benz Travego 15 SHD"); s("cap", "46 + 1 Kişilik");
-        s("driver", "Kemal Yılmaz"); s("dphone", "0 (543) 222 33 44"); s("src", "SRC-2 (Yurtiçi Yolcu)"); s("asst", "Murat Demir");
+        s("carrier", "Terasus Turizm Taş. Oto. İnş. Bilg. Prog. Faal. İth. Ve İhr. San. Ve Tic. Ltd. Şti. - Selçuk Üstün"); s("cid", "8391193039");
+        s("cphone", "0 (505) 842 33 33"); s("caddr", "Şehitmustafa Mah. Şehit Cengiz Topel Cad. İçelli Pasajı No:11/103 Tarsus / MERSİN");
+        s("plate", "33 EU 101"); s("brand", "Mercedes-Benz Travego 15 SHD"); s("cap", "46 + 1 Kişilik");
+        s("driver", "Mehmet Göze"); s("dphone", "0 (533) 352 34 73"); s("src", "SRC-2 (Yurtiçi Yolcu)"); s("asst", "Veis Eren");
         s("origin", "Tarsus Kleopatra Kapısı Önü (06:30 Hareket)");
         s("dest", "Tarsus ➔ Pozantı ➔ Niğde ➔ Kapadokya (Ürgüp-Göreme-Avanos) ➔ Tarsus");
-        s("price", "48500"); s("iban", "TR56 0006 2000 0001 2948 2019 44"); s("fuel", "ACENTA'ya ait");
+        s("price", "48500"); s("iban", "TR03 0011 1000 0000 0164 5934 49"); s("fuel", "ACENTA'ya ait");
         varsayilanTarihler(); akFiyat();
     };
 
