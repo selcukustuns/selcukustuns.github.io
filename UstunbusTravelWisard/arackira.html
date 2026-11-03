@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öz Üstünbus Turizm - Araç Kiralama ve Turizm Taşımacılığı Hizmet Sözleşmesi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .heading-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Ekran Önizleme Boyutu */
+        #contract-paper {
+            width: 210mm;
+            min-height: 297mm;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        /* Baskı & PDF (A4 Tam Uyum & Taşmayı Engelleyen Boyutlandırma) */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 4mm 7mm 4mm 7mm;
+            }
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #printable-container {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            #contract-paper {
+                width: 100% !important;
+                min-height: auto !important;
+                height: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding: 1.5mm 3mm !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            .contract-title {
+                font-size: 8.5pt !important;
+                margin-bottom: 1.2mm !important;
+            }
+            .meta-table {
+                font-size: 6.8pt !important;
+                margin-bottom: 1.2mm !important;
+            }
+            .meta-table td, .meta-table th, .meta-table div {
+                padding-top: 1px !important;
+                padding-bottom: 1px !important;
+            }
+            .article-text {
+                font-size: 6.6pt !important;
+                line-height: 1.11 !important;
+            }
+            .article-box {
+                margin-bottom: 1.5px !important;
+            }
+            .clause-box {
+                padding: 1.5px 3px !important;
+                margin-top: 1px !important;
+                margin-bottom: 1px !important;
+            }
+            .signature-area {
+                min-height: 85px !important;
+                padding: 4px 6px !important;
+                margin-top: 1.5mm !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 antialiased flex flex-col">
+
+    <!-- Üst Bar / Menü -->
+    <header class="no-print bg-slate-900 text-white sticky top-0 z-50 shadow-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="icons/ustunbuslogo.png" alt="Öz Üstünbus Logo" class="w-10 h-10 object-contain rounded-lg bg-white/10 p-1" onerror="this.src='https://placehold.co/80x80/0f172a/f59e0b?text=BUS'">
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold leading-tight uppercase tracking-wide">ÖZ ÜSTÜNBUS TURİZM</h1>
+                    <p class="text-xs text-amber-400 font-medium">TÜRSAB A-12982 • Şoförlü Turizm Taşıma Hizmet Sözleşmesi</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" onclick="loadSampleBusData()" class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>Örnek Doldur</span>
+                </button>
+                <button type="button" onclick="clearForm()" class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-slate-800 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>Temizle</span>
+                </button>
+                <button type="button" onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold rounded-lg shadow hover:shadow-md transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span>A4 Yazdır / PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- SOL FORM PANELİ -->
+            <div class="no-print lg:col-span-5 space-y-5">
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
+                    <span class="text-base">📋</span>
+                    <div>
+                        <p class="font-bold">Üstünbus Turizm Araç Kira Sözleşmesi</p>
+                        <p class="text-amber-800 mt-0.5">Sözleşmeyi doldurun ve imzalayın.</p>
+                    </div>
+                </div>
+
+                <form id="contract-form" class="space-y-4" onsubmit="event.preventDefault()">
+
+                    <!-- 1. ACENTA BİLGİLERİ -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">1</span>
+                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Acenta & Şirket Bilgileri</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Ticari Ünvan (Şirket)</label>
+                                <input type="text" id="agency_corporate_title" value="Öz Üstüner Turizm Taş. Gayr. Dan. Tar. Akar. San. Ve Tic. Ltd. Şti." class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-700 font-medium" readonly>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Acenta Markası</label>
+                                    <input type="text" id="agency_title" value="Öz Üstünbus Turizm ve Seyahat Acentası" class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-slate-800" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">TÜRSAB Belge No</label>
+                                    <input type="text" id="agency_tursab" value="A-12982" class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-amber-700" readonly>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Yetkili Temsilci</label>
+                                    <input type="text" id="agency_representative" oninput="updateContract()" value="EMİN ÜSTÜN" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Acenta Telefon (Sabit)</label>
+                                    <input type="text" id="agency_phone" value="0850 532 80 00 & 0532 560 89 19" class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-not-allowed" readonly>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Acenta Resmi Adresi</label>
+                                <input type="text" id="agency_address" value="Şehitler Tepesi Mah. 3631 Sk. Kılınç Apt. No:5A Tarsus / MERSİN" class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg text-slate-700" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. TAŞIMACI (KİRAYA VEREN FİRMA / ŞAHIS) -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Taşımacı (Firma / Şahıs)</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Taşımacı Ad Soyad / Şirket Unvanı</label>
+                                <input type="text" id="carrier_name" oninput="updateContract()" placeholder="Örn: Akdeniz Turizm Taşımacılık Ltd. Şti. veya Ad Soyad" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-semibold">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">TC No / Vergi No</label>
+                                    <input type="text" id="carrier_id" oninput="updateContract()" placeholder="TC / Vergi No" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">İletişim Telefonu</label>
+                                    <input type="tel" id="carrier_phone" oninput="updateContract()" placeholder="0 (5xx) xxx xx xx" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Tebligat Adresi</label>
+                                <input type="text" id="carrier_address" oninput="updateContract()" placeholder="Açık adres, İlçe / İl" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. OTOBÜS VE ŞOFÖR BİLGİLERİ -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">3</span>
+                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Otobüs ve Görevli Şoför</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div class="grid grid-cols-3 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Otobüs Plakası</label>
+                                    <input type="text" id="bus_plate" oninput="updateContract()" placeholder="33 TUR 01" class="w-full px-2.5 py-1.5 text-xs uppercase font-mono font-bold bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Marka / Model</label>
+                                    <input type="text" id="bus_brand" oninput="updateContract()" placeholder="Mercedes Travego 15 SHD" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Koltuk Kapasitesi</label>
+                                    <input type="text" id="bus_capacity" oninput="updateContract()" placeholder="46 + 1" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Görevli Şoför Adı Soyadı</label>
+                                    <input type="text" id="driver_name" oninput="updateContract()" placeholder="Şoför Adı Soyadı" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Şoför Cep Telefonu</label>
+                                    <input type="tel" id="driver_phone" oninput="updateContract()" placeholder="0 (5xx) xxx xx xx" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">SRC Belgesi</label>
+                                    <select id="driver_src" onchange="updateContract()" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-800">
+                                        <option value="SRC-1 (Uluslararası/Yurtiçi Yolcu)">SRC-1 (Uluslararası/Yurtiçi Yolcu)</option>
+                                        <option value="SRC-2 (Yurtiçi Yolcu)" selected>SRC-2 (Yurtiçi Yolcu)</option>
+                                        <option value="SRC-1 & SRC-2">SRC-1 & SRC-2</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Yedek Şoför / Muavin</label>
+                                    <input type="text" id="driver_assistant" oninput="updateContract()" placeholder="Yedek şoför adı (Opsiyonel)" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. GÜZERGAH VE SEFER BİLGİLERİ -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">4</span>
+                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Güzergah & Tarihler</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Kalkış Yeri & Buluşma Noktası</label>
+                                    <input type="text" id="trip_origin" oninput="updateContract()" placeholder="Örn: Mersin Tevfik Sırrı Gür Meydanı" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Varış / Tur Programı</label>
+                                    <input type="text" id="trip_destination" oninput="updateContract()" placeholder="Örn: Kapadokya - Ürgüp - Göreme - Mersin" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Başlangıç Tarihi & Saati</label>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        <input type="date" id="trip_start_date" oninput="updateContract()" class="w-full px-2 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-md">
+                                        <input type="time" id="trip_start_time" oninput="updateContract()" value="07:00" class="w-full px-2 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-md">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Bitiş Tarihi & Saati</label>
+                                    <div class="grid grid-cols-2 gap-1.5">
+                                        <input type="date" id="trip_end_date" oninput="updateContract()" class="w-full px-2 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-md">
+                                        <input type="time" id="trip_end_time" oninput="updateContract()" value="21:00" class="w-full px-2 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-md">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. MALİ ŞARTLAR & BEDEL -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] font-bold flex items-center justify-center">5</span>
+                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Kira Bedeli & Ödeme Koşulları</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Toplam Kira Bedeli (TL)</label>
+                                    <input type="number" id="contract_price" oninput="onPriceInput()" placeholder="Örn: 45000" class="w-full px-2.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Yazı İle Tutar (Otomatik)</label>
+                                    <input type="text" id="contract_price_words" oninput="updateContract()" placeholder="Otomatik yazılır" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Ödeme & Mahsup Esası</label>
+                                    <input type="text" value="Kartla Akaryakıt + Havale / Nakit" class="w-full px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-lg font-bold text-emerald-800 cursor-not-allowed" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Seyir Giderleri (Madde 3.4)</label>
+                                    <select id="fuel_type_clause" onchange="updateContract()" class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-800">
+                                        <option value="ACENTA'ya ait" selected>ACENTA'ya Ait (Standart)</option>
+                                        <option value="müşteriye ait">Müşteriye Ait</option>
+                                        <option value="TAŞIMACI'ya ait">Taşımacıya Ait</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Taşımacı IBAN / Banka Hesabı</label>
+                                <input type="text" id="carrier_iban" oninput="updateContract()" placeholder="TR.. ...." class="w-full px-2.5 py-1.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. DİJİTAL İMZA ÇİZİMİ -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-2">
+                        <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Taşımacı Dijital İmzası</span>
+                            <button type="button" onclick="clearSignature()" class="text-[11px] text-rose-600 font-semibold hover:underline">Temizle</button>
+                        </div>
+                        <div class="border border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden relative">
+                            <canvas id="signature-pad" class="w-full h-24 cursor-crosshair touch-none"></canvas>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block text-right">Ekrana parmağınız veya fare ile imza atabilirsiniz.</span>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- SAĞ PANEL: RESMİ SÖZLEŞME ÖNİZLEMESİ (A4 FORMATI) -->
+            <div class="lg:col-span-7 flex justify-center">
+                <div class="w-full">
+                    <div class="no-print flex items-center justify-between mb-3 px-1">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Resmi Baskı Önizlemesi (Tek Sayfa A4)
+                        </span>
+                        <button type="button" onclick="window.print()" class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Baskı Al / PDF Kaydet
+                        </button>
+                    </div>
+
+                    <!-- Sözleşme Taşıyıcı Kapsayıcı -->
+                    <div id="printable-container" class="w-full flex justify-center">
+                        <!-- Sözleşme Kağıdı -->
+                        <div id="contract-paper" class="rounded-xl shadow-xl border border-slate-300 p-5 text-slate-900 leading-normal flex flex-col justify-between">
+                            
+                            <div>
+                                <!-- Başlık & Logolar -->
+                                <div class="border-b-2 border-slate-950 pb-1.5 mb-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <img src="icons/ustunbuslogo.png" alt="Öz Üstünbus Turizm" class="h-11 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/180x60/ffffff/0f172a?text=USTUNBUS';">
+                                        </div>
+                                        <div class="flex items-center justify-end">
+                                            <img src="icons/tursab-logo.png" alt="TÜRSAB" class="h-11 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x65/ffffff/dc2626?text=TURSAB';">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mb-1.5">
+                                    <h2 class="contract-title text-sm font-black tracking-wider text-slate-950 uppercase heading-font">
+                                        Acenta Araç Kiralama ve Hizmet Sözleşmesi
+                                    </h2>
+                                </div>
+
+                                <!-- Sefer / Otobüs / Güzergah Özet Bilgi Tablosu -->
+                                <div class="meta-table grid grid-cols-4 border border-slate-300 rounded text-[7.2pt] mb-1.5 overflow-hidden">
+                                    <div class="p-1 border-r border-b border-slate-200 bg-slate-50/60 font-semibold text-slate-500">Otobüs Plakası:</div>
+                                    <div class="p-1 border-r border-b border-slate-200 font-bold font-mono text-slate-900" id="doc_bus_plate">-</div>
+                                    <div class="p-1 border-r border-b border-slate-200 bg-slate-50/60 font-semibold text-slate-500">Kapasite / Araç:</div>
+                                    <div class="p-1 border-b border-slate-200 font-medium text-slate-900" id="doc_bus_details">-</div>
+
+                                    <div class="p-1 border-r border-b border-slate-200 bg-slate-50/60 font-semibold text-slate-500">Görevli Sürücü:</div>
+                                    <div class="p-1 border-r border-b border-slate-200 font-medium text-slate-900">
+                                        <span id="doc_driver_name" class="font-bold">-</span>
+                                        <div id="doc_assistant_driver_container" class="hidden mt-0.5 pt-0.5 border-t border-slate-200 text-slate-700">
+                                            <span class="font-semibold text-slate-500">Diğer Sürücü:</span> <span id="doc_assistant_driver_name" class="font-bold"></span>
+                                        </div>
+                                    </div>
+                                    <div class="p-1 border-r border-b border-slate-200 bg-slate-50/60 font-semibold text-slate-500">Sürücü Tel / SRC:</div>
+                                    <div class="p-1 border-b border-slate-200 font-medium text-slate-900" id="doc_driver_contact">-</div>
+
+                                    <div class="p-1 border-r border-slate-200 bg-slate-50/60 font-semibold text-slate-500">Kalkış & Güzergah:</div>
+                                    <div class="p-1 border-r border-slate-200 font-medium text-slate-900 col-span-3" id="doc_trip_route">-</div>
+                                </div>
+
+                                <!-- 9 RESMİ SÖZLEŞME MADDESİ -->
+                                <div class="article-text space-y-1 text-[7pt] leading-[1.14] text-slate-800 text-justify">
+                                    
+                                    <div class="article-box">
+                                        <p><strong>MADDE 1 – TARAFLAR</strong></p>
+                                        <p><strong>1.1. ACENTA:</strong> Öz Üstünbus Turizm / Öz Üstüner Turizm Taş. Gayr. Dan. Tar. Akar. San. Ve Tic. Ltd. Şti. (TÜRSAB Belge No: A-12982 - Şehitler Tepesi Mah. 3631 Sk. Kılınç Apt. No:5A Tarsus / MERSİN - Tel: 0850 532 80 00 & 0532 560 89 19) (Bundan böyle kısaca <strong>"ACENTA"</strong> olarak anılacaktır.)</p>
+                                        <p><strong>1.2. TAŞIMACI:</strong> <span id="doc_carrier_name" class="font-bold underline decoration-slate-400">.......................................................................................................</span> (Bundan böyle kısaca <strong>"TAŞIMACI"</strong> olarak anılacaktır.)</p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 2 – SÖZLEŞMENİN KONUSU</strong></p>
+                                        <p>İşbu sözleşmenin konusu, ACENTA tarafından organize edilen turizm faaliyetlerinde kullanılmak üzere, özellikleri, güzergahı ve tarihleri belirlenen aracın TAŞIMACI tarafından şoförlü olarak ACENTA'ya kiralanması ve tarafların karşılıklı hak, yükümlülük ve cezai şartlarının belirlenmesidir. ACENTA ve TAŞIMACI, sözleşme konusu şartname ve mukavele hükümlerini eksiksiz yerine getirmeyi taahhüt eder.</p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 3 – ARAÇ VE DONANIM STANDARTLARI</strong></p>
+                                        <p><strong>3.1. Güvenlik ve Evraklar:</strong> TAŞIMACI, araçların turizm taşımacılığı esaslarına uygun olarak iç güvenlik (ilk yardım çantası, yangın söndürme cihazı vb.) ve dış güvenlik (stepne, takım çantası, kar zinciri vb.) ekipmanlarını eksiksiz bulundurmak zorundadır. Araçların şehir içi ve şehir dışı çalışabilmesi için kanuni belgelerin (trafik tescil ve kayıt belgeleri, zorunlu trafik ve koltuk ferdi kaza sigortaları, D2 belgesi vb.) tam ve eksiksiz bulundurulması tamamen TAŞIMACI'nın yükümlülüğündedir.</p>
+                                        <p><strong>3.2. İklimlendirme:</strong> Araçlarda yeterli ısıtma ve soğutma kapasitesine sahip kalorifer, klima ve havalandırma tesisatı bulunacak ve tam zamanlı, sorunsuz çalışır durumda olacaktır.</p>
+                                        <p><strong>3.3. Ses ve Temizlik:</strong> Araçlarda ses tesisatı yeterli ve sorunsuz (mikrofon, anons sistemi cızırtısız) olacak; araç içi ve dışı (camlar, perdeler, iç döşemeler, bagaj vb.) her daim temiz ve bakımlı olacaktır.</p>
+                                        <p><strong>3.4. Giderler:</strong> Araçların temizliği, her türlü periyodik bakımı, yağ değişimi ve mekanik onarımı TAŞIMACI'ya aittir. Otoban, otopark, köprü ve güzergah boyunca seyrüsefer için tüketilecek akaryakıt giderleri <strong id="doc_fuel_clause">ACENTA'ya ait</strong> olacaktır.</p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 4 – TAŞIMACININ VE SÜRÜCÜNÜN YÜKÜMLÜLÜKLERİ</strong></p>
+                                        <p><strong>4.1. Hazır Bulunma:</strong> Araç, ACENTA'nın veya müşterinin belirlediği yerde ve saatte kesinlikle hazır bulunmak zorundadır (Hareket saatinden en az 30 dakika önce).</p>
+                                        <p><strong>4.2. Kılık Kıyafet ve Davranış:</strong> Araç sürücülerinin kılık kıyafet, hijyen ve davranışlarına azami dikkat etmeleri zorunludur.</p>
+                                        <p><strong>4.3. Talimatlara Uygunluk:</strong> Araç sürücü ve görevlileri, tur süresince ACENTA'nın veya onun belirlediği sorumlu kişilerin (rehber, tur lideri) güzergah ve programa dair talimatlarına harfiyen uymak zorundadır.</p>
+                                        <p><strong>4.4. U-ETDS Yükümlülüğü:</strong> ACENTA, bildirimlerin yapılabilmesi için araca ve sürücülere ait belgeleri hareketten en az 2 saat önce TAŞIMACI'ya iletecektir. Bilgi eksikliğinden doğacak cezalardan TAŞIMACI sorumludur.</p>
+                                        <p><strong>4.5. Trafik Kuralları ve Cezalar:</strong> Araç seyir halindeyken Karayolları Trafik Kanunu'nun öngördüğü kurallara uymak zorundadır. Aracın kiralama süresi içerisinde doğacak olan hız ihlali, hatalı park vb. trafik ihlallerinden kaynaklanan her türlü ceza bedeli doğrudan TAŞIMACI'ya aittir.</p>
+                                        <p><strong>4.6. Kazalar ve Hasar:</strong> Her türlü tedbir alınmasına rağmen, olabilecek trafik vukuatlarından, kazalardan ve üçüncü şahıslar ile yolculara verilecek maddi/manevi zararlardan TAŞIMACI sorumludur.</p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 5 – ARIZA, GECİKME VE RÜCU ŞARTLARI</strong></p>
+                                        <p><strong>5.1. Arıza Halinde İkame:</strong> Seyir esnasında aracın arıza yapıp kullanılamaz durumda olması halinde TAŞIMACI, en kısa zamanda (maksimum 2 saat içerisinde) aynı nitelikte (eşdeğer veya üst model) araç temin etmekle mükelleftir.</p>
+                                        <p><strong>5.2. Rücu ve Dışarıdan Araç Temini:</strong> TAŞIMACI'nın işbu şartname ve sözleşme hükümlerini yerine getirmemesi, arızaya süresinde müdahale edememesi veya başka nedenlerle aksamalar olması sonucu ACENTA'nın eşdeğer taşıma vasıtaları ve firmalar kullanmak (dışarıdan araç tutmak) durumunda kalması halinde; bu vasıta veya firmalara yapılacak ödemeler, ek transfer masrafları TAŞIMACI tarafından tanzim edilir. Bu tutar, TAŞIMACI'nın toplam hakedişinden kesilir, aşan kısım kendisine rücu edilir.</p>
+                                    </div>
+
+                                    <div class="clause-box bg-amber-50/70 p-1 rounded border border-amber-200">
+                                        <p><strong>MADDE 6 – CEZAİ ŞARTLAR VE HİZMET KUSURU KESİNTİLERİ (HAKEDİŞ KESİNTİ TABLOSU)</strong></p>
+                                        <p class="mb-0.5">Taşıma hizmetinin eksiksiz ifası esastır. Aşağıdaki kusurların tespiti halinde, karşılarında belirtilen oranlar TAŞIMACI'nın toplam kira bedelinden doğrudan mahsup edilecektir:</p>
+                                        <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[6.5pt]">
+                                            <div>&bull; <strong>Mikrofon/Ses Sistemi Arızası:</strong> %15 kesinti.</div>
+                                            <div>&bull; <strong>Klima/Kalorifer Arızası:</strong> %25 kesinti.</div>
+                                            <div>&bull; <strong>Temizlik ve Davranış Kusuru:</strong> %15 kesinti.</div>
+                                            <div>&bull; <strong>Gecikme:</strong> %10 kesinti (&gt;30 dk fesih hakkı).</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 7 – İPTAL VE FESİH ŞARTLARI</strong></p>
+                                        <p><strong>7.1.</strong> İşbu sözleşmede yapılacak her türlü değişiklik ve sözleşmenin iptali tarafların yazılı onayından sonra geçerli olacaktır.</p>
+                                        <p><strong>7.2.</strong> ACENTA, işbu sözleşmeyi tur hareket saatine 24 saat kalana kadar gerekçesiz ve cezasız iptal etme hakkına sahiptir.</p>
+                                        <p><strong>7.3.</strong> Gerekçesi makul olmayan ve keyfi sözleşme iptalinde, aracı zamanında göndermeme durumunda zarar gören taraf (ACENTA), maddi ve manevi tazminat talebinde bulunacaktır. TAŞIMACI'nın haksız feshi durumunda sözleşme bedelinin %100'ü oranında cezai şart uygulanır.</p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 8 – GİDERLER, AKARYAKIT MAHSUBU VE ÖDEME PLANI</strong></p>
+                                        <p><strong>8.1. Konaklama ve Yemek:</strong> Seyahatler esnasında araç sürücüsünün yemek ve konaklama masrafları ACENTA'ya ait olacaktır.</p>
+                                        <p><strong>8.2. Bedel, Akaryakıt Mahsubu ve Ödeme Şekli:</strong> Araç Kira / Sözleşme bedeli net <strong id="doc_price_box" class="underline decoration-slate-400">.......... TL (.......................................................................)</strong> olup; iş bitiminde TAŞIMACI tarafından sözleşme konusu toplam hakediş faturası ACENTA'ya kesilecektir. Turizm taşımacılığı teamülleri ve sektör uygulamaları gereğince (aracın dolu depo teslim edilip dolu depo iade alınması esası dahilinde); seyrüsefer boyunca tüketilen akaryakıt bedelleri ACENTA'nın tercihine bağlı olarak ACENTA'nın kurumsal kredi kartı veya taşıt tanıma sistemi (TTS) vasıtasıyla doğrudan ödenebilir. ACENTA tarafından bu şekilde ödenen tüm akaryakıt tutarları ile varsa işbu sözleşmeden doğan cezai kesintiler TAŞIMACI'nın toplam hakediş bedelinden mahsup edilir. Mahsuplaşma sonrasında kalan net bakiye, ACENTA'nın kendi takdir ve tercihine göre <strong>Banka Havalesi / EFT</strong> veya <strong>Nakit</strong> olarak tanzim edilir. <span id="doc_iban_part"></span></p>
+                                    </div>
+
+                                    <div class="article-box">
+                                        <p><strong>MADDE 9 – YETKİLİ MAHKEME VE SÜRE</strong></p>
+                                        <p><strong>9.1. Yetkili Merci:</strong> Bu sözleşmenin yorumundan ve uygulamasından doğacak anlaşmazlıkların çözüm yeri <strong>Tarsus Mahkemeleri ve İcra Daireleridir</strong>.</p>
+                                        <p><strong>9.2. Yürürlük ve Süre:</strong> İş bu sözleşme <strong id="doc_start_date_clause">...../...../20..</strong> tarihinde başlar ve <strong id="doc_end_date_clause">...../...../20..</strong> tarihinde biter. Sürenin bitiminde taraflar başka bir ihtar ve ihbara gerek kalmaksızın sözleşme kendiliğinden sona erer.</p>
+                                        <p class="mt-0.5">Yukarıda yazılı <strong>9 (dokuz) ana maddeden</strong> oluşan bu sözleşme iki nüsha olarak düzenlenmiş olup tüm maddeleri taraflarca okunmuş ve kabul edilerek imza altına alınmıştır.</p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- İmzalar Bölümü -->
+                            <div class="grid grid-cols-2 gap-5 pt-2 border-t-2 border-slate-300 text-center text-[7.5pt]">
+                                
+                                <!-- ACENTA YETKİLİSİ İMZA -->
+                                <div class="signature-area border-2 border-dashed border-slate-300 rounded-lg p-2 bg-slate-50/60 flex flex-col justify-between min-h-[92px]">
+                                    <div>
+                                        <span class="font-bold uppercase tracking-wider block text-slate-900 text-[8.2pt]">ACENTA YETKİLİSİ</span>
+                                        <span class="text-[6.8pt] text-slate-600 block leading-tight">Öz Üstünbus Turizm / Öz Üstüner Turizm Ltd. Şti.</span>
+                                    </div>
+                                    <div class="my-auto py-1">
+                                        <span id="doc_sign_agent_name" class="text-[8.5pt] text-slate-900 block font-bold tracking-wide">EMİN ÜSTÜN</span>
+                                    </div>
+                                </div>
+
+                                <!-- TAŞIMACI İMZA -->
+                                <div class="signature-area border-2 border-dashed border-slate-300 rounded-lg p-2 bg-slate-50/60 flex flex-col justify-between min-h-[92px]">
+                                    <div>
+                                        <span class="font-bold uppercase tracking-wider block text-slate-900 text-[8.2pt]">TAŞIMACI</span>
+                                        <span id="doc_sign_carrier_name" class="text-[6.8pt] text-slate-600 block font-medium truncate leading-tight">-</span>
+                                    </div>
+                                    <div class="flex items-center justify-center my-auto py-1 h-12">
+                                        <img id="doc_signature_img" class="h-10 object-contain hidden" alt="Taşımacı İmzası">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JS Mantık -->
+    <script>
+        let canvas, ctx;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSignaturePad();
+            loadDefaultDates();
+            updateContract();
+        });
+
+        // Sayıyı Türkçe Metne Çeviren Fonksiyon
+        function numberToTurkishWords(num) {
+            if (num === null || num === undefined || isNaN(num) || num === 0) return '';
+            
+            const birler = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
+            const onlar = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
+            const basamaklar = ['', 'Bin', 'Milyon', 'Milyar'];
+
+            let n = Math.floor(Math.abs(num));
+            if (n === 0) return 'Sıfır Türk Lirası';
+
+            function ucluGrup(val) {
+                let text = '';
+                const y = Math.floor(val / 100);
+                const o = Math.floor((val % 100) / 10);
+                const b = val % 10;
+
+                if (y > 0) {
+                    text += (y === 1 ? '' : birler[y]) + 'Yüz ';
+                }
+                if (o > 0) {
+                    text += onlar[o] + ' ';
+                }
+                if (b > 0) {
+                    text += birler[b] + ' ';
+                }
+                return text.trim();
+            }
+
+            let parts = [];
+            let basamakIndex = 0;
+
+            while (n > 0) {
+                const grup = n % 1000;
+                if (grup > 0) {
+                    let grupText = ucluGrup(grup);
+                    if (basamakIndex === 1 && grup === 1) {
+                        parts.unshift('Bin');
+                    } else {
+                        const basamakAdi = basamaklar[basamakIndex];
+                        parts.unshift((grupText + (basamakAdi ? ' ' + basamakAdi : '')).trim());
+                    }
+                }
+                n = Math.floor(n / 1000);
+                basamakIndex++;
+            }
+
+            return parts.join(' ') + ' Türk Lirası';
+        }
+
+        function onPriceInput() {
+            const rawVal = document.getElementById('contract_price').value;
+            const num = parseFloat(rawVal);
+            if (!isNaN(num) && num > 0) {
+                document.getElementById('contract_price_words').value = numberToTurkishWords(num);
+            } else if (!rawVal) {
+                document.getElementById('contract_price_words').value = '';
+            }
+            updateContract();
+        }
+
+        function loadDefaultDates() {
+            const today = new Date();
+            const nextDay = new Date();
+            nextDay.setDate(today.getDate() + 2);
+
+            const formatDate = (date) => date.toISOString().split('T')[0];
+
+            document.getElementById('trip_start_date').value = formatDate(today);
+            document.getElementById('trip_end_date').value = formatDate(nextDay);
+        }
+
+        function formatTurkishDate(dateString) {
+            if (!dateString) return '...../...../20..';
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}.${parts[1]}.${parts[0]}`;
+            }
+            return dateString;
+        }
+
+        function updateContract() {
+            const agencyRep = document.getElementById('agency_representative').value.trim() || 'EMİN ÜSTÜN';
+            document.getElementById('doc_sign_agent_name').textContent = agencyRep;
+
+            const carrier = document.getElementById('carrier_name').value.trim();
+            document.getElementById('doc_carrier_name').textContent = carrier ? carrier : '.......................................................................................................';
+            document.getElementById('doc_sign_carrier_name').textContent = carrier || '-';
+
+            const plate = document.getElementById('bus_plate').value.trim();
+            const brand = document.getElementById('bus_brand').value.trim();
+            const capacity = document.getElementById('bus_capacity').value.trim();
+            
+            document.getElementById('doc_bus_plate').textContent = plate || '-';
+            document.getElementById('doc_bus_details').textContent = `${brand || '-'} / ${capacity ? capacity + ' Kişilik' : '-'}`;
+
+            const driver = document.getElementById('driver_name').value.trim();
+            const driverPhone = document.getElementById('driver_phone').value.trim();
+            const driverSrc = document.getElementById('driver_src').value;
+            
+            document.getElementById('doc_driver_name').textContent = driver || '-';
+            document.getElementById('doc_driver_contact').textContent = `${driverPhone || '-'} ${driverSrc ? '(' + driverSrc + ')' : ''}`;
+
+            const assistant = document.getElementById('driver_assistant').value.trim();
+            const assistantContainer = document.getElementById('doc_assistant_driver_container');
+            const assistantName = document.getElementById('doc_assistant_driver_name');
+
+            if (assistant) {
+                assistantName.textContent = assistant;
+                assistantContainer.classList.remove('hidden');
+            } else {
+                assistantName.textContent = '';
+                assistantContainer.classList.add('hidden');
+            }
+
+            const origin = document.getElementById('trip_origin').value.trim();
+            const destination = document.getElementById('trip_destination').value.trim();
+            const startTime = document.getElementById('trip_start_time').value;
+            const routeStr = `${origin || 'Kalkış Noktası'} ➔ ${destination || 'Varış/Tur Güzergahı'} (Hareket: ${startTime})`;
+            document.getElementById('doc_trip_route').textContent = routeStr;
+
+            document.getElementById('doc_fuel_clause').textContent = document.getElementById('fuel_type_clause').value;
+
+            const price = document.getElementById('contract_price').value.trim();
+            const priceWords = document.getElementById('contract_price_words').value.trim();
+            const iban = document.getElementById('carrier_iban').value.trim();
+            const formattedPrice = price ? Number(price).toLocaleString('tr-TR') : '..........';
+            const formattedWords = priceWords ? priceWords : '...................................................';
+            
+            document.getElementById('doc_price_box').textContent = `${formattedPrice} TL (${formattedWords})`;
+            document.getElementById('doc_iban_part').textContent = iban ? ` (Taşımacı IBAN: ${iban})` : '';
+
+            const startDate = document.getElementById('trip_start_date').value;
+            const endDate = document.getElementById('trip_end_date').value;
+            document.getElementById('doc_start_date_clause').textContent = formatTurkishDate(startDate);
+            document.getElementById('doc_end_date_clause').textContent = formatTurkishDate(endDate);
+        }
+
+        function loadSampleBusData() {
+            document.getElementById('carrier_name').value = 'Akdeniz Lüks Turizm Taşımacılık - Ahmet Akdeniz';
+            document.getElementById('carrier_id').value = '29104829102';
+            document.getElementById('carrier_phone').value = '0 (532) 412 88 90';
+            document.getElementById('carrier_address').value = 'Şehitler Cad. No:18 Akdeniz / MERSİN';
+
+            document.getElementById('bus_plate').value = '33 TUR 789';
+            document.getElementById('bus_brand').value = 'Mercedes-Benz Travego 15 SHD';
+            document.getElementById('bus_capacity').value = '46 + 1 Kişilik';
+
+            document.getElementById('driver_name').value = 'Kemal Yılmaz';
+            document.getElementById('driver_phone').value = '0 (543) 222 33 44';
+            document.getElementById('driver_src').value = 'SRC-2 (Yurtiçi Yolcu)';
+            document.getElementById('driver_assistant').value = 'Murat Demir';
+
+            document.getElementById('trip_origin').value = 'Tarsus Kleopatra Kapısı Önü (06:30 Hareket)';
+            document.getElementById('trip_destination').value = 'Tarsus ➔ Pozantı ➔ Niğde ➔ Kapadokya (Ürgüp-Göreme-Avanos) ➔ Tarsus';
+
+            document.getElementById('contract_price').value = '48500';
+            document.getElementById('carrier_iban').value = 'TR56 0006 2000 0001 2948 2019 44';
+            document.getElementById('fuel_type_clause').value = "ACENTA'ya ait";
+
+            onPriceInput();
+            loadDefaultDates();
+            updateContract();
+        }
+
+        function clearForm() {
+            document.getElementById('carrier_name').value = '';
+            document.getElementById('carrier_id').value = '';
+            document.getElementById('carrier_phone').value = '';
+            document.getElementById('carrier_address').value = '';
+            document.getElementById('bus_plate').value = '';
+            document.getElementById('bus_brand').value = '';
+            document.getElementById('bus_capacity').value = '';
+            document.getElementById('driver_name').value = '';
+            document.getElementById('driver_phone').value = '';
+            document.getElementById('driver_src').value = 'SRC-2 (Yurtiçi Yolcu)';
+            document.getElementById('driver_assistant').value = '';
+            document.getElementById('trip_origin').value = '';
+            document.getElementById('trip_destination').value = '';
+            document.getElementById('contract_price').value = '';
+            document.getElementById('contract_price_words').value = '';
+            document.getElementById('carrier_iban').value = '';
+            document.getElementById('fuel_type_clause').value = "ACENTA'ya ait";
+            clearSignature();
+            loadDefaultDates();
+            updateContract();
+        }
+
+        function initSignaturePad() {
+            canvas = document.getElementById('signature-pad');
+            ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                ctx.scale(ratio, ratio);
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#0f172a';
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            };
+
+            const startDrawing = (e) => {
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            };
+
+            const draw = (e) => {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+            };
+
+            const stopDrawing = () => {
+                if (isDrawing) {
+                    isDrawing = false;
+                    syncSignature();
+                }
+            };
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDrawing);
+
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            window.addEventListener('touchend', stopDrawing);
+        }
+
+        function syncSignature() {
+            const dataUrl = canvas.toDataURL('image/png');
+            const previewImg = document.getElementById('doc_signature_img');
+            previewImg.src = dataUrl;
+            previewImg.classList.remove('hidden');
+        }
+
+        function clearSignature() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const previewImg = document.getElementById('doc_signature_img');
+            previewImg.src = '';
+            previewImg.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
