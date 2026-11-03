@@ -3,782 +3,636 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yolcu Kayıt Etme Sistemi (YKES)</title>
+    <title>U-ETDS Akıllı Veri Ayrıştırıcı & Test Alanı</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
             --success: #16a34a;
             --danger: #dc2626;
+            --warning: #d97706;
             --dark: #0f172a;
             --border: #cbd5e1;
             --bg: #f8fafc;
         }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px 15px;
-            color: #334155;
-        }
-        .main-container {
-            max-width: 1260px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 12px;
-            margin-bottom: 16px;
-        }
-        h2 { margin: 0; color: var(--dark); font-size: 20px; }
-        .tour-select-box {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 20px;
-        }
-        .split-layout {
-            display: grid;
-            grid-template-columns: 430px 1fr;
-            gap: 25px;
-            align-items: start;
-        }
-        @media (max-width: 950px) {
-            .split-layout { grid-template-columns: 1fr; }
-        }
-        select, input {
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f1f5f9; padding: 25px; margin: 0; color: #1e293b; }
+        .container { max-width: 1250px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        h1 { margin-top: 0; font-size: 20px; color: var(--dark); border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { font-size: 13px; background: #dbeafe; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-weight: normal; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        @media (max-width: 850px) { .grid-2 { grid-template-columns: 1fr; } }
+        
+        .box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .box h3 { margin-top: 0; font-size: 15px; color: var(--dark); }
+        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 13px; resize: vertical; outline: none; }
+        textarea:focus { border-color: var(--primary); }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { cursor: pointer; padding: 10px 18px; border-radius: 6px; border: none; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-green { background: var(--success); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .btn-gray { background: #64748b; color: white; }
+        
+        .stats-bar { display: flex; gap: 15px; align-items: center; margin: 20px 0 10px; padding: 12px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-weight: 600; font-size: 13px; flex-wrap: wrap; }
+        .stats-bar span strong { color: var(--primary); }
+        
+        .table-wrap { overflow-x: auto; max-height: 520px; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { background: var(--dark); color: white; padding: 10px 12px; font-weight: 600; position: sticky; top: 0; z-index: 2; }
+        td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .input-cell { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; background: #fff; }
+        .input-cell:focus { border-color: var(--primary); outline: none; }
+        select.input-cell { cursor: pointer; font-weight: 700; }
+        
+        .err-row { background-color: #fef2f2 !important; }
+        .warn-row { background-color: #fffbeb !important; }
+        .tc-badge { font-family: monospace; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-block; }
+        .tc-ok { background: #dcfce7; color: var(--success); }
+        .tc-bad { background: #fee2e2; color: var(--danger); }
+        .tc-warn { background: #fef3c7; color: var(--warning); }
+
+        /* MODAL / POP-UP STİLLERİ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 13px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
         }
-        .bus-wrapper {
-            background: #fff;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 15px;
-        }
-        .bus-cabin {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 12px;
+        .modal-box {
+            background: #ffffff;
+            width: 90%;
+            max-width: 480px;
+            border-radius: 14px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 26px;
+            text-align: center;
             border: 1px solid #e2e8f0;
+            animation: slideDown 0.25s ease-out;
         }
-        .bus-front {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px dashed #cbd5e1;
-            font-size: 12px;
-            font-weight: 800;
-            color: #475569;
-        }
-        .legend-box {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid #cbd5e1;
-        }
-        .orta-kapi-blok {
-            grid-column: span 2;
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fee2e2;
+            color: var(--danger);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
-            border: 2px dashed #94a3b8;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 900;
-            color: #334155;
-            padding: 8px 6px;
+            font-size: 32px;
+            margin: 0 auto 16px;
         }
-        .passenger-card {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-        }
-        .passenger-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+        .modal-title {
+            font-size: 19px;
             font-weight: 800;
-            font-size: 13px;
-            color: #1e40af;
+            color: var(--dark);
+            margin: 0 0 10px 0;
         }
-        .btn-submit {
-            width: 100%;
-            margin-top: 15px;
-            padding: 13px;
-            background: var(--success);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
+        .modal-desc {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.5;
+            margin: 0 0 20px 0;
         }
-        .btn-submit:hover:not(:disabled) { background: #15803d; }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status-box {
-            display: none;
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
         }
+        .modal-actions button {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { transform: translateY(-20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="header">
-        <h2>🚌 Yolcu Kayıt Etme Sistemi (YKES)</h2>
-        <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:bold;">● Başarıyla Bağlandı</span>
-    </div>
-
-    <!-- TUR SEÇİMİ -->
-    <div class="tour-select-box">
-        <label for="turSecimi" style="display:block; font-size:13px; font-weight:700; color:#1e40af; margin-bottom:6px;">
-            📁 İŞLEM YAPILACAK TURU SEÇİN:
-        </label>
-        <div style="display:flex; gap:10px;">
-            <select id="turSecimi" onchange="turSecildi()" style="background:#fff; flex:1;">
-                <option value="">⏳ Turlar taranıyor...</option>
-            </select>
-            <button type="button" onclick="turlariYukle()" style="padding:8px 16px; background:#2563eb; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">🔄 Yenile</button>
-        </div>
-    </div>
-
-    <div class="split-layout">
-        
-        <!-- SOL: DİNAMİK ARAÇ ŞEMASI -->
-        <div class="bus-wrapper">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:10px;">
-                <span id="aracTipiBaslik" style="font-weight:bold; font-size:13.5px; color:var(--dark);">🚐 Araç Şeması</span>
-                <span id="koltukSayac" style="font-size:12px; font-weight:700; color:#16a34a;">0 Boş</span>
-            </div>
-
-            <div class="legend-box">
-                <span class="legend-item" style="background:#ffd1dc; color:#831843; border-color:#f472b6;">🎨 Grup Renkleri</span>
-                <span class="legend-item" style="background:#fce7f3; color:#be185d; border-color:#fbcfe8;">👩 Kadın</span>
-                <span class="legend-item" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">👨 Erkek</span>
-                <span class="legend-item" style="background:#ffffff; color:#15803d; border-color:#86efac;">✅ Boş Koltuk</span>
-            </div>
-
-            <div class="bus-cabin">
-                <div class="bus-front">
-                    <span>💺 KAPTAN</span>
-                    <span style="background:#e2e8f0; padding:3px 8px; border-radius:4px; font-size:11px;">🚪 ÖN KAPI</span>
-                </div>
-                
-                <div id="krokiAlani" style="display:flex; flex-direction:column; gap:6px;">
-                    <div style="text-align:center; padding:30px 10px; color:#64748b; font-size:13px;">Lütfen bir tur seçiniz.</div>
-                </div>
+<div class="container">
+    <h1>
+        <span>🧪 U-ETDS Akıllı Veri Ayrıştırıcı & Test Paneli</span>
+        <span class="badge">U-ETDS Standart 7 Kolon</span>
+    </h1>
+    
+    <div class="grid-2">
+        <div class="box">
+            <h3>📝 WhatsApp / Excel'den Kopyala-Yapıştır</h3>
+            <textarea id="rawTextInput" placeholder="WhatsApp'tan gelen listeyi veya Excel'den kopyaladığınız satırları buraya yapıştırın..."></textarea>
+            <div class="btn-group">
+                <button type="button" class="btn-blue" onclick="metniAyristir()">⚡ Metni Ayrıştır</button>
             </div>
         </div>
 
-        <!-- SAĞ: ÇOKLU YOLCU FORMU -->
-        <div style="background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="margin:0; font-size:15px; color:var(--primary);">
-                    👥 Seçilen Koltuklar (<span id="seciliSayac">0</span> Kişi)
-                </h3>
-                <button type="button" onclick="secimleriTemizle()" style="font-size:11px; padding:4px 8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">Seçimi Temizle</button>
+        <div class="box">
+            <h3>📊 Karışık/Bozuk Excel Dosyası Yükle</h3>
+            <p style="font-size: 12px; color: #64748b; margin-top: 0;">
+                Başlıkları karmaşık, cinsiyeti olmayan veya isim/soyadı birleşik olan Excel dosyasını seçin.
+            </p>
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="width: 100%; padding: 8px; background: #fff; border: 1px solid var(--border); border-radius: 6px;">
+            <div class="btn-group">
+                <button type="button" class="btn-blue" onclick="excelDosyasiAyristir()">🔍 Excel'i İncele ve Ayıkla</button>
             </div>
+        </div>
+    </div>
 
-            <!-- Toplu Durak ve Hızlı Telefon Doldurma -->
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px; background:#eff6ff; padding:10px; border-radius:6px; border:1px solid #bfdbfe;">
-                <div>
-                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Durak:</span>
-                    <select id="topluDurakSecici" onchange="topluDurakUygula()" style="padding:6px; font-size:12px;">
-                        <option value="">Seçiniz...</option>
-                        <option value="Mersin - Vipol">Mersin - Vipol</option>
-                        <option value="Mersin - Forum">Mersin - Forum</option>
-                        <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
-                        <option value="Tarsus - Ofis">Tarsus - Ofis</option>
-                        <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
-                        <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
-                        <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
-                        <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
-                    </select>
-                </div>
-                <div>
-                    <span style="font-size:11.5px; font-weight:bold; color:#1e40af; display:block; margin-bottom:3px;">Gruba Ortak Tel No:</span>
-                    <input type="text" id="topluTelInput" placeholder="0532..." onkeyup="topluTelUygula()" style="padding:6px; font-size:12px;">
-                </div>
-            </div>
-
-            <div id="yolcuListesiFormu" style="max-height: 480px; overflow-y:auto; padding-right:5px;">
-                <div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
-                    Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
-                </div>
-            </div>
-
-            <button type="button" id="btnKaydet" onclick="grubuKaydet()" class="btn-submit" disabled>
-                💾 Yolcuyu Kaydet
+    <div class="stats-bar">
+        <span>Toplam: <strong id="statToplam">0</strong></span>
+        <span>Hatalı TC: <strong id="statHatali" style="color:var(--danger);">0</strong></span>
+        <span>Kadın (K): <strong id="statKadin" style="color:#be185d;">0</strong></span>
+        <span>Erkek (E): <strong id="statErkek" style="color:#0369a1;">0</strong></span>
+        <span>Otomatik Kadın Atananlar: <strong id="statBelirsiz" style="color:var(--warning);">0</strong></span>
+        <div style="margin-left: auto;">
+            <button type="button" class="btn-green" id="btnExcelIndir" onclick="uetdsIndirmeTetikle()" disabled>
+                📥 U-ETDS Excel'ini İndir (.xlsx)
             </button>
-
-            <div id="durumKutusu" class="status-box"></div>
         </div>
+    </div>
 
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 35px;">#</th>
+                    <th style="width: 60px;">ÜLKE</th>
+                    <th>İSİM</th>
+                    <th>SOYİSİM</th>
+                    <th style="width: 160px;">T.C. KİMLİK NO</th>
+                    <th style="width: 140px;">CİNSİYET (K / E)</th>
+                    <th style="width: 140px;">TELEFON</th>
+                    <th style="width: 100px;">DURUM</th>
+                    <th style="width: 40px;">SİL</th>
+                </tr>
+            </thead>
+            <tbody id="yolcuGovde">
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 30px;">
+                        Veri bekleniyor... Yukarıdan Excel yükleyin veya metin yapıştırın.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- POP-UP MODAL -->
+<div id="hataliTcModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">Hatalı T.C. Kimlik No Bulundu!</div>
+        <p class="modal-desc" id="modalAciklama">
+            Listede 11 haneli olmayan veya geçersiz T.C. kimlik numarası tespit edildi.<br><br>
+            Hatalı kayıtlar listeden <strong>temizlenip</strong> U-ETDS dosyası indirilsin mi?
+        </p>
+        <div class="modal-actions">
+            <button type="button" class="btn-gray" onclick="modalKapat()">Hayır, Düzelteceğim</button>
+            <button type="button" class="btn-red" onclick="hatalilariTemizleVeIndir()">Evet, Hatalıları Sil ve İndir</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const API_BASE = "https://ykes-drive-bridge.vercel.app";
-    let aktifDosyaId = null;
-    let aktifKapasiteTipi = 46;
-    let mevcutKoltukListesi = [];
-    let seciliKoltuklar = [];
+let AYRISMIS_YOLCULAR = [];
 
-    async function turlariYukle() {
-        const select = document.getElementById("turSecimi");
-        select.innerHTML = '<option value="">⏳ Turlar taranıyor...</option>';
+// Erkek İsimleri Havuzu
+const ERKEK_ISIMLERI = new Set([
+    "MEHMET", "HAŞİM", "RAMAZAN", "DENİZ", "SULEYMAN", "SÜLEYMAN", "YEMİNİ", 
+    "ALİ", "AHMET", "MUSTAFA", "HÜSEYİN", "HASAN", "İBRAHİM", "İSMAİL", 
+    "OSMAN", "MURAT", "ÖMER", "YUSUF", "HALİL", "BEKİR", "FATİH", "HAKAN", 
+    "GÖKHAN", "SERKAN", "BURAK", "ONUR", "EMRE", "SELÇUK", "CENGİZ", "TURGAY", 
+    "VEİS", "EMİN", "ERDEM", "SAİM", "KEMAL", "KADİR", "ORHAN", "ADNAN",
+    "CAN", "CEM", "BARIŞ", "TOLGA", "BERK", "VOLKAN", "METİN", "ENGİN",
+    "ZAFER", "YAVUZ", "SEDAT", "BÜLENT", "BİLAL", "CİHAN", "ERKAN"
+]);
 
-        try {
-            const res = await fetch(`${API_BASE}/api/turlar`);
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
-
-            select.innerHTML = '<option value="">-- Lütfen Bir Tur Seçiniz --</option>';
-
-            const gruplar = {};
-            data.dosyalar.forEach(d => {
-                const k = d.klasor || "Ana Dizin";
-                if (!gruplar[k]) gruplar[k] = [];
-                gruplar[k].push(d);
-            });
-
-            for (const [kategori, dosyalar] of Object.entries(gruplar)) {
-                const group = document.createElement("optgroup");
-                group.label = `📁 ${kategori}`;
-                dosyalar.forEach(d => {
-                    const opt = document.createElement("option");
-                    opt.value = d.id;
-                    opt.innerText = d.name;
-                    group.appendChild(opt);
-                });
-                select.appendChild(group);
-            }
-        } catch (err) {
-            select.innerHTML = `<option value="">❌ Hata: ${err.message}</option>`;
-        }
+function akilliCinsiyetTahmin(ad) {
+    if (!ad) return { cinsiyet: "K", belirsiz: true };
+    const ilkIsim = ad.trim().split(" ")[0].toLocaleUpperCase('tr-TR');
+    if (ERKEK_ISIMLERI.has(ilkIsim)) {
+        return { cinsiyet: "E", belirsiz: false };
     }
+    return { cinsiyet: "K", belirsiz: true };
+}
 
-    async function turSecildi() {
-        const select = document.getElementById("turSecimi");
-        aktifDosyaId = select.value;
-        seciliKoltuklar = [];
-        yolcuFormunuYenile();
-        if (!aktifDosyaId) return;
+function metinTemizleVeNormallestir(str) {
+    return String(str || "")
+        .toLocaleUpperCase('tr-TR')
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, ' ')
+        .trim();
+}
 
-        bildirimGoster("⏳ Tur ve koltuk durumu yükleniyor...", "#0369a1", "#eff6ff", "#bfdbfe");
+// 1. METİN AYRIŞTIRICI (Excel Kopya-Yapıştır ve Serbest Metin Uyumlu)
+function metniAyristir() {
+    const raw = document.getElementById("rawTextInput").value.trim();
+    if (!raw) return alert("Lütfen metin girin!");
 
-        try {
-            const res = await fetch(`${API_BASE}/api/tur-detay?id=${aktifDosyaId}`);
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
+    const satirlar = raw.split("\n").filter(s => s.trim() !== "");
+    const liste = [];
 
-            aktifKapasiteTipi = 46;
-            data.sayfalar.forEach(s => {
-                if (s.sayfa_adi.includes("41")) aktifKapasiteTipi = 41;
-                if (s.sayfa_adi.includes("54")) aktifKapasiteTipi = 54;
-            });
+    satirlar.forEach(satir => {
+        let text = satir.trim();
+        const upperRaw = metinTemizleVeNormallestir(text);
 
-            document.getElementById("aracTipiBaslik").innerText = `🚐 ${aktifKapasiteTipi} Kişilik ${aktifKapasiteTipi === 41 ? '(2+1 VIP)' : '(2+2)'}`;
-
-            const krokiSayfa = data.sayfalar.find(s => s.sayfa_adi.includes(String(aktifKapasiteTipi))) || data.sayfalar[0];
-            const uedtsSayfa = data.sayfalar.find(s => s.sayfa_adi.includes("UEDTS") || s.sayfa_adi.includes("UETDS"));
-
-            const cinsiyetler = {};
-            if (uedtsSayfa && uedtsSayfa.satirlar) {
-                uedtsSayfa.satirlar.forEach((satir, idx) => {
-                    if (idx >= 2) {
-                        const kNo = idx - 1;
-                        const cVal = String(satir[4]?.deger || '').trim().toUpperCase();
-                        if (cVal === 'K' || cVal.includes('KADIN')) cinsiyetler[kNo] = 'K';
-                        else if (cVal === 'E' || cVal.includes('ERKEK')) cinsiyetler[kNo] = 'E';
-                    }
-                });
-            }
-
-            const KROKI_HUC_46 = {
-                1: [17, 0], 2: [17, 1], 3: [17, 3], 4: [17, 4],
-                5: [20, 0], 6: [20, 1], 7: [20, 3], 8: [20, 4],
-                9: [23, 0], 10: [23, 1], 11: [23, 3], 12: [23, 4],
-                13: [26, 0], 14: [26, 1], 15: [26, 3], 16: [26, 4],
-                17: [29, 0], 18: [29, 1], 19: [29, 3], 20: [29, 4],
-                21: [32, 0], 22: [32, 1],
-                23: [35, 3], 24: [35, 4], 25: [35, 0], 26: [35, 1],
-                27: [38, 3], 28: [38, 4], 29: [38, 0], 30: [38, 1],
-                31: [41, 3], 32: [41, 4], 33: [41, 0], 34: [41, 1],
-                35: [44, 3], 36: [44, 4], 37: [44, 0], 38: [44, 1],
-                39: [47, 3], 40: [47, 4], 41: [47, 0], 42: [47, 1],
-                43: [50, 3], 44: [50, 4], 45: [50, 0], 46: [50, 1]
-            };
-            const KROKI_HUC_41 = {
-                1: [17, 0], 2: [17, 2], 3: [17, 3],
-                4: [20, 0], 5: [20, 2], 6: [20, 3],
-                7: [23, 0], 8: [23, 2], 9: [23, 3],
-                10: [26, 0], 11: [26, 2], 12: [26, 3],
-                13: [29, 0], 14: [29, 2], 15: [29, 3],
-                16: [32, 0], 17: [32, 2], 18: [32, 3],
-                19: [35, 0], 20: [35, 2], 21: [35, 3],
-                22: [38, 0],
-                23: [41, 0], 24: [41, 2], 25: [41, 3],
-                26: [44, 0], 27: [44, 2], 28: [44, 3],
-                29: [47, 0], 30: [47, 2], 31: [47, 3],
-                32: [50, 0], 33: [50, 2], 34: [50, 3],
-                35: [53, 0], 36: [53, 2], 37: [53, 3],
-                38: [56, 0], 39: [56, 1], 40: [56, 2], 41: [56, 3]
-            };
-            const KROKI_HUC_54 = {
-                ...KROKI_HUC_46,
-                47: [54, 3], 48: [54, 4], 49: [54, 0], 50: [54, 1],
-                51: [57, 3], 52: [57, 4], 53: [57, 0], 54: [57, 1]
-            };
-
-            let harita = KROKI_HUC_46;
-            if (aktifKapasiteTipi === 41) harita = KROKI_HUC_41;
-            else if (aktifKapasiteTipi === 54) harita = KROKI_HUC_54;
-
-            const isimSutunIdx = (aktifKapasiteTipi === 41) ? 6 : 7;
-            const durakSutunIdx = (aktifKapasiteTipi === 41) ? 10 : 11;
-            mevcutKoltukListesi = [];
-
-            for (let no = 1; no <= aktifKapasiteTipi; no++) {
-                let renkliMi = false;
-                let hucreRenkCss = "";
-                let rgbDegerleri = null;
-
-                if (harita[no]) {
-                    const [rIdx, cIdx] = harita[no];
-                    const hucre = krokiSayfa.satirlar[rIdx]?.[cIdx];
-                    if (hucre && hucre.renk) {
-                        const r = hucre.renk.red ?? 1;
-                        const g = hucre.renk.green ?? 1;
-                        const b = hucre.renk.blue ?? 1;
-                        if (r < 0.96 || g < 0.96 || b < 0.96) {
-                            renkliMi = true;
-                            const r255 = Math.round(r * 255);
-                            const g255 = Math.round(g * 255);
-                            const b255 = Math.round(b * 255);
-                            hucreRenkCss = `rgb(${r255}, ${g255}, ${b255})`;
-                            rgbDegerleri = { r: r255, g: g255, b: b255 };
-                        }
-                    }
-                }
-
-                const satirIdx = no + 6;
-                const isim = String(krokiSayfa.satirlar[satirIdx]?.[isimSutunIdx]?.deger || '').trim();
-                const durak = String(krokiSayfa.satirlar[satirIdx]?.[durakSutunIdx]?.deger || '').trim();
-                const doluMu = (renkliMi || isim !== '');
-
-                mevcutKoltukListesi.push({
-                    no: no,
-                    dolu: doluMu,
-                    isim: isim || (renkliMi ? "Grup Kayıt" : ""),
-                    durak: durak,
-                    cinsiyet: doluMu ? (cinsiyetler[no] || 'E') : null,
-                    gercekRenk: hucreRenkCss,
-                    rgb: rgbDegerleri
-                });
-            }
-
-            krokiyiCiz(mevcutKoltukListesi, aktifKapasiteTipi);
-            bildirimGoster(`✅ "${data.baslik}" yüklendi.`, "#166534", "#f0fdf4", "#bbf7d0");
-
-        } catch (err) {
-            bildirimGoster(`❌ Hata: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
-        }
-    }
-
-    function krokiyiCiz(koltuklar, kapasite) {
-        const krokiAlani = document.getElementById("krokiAlani");
-        krokiAlani.innerHTML = "";
-
-        let bosSayisi = 0;
-        koltuklar.forEach(k => { if (!k.dolu) bosSayisi++; });
-        document.getElementById("koltukSayac").innerText = `${bosSayisi} Boş Koltuk`;
-
-        if (kapasite === 41) {
-            const siralama41 = [
-                { sol: [1],   sag: [2, 3] },
-                { sol: [4],   sag: [5, 6] },
-                { sol: [7],   sag: [8, 9] },
-                { sol: [10],  sag: [11, 12] },
-                { sol: [13],  sag: [14, 15] },
-                { sol: [16],  sag: [17, 18] },
-                { sol: [19],  sag: [20, 21] },
-                { sol: [22],  sag: 'kapi' },
-                { sol: [23],  sag: [24, 25] },
-                { sol: [26],  sag: [27, 28] },
-                { sol: [29],  sag: [30, 31] },
-                { sol: [32],  sag: [33, 34] },
-                { sol: [35],  sag: [36, 37] },
-                { arka: [38, 39, 40, 41] }
-            ];
-
-            siralama41.forEach(sira => {
-                const rowDiv = document.createElement("div");
-                if (sira.arka) {
-                    rowDiv.style.display = "grid";
-                    rowDiv.style.gridTemplateColumns = "1fr 1fr 1fr 1fr";
-                    rowDiv.style.gap = "6px";
-                    sira.arka.forEach(no => rowDiv.appendChild(butonUret(no, koltuklar)));
-                } else {
-                    rowDiv.style.display = "grid";
-                    rowDiv.style.gridTemplateColumns = "1fr 24px 1fr 1fr";
-                    rowDiv.style.gap = "6px";
-                    rowDiv.style.alignItems = "center";
-                    rowDiv.appendChild(butonUret(sira.sol[0], koltuklar));
-
-                    const koridor = document.createElement("div");
-                    koridor.style.textAlign = "center";
-                    koridor.style.color = "#94a3b8";
-                    koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
-                    rowDiv.appendChild(koridor);
-
-                    if (sira.sag === 'kapi') {
-                        const kapi = document.createElement("div");
-                        kapi.className = "orta-kapi-blok";
-                        kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
-                        rowDiv.appendChild(kapi);
-                    } else {
-                        rowDiv.appendChild(butonUret(sira.sag[0], koltuklar));
-                        rowDiv.appendChild(butonUret(sira.sag[1], koltuklar));
-                    }
-                }
-                krokiAlani.appendChild(rowDiv);
-            });
+        // A) Başlık satırı kontrolü: "AD SOYAD", "TC", "TEL", "KİMLİK" geçiyorsa atla
+        if ((upperRaw.includes("AD") || upperRaw.includes("SOYAD")) && (upperRaw.includes("TC") || upperRaw.includes("TEL") || upperRaw.includes("KIMLIK"))) {
             return;
         }
 
-        const siralama2x2 = [
-            { sol: [1, 2],   sag: [3, 4] },
-            { sol: [5, 6],   sag: [7, 8] },
-            { sol: [9, 10],  sag: [11, 12] },
-            { sol: [13, 14], sag: [15, 16] },
-            { sol: [17, 18], sag: [19, 20] },
-            { sol: [21, 22], sag: 'kapi' },
-            { sol: [25, 26], sag: [23, 24] },
-            { sol: [29, 30], sag: [27, 28] },
-            { sol: [33, 34], sag: [31, 32] },
-            { sol: [37, 38], sag: [35, 36] },
-            { sol: [41, 42], sag: [39, 40] },
-            { sol: [45, 46], sag: [43, 44] }
-        ];
+        // B) Excel'den Tab (\t) ile kopyalanmışsa
+        if (satir.includes("\t")) {
+            const cols = satir.split("\t").map(c => c.trim()).filter(c => c !== "");
+            let adSoyadCol = "";
+            let tcCol = "";
+            let telCol = "-";
+            let cinsCol = "";
 
-        if (kapasite === 54) {
-            siralama2x2.push({ sol: [49, 50], sag: [47, 48] });
-            siralama2x2.push({ sol: [53, 54], sag: [51, 52] });
-        }
+            cols.forEach(c => {
+                const digits = c.replace(/\D/g, "");
+                const cUpper = c.toUpperCase();
 
-        siralama2x2.forEach(sira => {
-            const rowDiv = document.createElement("div");
-            rowDiv.style.display = "grid";
-            rowDiv.style.gridTemplateColumns = "1fr 1fr 22px 1fr 1fr";
-            rowDiv.style.gap = "6px";
-            rowDiv.style.alignItems = "center";
-
-            rowDiv.appendChild(butonUret(sira.sol[0], koltuklar));
-            rowDiv.appendChild(butonUret(sira.sol[1], koltuklar));
-
-            const koridor = document.createElement("div");
-            koridor.style.textAlign = "center";
-            koridor.style.color = "#94a3b8";
-            koridor.innerText = sira.sag === 'kapi' ? "║" : "│";
-            rowDiv.appendChild(koridor);
-
-            if (sira.sag === 'kapi') {
-                const kapi = document.createElement("div");
-                kapi.className = "orta-kapi-blok";
-                kapi.innerHTML = `<span>🚪</span> <span>ORTA KAPI</span>`;
-                rowDiv.appendChild(kapi);
-            } else {
-                rowDiv.appendChild(butonUret(sira.sag[0], koltuklar));
-                rowDiv.appendChild(butonUret(sira.sag[1], koltuklar));
-            }
-
-            krokiAlani.appendChild(rowDiv);
-        });
-    }
-
-    function butonUret(kNo, koltuklar) {
-        const kVeri = koltuklar.find(x => x.no === kNo);
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.id = "btnKoltuk_" + kNo;
-        btn.style.padding = "9px 0";
-        btn.style.borderRadius = "7px";
-        btn.style.fontWeight = "800";
-        btn.style.fontSize = "12px";
-
-        if (kVeri.dolu) {
-            btn.style.cursor = "not-allowed";
-            const infoText = `Koltuk ${kNo}: ${kVeri.isim}${kVeri.durak ? ' | Durak: ' + kVeri.durak : ''}`;
-            btn.title = infoText;
-
-            if (kVeri.gercekRenk && kVeri.rgb) {
-                btn.style.background = kVeri.gercekRenk;
-                btn.style.border = "1.5px solid rgba(0,0,0,0.18)";
-                const parlaklik = (kVeri.rgb.r * 299 + kVeri.rgb.g * 587 + kVeri.rgb.b * 114) / 1000;
-                btn.style.color = parlaklik > 140 ? "#0f172a" : "#ffffff";
-            } else {
-                btn.style.background = "#e2e8f0";
-                btn.style.border = "1.5px solid #cbd5e1";
-                btn.style.color = "#475569";
-            }
-
-            const cinsiyetIcon = kVeri.cinsiyet === 'K' ? '👩' : (kVeri.cinsiyet === 'E' ? '👨' : '🔒');
-            btn.innerText = `${kNo} ${cinsiyetIcon}`;
-        } else {
-            const seciliMi = seciliKoltuklar.includes(kNo);
-            if (seciliMi) {
-                btn.style.background = "#2563eb";
-                btn.style.color = "#ffffff";
-                btn.style.border = "1.5px solid #1d4ed8";
-            } else {
-                btn.style.background = "#ffffff";
-                btn.style.color = "#15803d";
-                btn.style.border = "1.5px solid #86efac";
-            }
-            btn.style.cursor = "pointer";
-            btn.innerText = String(kNo);
-            btn.onclick = () => koltukTiklandi(kNo);
-        }
-        return btn;
-    }
-
-    function koltukTiklandi(kNo) {
-        const idx = seciliKoltuklar.indexOf(kNo);
-        if (idx > -1) {
-            seciliKoltuklar.splice(idx, 1);
-        } else {
-            seciliKoltuklar.push(kNo);
-            seciliKoltuklar.sort((a, b) => a - b);
-        }
-
-        mevcutKoltukListesi.forEach(k => {
-            if (!k.dolu) {
-                const b = document.getElementById("btnKoltuk_" + k.no);
-                if (b) {
-                    if (seciliKoltuklar.includes(k.no)) {
-                        b.style.background = "#2563eb";
-                        b.style.color = "#ffffff";
-                        b.style.borderColor = "#1d4ed8";
-                    } else {
-                        b.style.background = "#ffffff";
-                        b.style.color = "#15803d";
-                        b.style.borderColor = "#86efac";
-                    }
+                if (digits.length === 11 && !tcCol) {
+                    tcCol = digits;
+                } else if ((digits.length === 10 || (digits.length === 11 && digits.startsWith("0"))) && telCol === "-") {
+                    telCol = digits;
+                } else if (/^\d{1,3}$/.test(c) && !adSoyadCol) {
+                    // Sıra no (1, 2, 3...)
+                    return;
+                } else if (["K", "KADIN", "BAYAN", "E", "ERKEK", "BAY"].includes(cUpper)) {
+                    cinsCol = cUpper.startsWith("E") ? "E" : "K";
+                } else if (/[a-zA-ZçğıöşüÇĞİÖŞÜ]/.test(c) && !adSoyadCol) {
+                    adSoyadCol = c;
                 }
-            }
-        });
+            });
 
-        yolcuFormunuYenile();
-    }
-
-    function secimleriTemizle() {
-        seciliKoltuklar = [];
-        mevcutKoltukListesi.forEach(k => {
-            if (!k.dolu) {
-                const b = document.getElementById("btnKoltuk_" + k.no);
-                if (b) {
-                    b.style.background = "#ffffff";
-                    b.style.color = "#15803d";
-                    b.style.borderColor = "#86efac";
+            if (adSoyadCol || tcCol) {
+                const parcalar = adSoyadCol.split(" ").filter(p => p.trim() !== "");
+                let isim = "", soyisim = "";
+                if (parcalar.length > 1) {
+                    soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
+                    isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
+                } else if (parcalar.length === 1) {
+                    isim = parcalar[0].toLocaleUpperCase('tr-TR');
                 }
-            }
-        });
-        yolcuFormunuYenile();
-    }
 
-    function yolcuFormunuYenile() {
-        const container = document.getElementById("yolcuListesiFormu");
-        const btnKaydet = document.getElementById("btnKaydet");
-        const sayac = document.getElementById("seciliSayac");
+                let cinsiyet = cinsCol;
+                let cinsiyetBelirsiz = false;
+                if (!cinsiyet) {
+                    const tahmin = akilliCinsiyetTahmin(isim);
+                    cinsiyet = tahmin.cinsiyet;
+                    cinsiyetBelirsiz = tahmin.belirsiz;
+                }
 
-        sayac.innerText = seciliKoltuklar.length;
-        btnKaydet.disabled = (seciliKoltuklar.length === 0);
-
-        if (seciliKoltuklar.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:13px;">
-                Henüz koltuk seçilmedi. Soldaki şemadan boş koltuklara tıklayın.
-            </div>`;
-            return;
-        }
-
-        container.innerHTML = "";
-
-        seciliKoltuklar.forEach((kNo, index) => {
-            const card = document.createElement("div");
-            card.className = "passenger-card";
-            card.innerHTML = `
-                <div class="passenger-card-header">
-                    <span>💺 Koltuk No: ${kNo} (${index + 1}. Yolcu)</span>
-                    <button type="button" onclick="koltukTiklandi(${kNo})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">✖ Kaldır</button>
-                </div>
-                
-                <!-- Satır 1: Ad Soyad & Cinsiyet -->
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; margin-bottom:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Yolcu Adı Soyadı:</label>
-                        <input type="text" id="ad_${kNo}" placeholder="Örn: Selçuk Üstün" style="font-weight:600;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Cinsiyet:</label>
-                        <select id="cins_${kNo}">
-                            <option value="E">👨 Erkek</option>
-                            <option value="K">👩 Kadın</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Satır 2: T.C. Kimlik & Doğum Tarihi (Opsiyonel) -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">T.C. Kimlik / Pasaport:</label>
-                        <input type="text" id="tc_${kNo}" maxlength="11" placeholder="11 Haneli T.C.">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Doğum Tarihi (Opsiyonel):</label>
-                        <input type="text" id="dogum_${kNo}" placeholder="GG.AA.YYYY">
-                    </div>
-                </div>
-
-                <!-- Satır 3: Telefon & Biniş Durağı -->
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Telefon Numarası:</label>
-                        <input type="text" id="tel_${kNo}" placeholder="0532..." value="">
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:2px; display:block;">Biniş Durağı:</label>
-                        <select id="durak_${kNo}">
-                            <option value="Mersin - Vipol">Mersin - Vipol</option>
-                            <option value="Mersin - Forum">Mersin - Forum</option>
-                            <option value="Mersin - Eski Devlet Hastanesi">Mersin - Eski Devlet Hastanesi</option>
-                            <option value="Tarsus - Ofis" selected>Tarsus - Ofis</option>
-                            <option value="Tarsus - Madame Home">Tarsus - Madame Home</option>
-                            <option value="Tarsus - Cengiz Topel">Tarsus - Cengiz Topel</option>
-                            <option value="Tarsus - Kleopatra">Tarsus - Kleopatra</option>
-                            <option value="Adana - Duygu Kafe">Adana - Duygu Kafe</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function topluDurakUygula() {
-        const secilen = document.getElementById("topluDurakSecici").value;
-        if (!secilen) return;
-        seciliKoltuklar.forEach(kNo => {
-            const el = document.getElementById(`durak_${kNo}`);
-            if (el) el.value = secilen;
-        });
-    }
-
-    function topluTelUygula() {
-        const val = document.getElementById("topluTelInput").value;
-        seciliKoltuklar.forEach(kNo => {
-            const el = document.getElementById(`tel_${kNo}`);
-            if (el) el.value = val;
-        });
-    }
-
-    async function grubuKaydet() {
-        if (!aktifDosyaId || seciliKoltuklar.length === 0) return;
-
-        const yolcular = [];
-        for (const kNo of seciliKoltuklar) {
-            const ad = document.getElementById(`ad_${kNo}`)?.value.trim();
-            if (!ad) {
-                alert(`Lütfen Koltuk ${kNo} için yolcu adı girin!`);
-                document.getElementById(`ad_${kNo}`)?.focus();
+                liste.push({
+                    ulke: "TR",
+                    isim: isim,
+                    soyisim: soyisim,
+                    tc: tcCol,
+                    cinsiyet: cinsiyet,
+                    cinsiyetBelirsiz: cinsiyetBelirsiz,
+                    telefon: telCol
+                });
                 return;
             }
-            yolcular.push({
-                koltuk_no: kNo,
-                ad_soyad: ad,
-                cinsiyet: document.getElementById(`cins_${kNo}`)?.value || 'E',
-                tc_kimlik: document.getElementById(`tc_${kNo}`)?.value.trim() || '',
-                dogum_tarihi: document.getElementById(`dogum_${kNo}`)?.value.trim() || '',
-                telefon: document.getElementById(`tel_${kNo}`)?.value.trim() || '-',
-                binis_duragi: document.getElementById(`durak_${kNo}`)?.value || ''
+        }
+
+        // C) Düz Serbest Metin İşleme
+        let tc = "";
+        const tcMatch = text.match(/\b\d{11}\b/);
+        if (tcMatch) {
+            tc = tcMatch[0];
+            text = text.replace(tc, " ");
+        }
+
+        let tel = "-";
+        const telMatch = text.match(/(?:(?:\+90)|0)?\s?5\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}/);
+        if (telMatch) {
+            tel = telMatch[0].replace(/\D/g, "");
+            text = text.replace(telMatch[0], " ");
+        }
+
+        let cinsiyet = "";
+        if (/\b(E|ERKEK|BAY|M)\b/i.test(text)) {
+            cinsiyet = "E";
+            text = text.replace(/\b(E|ERKEK|BAY|M)\b/i, " ");
+        } else if (/\b(K|KADIN|BAYAN|KIZ|F)\b/i.test(text)) {
+            cinsiyet = "K";
+            text = text.replace(/\b(K|KADIN|BAYAN|KIZ|F)\b/i, " ");
+        }
+
+        let temiz = text.replace(/^\d+[\.\-\)]\s*/, "")
+                        .replace(/[(),\-:;]/g, " ")
+                        .replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ\s]/g, "")
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+        if (["REHBER", "ACENTA", "ACENTE", "KAPTAN", "ŞOFÖR"].some(k => temiz.toUpperCase().includes(k))) return;
+
+        const parcalar = temiz.split(" ").filter(p => p.trim() !== "");
+        let isim = "", soyisim = "";
+        if (parcalar.length > 1) {
+            soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
+            isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
+        } else if (parcalar.length === 1 && parcalar[0]) {
+            isim = parcalar[0].toLocaleUpperCase('tr-TR');
+        }
+
+        if (!isim && !tc) return;
+
+        let cinsiyetBelirsiz = false;
+        if (!cinsiyet) {
+            const tahmin = akilliCinsiyetTahmin(isim);
+            cinsiyet = tahmin.cinsiyet;
+            cinsiyetBelirsiz = tahmin.belirsiz;
+        }
+
+        liste.push({
+            ulke: "TR",
+            isim: isim,
+            soyisim: soyisim,
+            tc: tc,
+            cinsiyet: cinsiyet,
+            cinsiyetBelirsiz: cinsiyetBelirsiz,
+            telefon: tel
+        });
+    });
+
+    AYRISMIS_YOLCULAR = liste;
+    tabloyuCiz();
+}
+
+// 2. EXCEL DOSYASI AYRIŞTIRICI
+function excelDosyasiAyristir() {
+    const fileInput = document.getElementById("excelFileInput");
+    if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen bir Excel dosyası seçin!");
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: "array", raw: false });
+
+        const targetSheetName = wb.SheetNames.find(s => {
+            const u = metinTemizleVeNormallestir(s);
+            return u.includes("UEDTS") || u.includes("UETDS") || u.includes("YOLCU") || u.includes("SAYFA1");
+        }) || wb.SheetNames[0];
+
+        const ws = wb.Sheets[targetSheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+
+        if (rows.length === 0) return alert("Dosyada okunabilir satır bulunamadı!");
+
+        let headIdx = -1;
+        for (let r = 0; r < Math.min(10, rows.length); r++) {
+            const rowStr = rows[r].map(c => metinTemizleVeNormallestir(c));
+            if (rowStr.some(c => c.includes("AD") || c.includes("TC") || c.includes("KİMLİK") || c.includes("TEL"))) {
+                headIdx = r;
+                break;
+            }
+        }
+        if (headIdx === -1) headIdx = 0;
+
+        const headerRow = rows[headIdx].map(c => metinTemizleVeNormallestir(c));
+        
+        let cTc = -1, cAdTek = -1, cAdAyri = -1, cSoyadAyri = -1, cCins = -1, cTel = -1;
+
+        headerRow.forEach((h, idx) => {
+            if (h.includes("TC") || h.includes("KİMLİK") || h.includes("PASAPORT")) cTc = idx;
+            else if (h.includes("AD SOYAD") || h.includes("ADI SOYADI") || h.includes("YOLCU ADI")) cAdTek = idx;
+            else if (h === "AD" || h === "ADI") cAdAyri = idx;
+            else if (h.includes("SOYAD")) cSoyadAyri = idx;
+            else if (h.includes("CİNS") || h.includes("GENDER")) cCins = idx;
+            else if (h.includes("TEL") || h.includes("GSM") || h.includes("TELEFON")) cTel = idx;
+        });
+
+        if (cAdTek === -1 && cAdAyri === -1) {
+            cAdTek = headerRow.findIndex(h => h.includes("AD"));
+        }
+
+        const liste = [];
+
+        for (let i = headIdx + 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || !r.some(x => String(x).trim() !== "")) continue;
+
+            let rawTc = cTc !== -1 ? String(r[cTc] || "").replace(/\D/g, "") : "";
+            let rawTel = cTel !== -1 ? String(r[cTel] || "").replace(/\D/g, "") : "-";
+            let rawCins = cCins !== -1 ? String(r[cCins] || "").trim().toUpperCase() : "";
+
+            let isim = "", soyisim = "";
+
+            if (cAdTek !== -1 && (!cSoyadAyri || cSoyadAyri === -1)) {
+                const tamAd = String(r[cAdTek] || "").trim().replace(/\s+/g, ' ');
+                const parcalar = tamAd.split(" ").filter(p => p.trim() !== "");
+                if (parcalar.length > 1) {
+                    soyisim = parcalar.pop().toLocaleUpperCase('tr-TR');
+                    isim = parcalar.join(" ").toLocaleUpperCase('tr-TR');
+                } else {
+                    isim = tamAd.toLocaleUpperCase('tr-TR');
+                }
+            } else {
+                isim = String(r[cAdAyri] || "").trim().toLocaleUpperCase('tr-TR');
+                soyisim = String(r[cSoyadAyri] || "").trim().toLocaleUpperCase('tr-TR');
+            }
+
+            const tamAdKontrol = (isim + " " + soyisim).toUpperCase();
+            if (["REHBER", "ACENTA", "ACENTE", "KAPTAN", "ŞOFÖR", "SOFOR"].some(k => tamAdKontrol.includes(k))) continue;
+            if (!isim && !rawTc) continue;
+
+            let cins = "K";
+            let cinsiyetBelirsiz = false;
+
+            if (rawCins.startsWith("E") || rawCins.includes("BAY") || rawCins.includes("ERKEK") || rawCins === "M") {
+                cins = "E";
+            } else if (rawCins.startsWith("K") || rawCins.includes("BAYAN") || rawCins.includes("KADIN") || rawCins === "F") {
+                cins = "K";
+            } else {
+                const tahmin = akilliCinsiyetTahmin(isim);
+                cins = tahmin.cinsiyet;
+                cinsiyetBelirsiz = tahmin.belirsiz;
+            }
+
+            liste.push({
+                ulke: "TR",
+                isim: isim,
+                soyisim: soyisim,
+                tc: rawTc,
+                cinsiyet: cins,
+                cinsiyetBelirsiz: cinsiyetBelirsiz,
+                telefon: rawTel.length >= 10 ? rawTel : "-"
             });
         }
 
-        const btn = document.getElementById("btnKaydet");
-        btn.disabled = true;
-        bildirimGoster(`⏳ ${yolcular.length} yolcu kaydediliyor...`, "#0369a1", "#eff6ff", "#bfdbfe");
+        AYRISMIS_YOLCULAR = liste;
+        tabloyuCiz();
+    };
+    reader.readAsArrayBuffer(fileInput.files[0]);
+}
 
-        try {
-            const res = await fetch(`${API_BASE}/api/grup-kaydet`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    dosya_id: aktifDosyaId,
-                    kapasite: aktifKapasiteTipi,
-                    yolcular: yolcular
-                })
-            });
-            const data = await res.json();
-            if (!data.success) throw new Error(data.hata);
+// 3. TABLO ÇİZİMİ
+function tabloyuCiz() {
+    const tbody = document.getElementById("yolcuGovde");
+    tbody.innerHTML = "";
 
-            bildirimGoster(`✅ Başarılı: ${data.mesaj}`, "#166534", "#f0fdf4", "#bbf7d0");
+    if (AYRISMIS_YOLCULAR.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #94a3b8; padding: 30px;">Kayıt bulunamadı.</td></tr>`;
+        istatistikGuncelle();
+        return;
+    }
 
-            seciliKoltuklar = [];
-            yolcuFormunuYenile();
-            turSecildi();
+    AYRISMIS_YOLCULAR.forEach((y, idx) => {
+        const tr = document.createElement("tr");
+        const tcGecerli = /^\d{11}$/.test(y.tc);
+        const satirHata = !tcGecerli || !y.isim || !y.soyisim;
 
-        } catch (err) {
-            bildirimGoster(`❌ Kayıt Hatası: ${err.message}`, "#991b1b", "#fee2e2", "#fca5a5");
-            btn.disabled = false;
+        if (satirHata) tr.className = "err-row";
+        else if (y.cinsiyetBelirsiz) tr.className = "warn-row";
+
+        tr.innerHTML = `
+            <td style="color:#64748b; font-weight:bold;">${idx + 1}</td>
+            <td><input type="text" class="input-cell" style="width:50px; text-align:center;" value="${y.ulke}" onchange="hucreGuncelle(${idx}, 'ulke', this.value)"></td>
+            <td><input type="text" class="input-cell" style="font-weight:700;" value="${y.isim}" onchange="hucreGuncelle(${idx}, 'isim', this.value)"></td>
+            <td><input type="text" class="input-cell" style="font-weight:700;" value="${y.soyisim}" onchange="hucreGuncelle(${idx}, 'soyisim', this.value)"></td>
+            <td>
+                <input type="text" maxlength="11" class="input-cell" style="font-family:monospace; font-weight:700; color:${tcGecerli ? '#0f172a' : '#dc2626'};" value="${y.tc}" placeholder="11 Haneli TC" onchange="hucreGuncelle(${idx}, 'tc', this.value)">
+            </td>
+            <td>
+                <select class="input-cell" style="color:${y.cinsiyet === 'K' ? '#be185d' : '#0369a1'};" onchange="hucreGuncelle(${idx}, 'cinsiyet', this.value)">
+                    <option value="K" ${y.cinsiyet === 'K' ? 'selected' : ''}>👩 Kadın (K)</option>
+                    <option value="E" ${y.cinsiyet === 'E' ? 'selected' : ''}>👨 Erkek (E)</option>
+                </select>
+            </td>
+            <td><input type="text" class="input-cell" value="${y.telefon}" onchange="hucreGuncelle(${idx}, 'telefon', this.value)"></td>
+            <td>
+                <span class="tc-badge ${tcGecerli ? (y.cinsiyetBelirsiz ? 'tc-warn' : 'tc-ok') : 'tc-bad'}">
+                    ${!tcGecerli ? '❌ Hatalı TC' : (y.cinsiyetBelirsiz ? '⚠️ Otomatik K' : '✅ Hazır')}
+                </span>
+            </td>
+            <td>
+                <button type="button" onclick="satirSil(${idx})" style="background:none; border:none; color:var(--danger); font-size:16px; padding:0; cursor:pointer;">✖</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    istatistikGuncelle();
+}
+
+function hucreGuncelle(idx, alan, deger) {
+    if (alan === "tc") deger = deger.replace(/\D/g, "");
+    if (alan === "isim" || alan === "soyisim") deger = deger.toLocaleUpperCase('tr-TR');
+    if (alan === "cinsiyet") AYRISMIS_YOLCULAR[idx].cinsiyetBelirsiz = false;
+    
+    AYRISMIS_YOLCULAR[idx][alan] = deger;
+    tabloyuCiz();
+}
+
+function satirSil(idx) {
+    AYRISMIS_YOLCULAR.splice(idx, 1);
+    tabloyuCiz();
+}
+
+function istatistikGuncelle() {
+    let hatali = 0, kadin = 0, erkek = 0, belirsiz = 0;
+    AYRISMIS_YOLCULAR.forEach(y => {
+        if (!/^\d{11}$/.test(y.tc) || !y.isim || !y.soyisim) hatali++;
+        if (y.cinsiyet === "K") kadin++; else erkek++;
+        if (y.cinsiyetBelirsiz) belirsiz++;
+    });
+
+    document.getElementById("statToplam").innerText = AYRISMIS_YOLCULAR.length;
+    document.getElementById("statHatali").innerText = hatali;
+    document.getElementById("statKadin").innerText = kadin;
+    document.getElementById("statErkek").innerText = erkek;
+    document.getElementById("statBelirsiz").innerText = belirsiz;
+
+    document.getElementById("btnExcelIndir").disabled = (AYRISMIS_YOLCULAR.length === 0);
+}
+
+// 4. POP-UP VE İNDİRME FONKSİYONLARI
+function modalAc(hataliSayisi) {
+    document.getElementById("modalAciklama").innerHTML = `
+        Listede 11 haneli olmayan veya geçersiz <strong>${hataliSayisi}</strong> adet T.C. kimlik numarası tespit edildi.<br><br>
+        Hatalı satırlar listeden <strong>temizlenip</strong> U-ETDS Excel dosyası indirilsin mi?
+    `;
+    const modal = document.getElementById("hataliTcModal");
+    modal.style.display = "flex";
+}
+
+function modalKapat() {
+    document.getElementById("hataliTcModal").style.display = "none";
+}
+
+function uetdsIndirmeTetikle() {
+    if (AYRISMIS_YOLCULAR.length === 0) return;
+
+    const hataliList = AYRISMIS_YOLCULAR.filter(y => !/^\d{11}$/.test(y.tc));
+
+    if (hataliList.length > 0) {
+        modalAc(hataliList.length);
+    } else {
+        dosyayiExcelYapVeIndir(AYRISMIS_YOLCULAR);
+    }
+}
+
+function hatalilariTemizleVeIndir() {
+    modalKapat();
+    AYRISMIS_YOLCULAR = AYRISMIS_YOLCULAR.filter(y => /^\d{11}$/.test(y.tc));
+    tabloyuCiz();
+    dosyayiExcelYapVeIndir(AYRISMIS_YOLCULAR);
+}
+
+function dosyayiExcelYapVeIndir(yolcular) {
+    if (yolcular.length === 0) return alert("İndirilecek geçerli yolcu kaydı bulunamadı!");
+
+    const basliklar = ["ÜLKE", "İSİM", "SOYİSİM", "T.C.", "CİNSİYET", "TEL NO", "HES KODU"];
+    const aoa = [basliklar];
+
+    yolcular.forEach(y => {
+        aoa.push([
+            y.ulke || "TR",
+            y.isim,
+            y.soyisim,
+            String(y.tc),
+            y.cinsiyet === "K" ? "K" : "E",
+            y.telefon || "-",
+            ""
+        ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    for (let r = 1; r < aoa.length; r++) {
+        const hucreAdresi = XLSX.utils.encode_cell({ r: r, c: 3 });
+        if (ws[hucreAdresi]) {
+            ws[hucreAdresi].t = 's';
+            ws[hucreAdresi].z = '@';
         }
     }
 
-    function bildirimGoster(mesaj, renk, arkaplan, kenarlik) {
-        const durum = document.getElementById("durumKutusu");
-        durum.style.display = "block";
-        durum.style.color = renk;
-        durum.style.background = arkaplan;
-        durum.style.border = "1px solid " + kenarlik;
-        durum.innerHTML = mesaj;
-    }
+    ws['!cols'] = [
+        { wch: 8 },  { wch: 22 }, { wch: 20 }, { wch: 18 }, { wch: 10 }, { wch: 16 }, { wch: 12 }
+    ];
 
-    document.addEventListener("DOMContentLoaded", turlariYukle);
+    XLSX.utils.book_append_sheet(wb, ws, "U-ETDS");
+    XLSX.writeFile(wb, "Standart_UETDS_Yolcu_Listesi.xlsx");
+}
 </script>
-
 </body>
 </html>
