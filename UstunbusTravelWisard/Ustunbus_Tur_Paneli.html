@@ -30,6 +30,7 @@
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
     <button id="tabSozlesme" class="ust-panel-tab" onclick="panelSekmesiDegistir('sozlesme')">📑 Acente-Rehber Sözleşmesi</button>
+    <button id="tabAracKira" class="ust-panel-tab" onclick="panelSekmesiDegistir('arackira')">🚙 Araç Kira Sözleşmesi</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
     <span id="operatorStatus" class="operator-status" style="margin-left:auto;">✅ Operatör oturumu açık</span>
@@ -1154,6 +1155,78 @@
             </a>
         </div>
     </div>
+</div>
+
+<!-- 6. ARAÇ KİRA SÖZLEŞMESİ MODÜLÜ -->
+<div id="aracKiraCard" style="display:none;">
+<div class="ak-top ak-noprint">
+  <div><h2>🚙 Acenta Araç Kira & Hizmet Sözleşmesi</h2><small>Seyahat Acentası & Taşımacı Hizmet Sözleşmesi</small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button type="button" class="ak-btn" onclick="akOrnek()">⚡ Örnek Doldur</button>
+    <button type="button" class="ak-btn r" onclick="akTemizle()">🗑️ Temizle</button>
+    <button type="button" class="ak-btn g" onclick="akYazdir()">🖨️ A4 Yazdır / PDF</button>
+  </div>
+</div>
+<div class="ak-grid">
+  <div class="ak-noprint"><div id="ak-form"></div>
+    <div class="ak-sec"><h3 style="justify-content:space-between"><span>Taşımacı Dijital İmzası</span><a href="#" onclick="akImzaTemizle();return false" style="color:#e11d48;font-size:11px;text-transform:none">Temizle</a></h3>
+      <div class="ak-sign"><canvas id="ak-pad"></canvas></div>
+      <div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:3px">Ekrana parmağınız veya fare ile imza atabilirsiniz.</div></div>
+  </div>
+  <div class="ak-wrap"><div id="ak-paper">
+   <div>
+    <div class="ak-hd"><img src="icons/ustunbuslogo.png" alt="Öz Üstünbus Turizm" onerror="this.onerror=null;this.src='https://placehold.co/180x60/ffffff/0f172a?text=USTUNBUS'"><img src="icons/tursab-logo.png" alt="TÜRSAB" onerror="this.onerror=null;this.src='https://placehold.co/150x65/ffffff/dc2626?text=TURSAB'"></div>
+    <h2 class="ak-ttl">Acenta Araç Kiralama ve Hizmet Sözleşmesi</h2>
+    <div class="ak-meta">
+      <div class="l">Otobüs Plakası:</div><div id="akd_plate" style="font-family:monospace;font-weight:700">-</div>
+      <div class="l">Kapasite / Araç:</div><div id="akd_bus">-</div>
+      <div class="l">Görevli Sürücü:</div><div><b id="akd_driver">-</b><div id="akd_asst_box" class="hid" style="border-top:1px solid #e2e8f0;margin-top:2px;padding-top:2px"><span style="color:#64748b;font-weight:600">Diğer Sürücü:</span> <b id="akd_asst"></b></div></div>
+      <div class="l">Sürücü Tel / SRC:</div><div id="akd_contact">-</div>
+      <div class="l">Kalkış &amp; Güzergah:</div><div class="sp3" id="akd_route">-</div>
+    </div>
+    <div class="ak-txt">
+     <div class="ak-art"><p><strong>MADDE 1 – TARAFLAR</strong></p>
+      <p><strong>1.1. ACENTA:</strong> Öz Üstünbus Turizm / Öz Üstüner Turizm Taş. Gayr. Dan. Tar. Akar. San. Ve Tic. Ltd. Şti. (TÜRSAB Belge No: A-12982 - Şehitler Tepesi Mah. 3631 Sk. Kılınç Apt. No:5A Tarsus / MERSİN - Tel: 0850 532 80 00 &amp; 0532 560 89 19) (Bundan böyle kısaca <strong>"ACENTA"</strong> olarak anılacaktır.)</p>
+      <p><strong>1.2. TAŞIMACI:</strong> <span id="akd_carrier" style="font-weight:700;text-decoration:underline">.......................................................................................................</span><span id="akd_cinfo"></span> (Bundan böyle kısaca <strong>"TAŞIMACI"</strong> olarak anılacaktır.)</p></div>
+     <div class="ak-art"><p><strong>MADDE 2 – SÖZLEŞMENİN KONUSU</strong></p>
+      <p>İşbu sözleşmenin konusu, ACENTA tarafından organize edilen turizm faaliyetlerinde kullanılmak üzere, özellikleri, güzergahı ve tarihleri belirlenen aracın TAŞIMACI tarafından şoförlü olarak ACENTA'ya kiralanması ve tarafların karşılıklı hak, yükümlülük ve cezai şartlarının belirlenmesidir. ACENTA ve TAŞIMACI, sözleşme konusu şartname ve mukavele hükümlerini eksiksiz yerine getirmeyi taahhüt eder.</p></div>
+     <div class="ak-art"><p><strong>MADDE 3 – ARAÇ VE DONANIM STANDARTLARI</strong></p>
+      <p><strong>3.1. Güvenlik ve Evraklar:</strong> TAŞIMACI, araçların turizm taşımacılığı esaslarına uygun olarak iç güvenlik (ilk yardım çantası, yangın söndürme cihazı vb.) ve dış güvenlik (stepne, takım çantası, kar zinciri vb.) ekipmanlarını eksiksiz bulundurmak zorundadır. Araçların şehir içi ve şehir dışı çalışabilmesi için kanuni belgelerin (trafik tescil ve kayıt belgeleri, zorunlu trafik ve koltuk ferdi kaza sigortaları, D2 belgesi vb.) tam ve eksiksiz bulundurulması tamamen TAŞIMACI'nın yükümlülüğündedir.</p>
+      <p><strong>3.2. İklimlendirme:</strong> Araçlarda yeterli ısıtma ve soğutma kapasitesine sahip kalorifer, klima ve havalandırma tesisatı bulunacak ve tam zamanlı, sorunsuz çalışır durumda olacaktır.</p>
+      <p><strong>3.3. Ses ve Temizlik:</strong> Araçlarda ses tesisatı yeterli ve sorunsuz (mikrofon, anons sistemi cızırtısız) olacak; araç içi ve dışı (camlar, perdeler, iç döşemeler, bagaj vb.) her daim temiz ve bakımlı olacaktır.</p>
+      <p><strong>3.4. Giderler:</strong> Araçların temizliği, her türlü periyodik bakımı, yağ değişimi ve mekanik onarımı TAŞIMACI'ya aittir. Otoban, otopark, köprü ve güzergah boyunca seyrüsefer için tüketilecek akaryakıt giderleri <strong id="akd_fuel">ACENTA'ya ait</strong> olacaktır.</p></div>
+     <div class="ak-art"><p><strong>MADDE 4 – TAŞIMACININ VE SÜRÜCÜNÜN YÜKÜMLÜLÜKLERİ</strong></p>
+      <p><strong>4.1. Hazır Bulunma:</strong> Araç, ACENTA'nın veya müşterinin belirlediği yerde ve saatte kesinlikle hazır bulunmak zorundadır (Hareket saatinden en az 30 dakika önce).</p>
+      <p><strong>4.2. Kılık Kıyafet ve Davranış:</strong> Araç sürücülerinin kılık kıyafet, hijyen ve davranışlarına azami dikkat etmeleri zorunludur.</p>
+      <p><strong>4.3. Talimatlara Uygunluk:</strong> Araç sürücü ve görevlileri, tur süresince ACENTA'nın veya onun belirlediği sorumlu kişilerin (rehber, tur lideri) güzergah ve programa dair talimatlarına harfiyen uymak zorundadır.</p>
+      <p><strong>4.4. U-ETDS Yükümlülüğü:</strong> ACENTA, bildirimlerin yapılabilmesi için araca ve sürücülere ait belgeleri hareketten en az 2 saat önce TAŞIMACI'ya iletecektir. Bilgi eksikliğinden doğacak cezalardan TAŞIMACI sorumludur.</p>
+      <p><strong>4.5. Trafik Kuralları ve Cezalar:</strong> Araç seyir halindeyken Karayolları Trafik Kanunu'nun öngördüğü kurallara uymak zorundadır. Aracın kiralama süresi içerisinde doğacak olan hız ihlali, hatalı park vb. trafik ihlallerinden kaynaklanan her türlü ceza bedeli doğrudan TAŞIMACI'ya aittir.</p>
+      <p><strong>4.6. Kazalar ve Hasar:</strong> Her türlü tedbir alınmasına rağmen, olabilecek trafik vukuatlarından, kazalardan ve üçüncü şahıslar ile yolculara verilecek maddi/manevi zararlardan TAŞIMACI sorumludur.</p></div>
+     <div class="ak-art"><p><strong>MADDE 5 – ARIZA, GECİKME VE RÜCU ŞARTLARI</strong></p>
+      <p><strong>5.1. Arıza Halinde İkame:</strong> Seyir esnasında aracın arıza yapıp kullanılamaz durumda olması halinde TAŞIMACI, en kısa zamanda (maksimum 2 saat içerisinde) aynı nitelikte (eşdeğer veya üst model) araç temin etmekle mükelleftir.</p>
+      <p><strong>5.2. Rücu ve Dışarıdan Araç Temini:</strong> TAŞIMACI'nın işbu şartname ve sözleşme hükümlerini yerine getirmemesi, arızaya süresinde müdahale edememesi veya başka nedenlerle aksamalar olması sonucu ACENTA'nın eşdeğer taşıma vasıtaları ve firmalar kullanmak (dışarıdan araç tutmak) durumunda kalması halinde; bu vasıta veya firmalara yapılacak ödemeler, ek transfer masrafları TAŞIMACI tarafından tanzim edilir. Bu tutar, TAŞIMACI'nın toplam hakedişinden kesilir, aşan kısım kendisine rücu edilir.</p></div>
+     <div class="ak-cl"><p><strong>MADDE 6 – CEZAİ ŞARTLAR VE HİZMET KUSURU KESİNTİLERİ (HAKEDİŞ KESİNTİ TABLOSU)</strong></p>
+      <p>Taşıma hizmetinin eksiksiz ifası esastır. Aşağıdaki kusurların tespiti halinde, karşılarında belirtilen oranlar TAŞIMACI'nın toplam kira bedelinden doğrudan mahsup edilecektir:</p>
+      <div class="g"><div>&bull; <strong>Mikrofon/Ses Sistemi Arızası:</strong> %15 kesinti.</div><div>&bull; <strong>Klima/Kalorifer Arızası:</strong> %25 kesinti.</div><div>&bull; <strong>Temizlik ve Davranış Kusuru:</strong> %15 kesinti.</div><div>&bull; <strong>Gecikme:</strong> %10 kesinti (&gt;30 dk fesih hakkı).</div></div></div>
+     <div class="ak-art"><p><strong>MADDE 7 – İPTAL VE FESİH ŞARTLARI</strong></p>
+      <p><strong>7.1.</strong> İşbu sözleşmede yapılacak her türlü değişiklik ve sözleşmenin iptali tarafların yazılı onayından sonra geçerli olacaktır.</p>
+      <p><strong>7.2.</strong> ACENTA, işbu sözleşmeyi tur hareket saatine 6 saat kalana kadar gerekçesiz ve cezasız iptal etme hakkına sahiptir.</p>
+      <p><strong>7.3.</strong> Gerekçesi makul olmayan ve keyfi sözleşme iptalinde, aracı zamanında göndermeme durumunda zarar gören taraf (ACENTA), maddi ve manevi tazminat talebinde bulunacaktır. TAŞIMACI'nın haksız feshi durumunda sözleşme bedelinin %100'ü oranında cezai şart uygulanır.</p></div>
+     <div class="ak-art"><p><strong>MADDE 8 – GİDERLER, AKARYAKIT MAHSUBU VE ÖDEME PLANI</strong></p>
+      <p><strong>8.1. Konaklama ve Yemek:</strong> Seyahatler esnasında araç sürücüsünün yemek ve konaklama masrafları ACENTA'ya ait olacaktır.</p>
+      <p><strong>8.2. Bedel, Akaryakıt Mahsubu ve Ödeme Şekli:</strong> Araç Kira / Sözleşme bedeli net <strong id="akd_price" style="text-decoration:underline">.......... TL (.......................................................................)</strong> olup; iş bitiminde TAŞIMACI tarafından sözleşme konusu toplam hakediş faturası ACENTA'ya kesilecektir. Turizm taşımacılığı teamülleri ve sektör uygulamaları gereğince (aracın dolu depo teslim edilip dolu depo iade alınması esası dahilinde); seyrüsefer boyunca tüketilen akaryakıt bedelleri ACENTA'nın tercihine bağlı olarak ACENTA'nın kurumsal kredi kartı veya taşıt tanıma sistemi (TTS) vasıtasıyla doğrudan ödenebilir. ACENTA tarafından bu şekilde ödenen tüm akaryakıt tutarları ile varsa işbu sözleşmeden doğan cezai kesintiler TAŞIMACI'nın toplam hakediş bedelinden mahsup edilir. Mahsuplaşma sonrasında kalan net bakiye, ACENTA'nın kendi takdir ve tercihine göre <strong>Banka Havalesi / EFT</strong> veya <strong>Nakit</strong> olarak tanzim edilir. <span id="akd_iban"></span></p></div>
+     <div class="ak-art"><p><strong>MADDE 9 – YETKİLİ MAHKEME VE SÜRE</strong></p>
+      <p><strong>9.1. Yetkili Merci:</strong> Bu sözleşmenin yorumundan ve uygulamasından doğacak anlaşmazlıkların çözüm yeri <strong>Tarsus Mahkemeleri ve İcra Daireleridir</strong>.</p>
+      <p><strong>9.2. Yürürlük ve Süre:</strong> İş bu sözleşme <strong id="akd_d1">...../...../20..</strong> tarihinde başlar ve <strong id="akd_d2">...../...../20..</strong> tarihinde biter. Sürenin bitiminde taraflar başka bir ihtar ve ihbara gerek kalmaksızın sözleşme kendiliğinden sona erer.</p>
+      <p style="margin-top:2px">Yukarıda yazılı <strong>9 (dokuz) ana maddeden</strong> oluşan bu sözleşme iki nüsha olarak düzenlenmiş olup tüm maddeleri taraflarca okunmuş ve kabul edilerek imza altına alınmıştır.</p></div>
+    </div>
+   </div>
+   <div class="ak-sg">
+    <div class="ak-sb"><div><b style="font-size:1.17em">ACENTA YETKİLİSİ</b><div style="font-size:.97em;color:#475569">Öz Üstünbus Turizm / Öz Üstüner Turizm Ltd. Şti.</div></div><b id="akd_sign_agent" style="font-size:1.2em">EMİN ÜSTÜN</b></div>
+    <div class="ak-sb"><div><b style="font-size:1.17em">TAŞIMACI</b><div id="akd_sign_carrier" style="font-size:.97em;color:#475569">-</div></div><div style="height:44px;display:flex;align-items:center;justify-content:center"><img id="akd_sig" class="hid" style="height:40px;object-fit:contain" alt="Taşımacı İmzası"></div></div>
+   </div>
+  </div></div>
+</div>
 </div>
 
 <!-- Operatör Giriş Alanı -->

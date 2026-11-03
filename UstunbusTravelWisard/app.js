@@ -695,6 +695,7 @@ function panelSekmesiDegistir(sekme) {
     const uetdsCard = document.getElementById("uetdsCard");
     const durakCard = document.getElementById("durakListesiCard");
     const sozlesmeCard = document.getElementById("sozlesmeCard");
+    const aracKiraCard = document.getElementById("aracKiraCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
     
@@ -710,6 +711,7 @@ function panelSekmesiDegistir(sekme) {
     const uetdsTab = document.getElementById("tabUetds");
     const durakTab = document.getElementById("tabDurak");
     const sozlesmeTab = document.getElementById("tabSozlesme");
+    const aracKiraTab = document.getElementById("tabAracKira");
 
     if (personelTab) personelTab.classList.remove("active");
     if (operatorTab) operatorTab.classList.remove("active");
@@ -723,6 +725,7 @@ function panelSekmesiDegistir(sekme) {
     if (uetdsTab) uetdsTab.classList.remove("active");
     if (durakTab) durakTab.classList.remove("active");
     if (sozlesmeTab) sozlesmeTab.classList.remove("active");
+    if (aracKiraTab) aracKiraTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
     if (adminCard) adminCard.style.display = "none";
@@ -736,6 +739,7 @@ function panelSekmesiDegistir(sekme) {
     if (uetdsCard) uetdsCard.style.display = "none";
     if (durakCard) durakCard.style.display = "none";
     if (sozlesmeCard) sozlesmeCard.style.display = "none";
+    if (aracKiraCard) aracKiraCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
 
@@ -791,6 +795,13 @@ function panelSekmesiDegistir(sekme) {
     if (sekme === "sozlesme") {
         if (sozlesmeTab) sozlesmeTab.classList.add("active");
         if (sozlesmeCard) sozlesmeCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "arackira") {
+        if (aracKiraTab) aracKiraTab.classList.add("active");
+        if (aracKiraCard) aracKiraCard.style.display = "block";
+        aracKiraInit();
         return;
     }
 
@@ -4134,3 +4145,221 @@ window.addEventListener("DOMContentLoaded", () => {
     hesaplaVeUygulaHizmetTuru(0);
     dokumanaYansit();
 });
+
+/* ============================================================
+   ARAÇ KİRA SÖZLEŞMESİ MODÜLÜ
+   ============================================================ */
+(function () {
+    const AK_OPT_SRC = ["SRC-1 (Uluslararası/Yurtiçi Yolcu)", "SRC-2 (Yurtiçi Yolcu)", "SRC-1 & SRC-2"];
+    const AK_OPT_FUEL = [["ACENTA'ya ait", "ACENTA'ya Ait (Standart)"], ["müşteriye ait", "Müşteriye Ait"], ["TAŞIMACI'ya ait", "Taşımacıya Ait"]];
+    // [id, etiket, tip, ek ayarlar]  (w2: tam satır, ro: salt okunur, v: varsayılan, ph: placeholder)
+    const AK_FORM = [
+        ["Acenta & Şirket Bilgileri", [
+            ["corp", "Ticari Ünvan (Şirket)", "text", { w2: 1, ro: 1, v: "Öz Üstüner Turizm Taş. Gayr. Dan. Tar. Akar. San. Ve Tic. Ltd. Şti." }],
+            ["agency", "Acenta Markası", "text", { ro: 1, v: "Öz Üstünbus Turizm ve Seyahat Acentası" }],
+            ["tursab", "TÜRSAB Belge No", "text", { ro: 1, v: "A-12982" }],
+            ["rep", "Yetkili Temsilci", "text", { v: "EMİN ÜSTÜN" }],
+            ["aphone", "Acenta Telefon (Sabit)", "text", { ro: 1, v: "0850 532 80 00 & 0532 560 89 19" }],
+            ["aaddr", "Acenta Resmi Adresi", "text", { w2: 1, ro: 1, v: "Şehitler Tepesi Mah. 3631 Sk. Kılınç Apt. No:5A Tarsus / MERSİN" }]]],
+        ["Taşımacı (Firma / Şahıs)", [
+            ["carrier", "Taşımacı Ad Soyad / Şirket Unvanı", "text", { w2: 1, ph: "Örn: Akdeniz Turizm Taşımacılık Ltd. Şti. veya Ad Soyad" }],
+            ["cid", "TC No / Vergi No", "text", { ph: "TC / Vergi No" }],
+            ["cphone", "İletişim Telefonu", "tel", { ph: "0 (5xx) xxx xx xx" }],
+            ["caddr", "Tebligat Adresi", "text", { w2: 1, ph: "Açık adres, İlçe / İl" }]]],
+        ["Otobüs ve Görevli Şoför", [
+            ["plate", "Otobüs Plakası", "text", { ph: "33 TUR 01", up: 1 }],
+            ["cap", "Koltuk Kapasitesi", "text", { ph: "46 + 1" }],
+            ["brand", "Marka / Model", "text", { w2: 1, ph: "Mercedes Travego 15 SHD" }],
+            ["driver", "Görevli Şoför Adı Soyadı", "text", { ph: "Şoför Adı Soyadı" }],
+            ["dphone", "Şoför Cep Telefonu", "tel", { ph: "0 (5xx) xxx xx xx" }],
+            ["src", "SRC Belgesi", "select", { opts: AK_OPT_SRC, v: AK_OPT_SRC[1] }],
+            ["asst", "Yedek Şoför / Muavin", "text", { ph: "Yedek şoför adı (Opsiyonel)" }]]],
+        ["Güzergah & Tarihler", [
+            ["origin", "Kalkış Yeri & Buluşma Noktası", "text", { w2: 1, ph: "Örn: Mersin Tevfik Sırrı Gür Meydanı" }],
+            ["dest", "Varış / Tur Programı", "text", { w2: 1, ph: "Örn: Kapadokya - Ürgüp - Göreme - Mersin" }],
+            ["sdate", "Başlangıç Tarihi", "date", {}], ["stime", "Başlangıç Saati", "time", { v: "07:00" }],
+            ["edate", "Bitiş Tarihi", "date", {}], ["etime", "Bitiş Saati", "time", { v: "21:00" }]]],
+        ["Kira Bedeli & Ödeme Koşulları", [
+            ["price", "Toplam Kira Bedeli (TL)", "number", { ph: "Örn: 45000", price: 1 }],
+            ["words", "Yazı İle Tutar (Otomatik)", "text", { ph: "Otomatik yazılır" }],
+            ["pay", "Ödeme & Mahsup Esası", "text", { ro: 1, v: "Kartla Akaryakıt + Havale / Nakit" }],
+            ["fuel", "Seyir Giderleri (Madde 3.4)", "select", { opts: AK_OPT_FUEL, v: AK_OPT_FUEL[0][0] }],
+            ["iban", "Taşımacı IBAN / Banka Hesabı", "text", { w2: 1, ph: "TR.. ...." }]]]
+    ];
+
+    let canvas = null, ctx = null, drawing = false, lx = 0, ly = 0, hazir = false;
+    const $ = id => document.getElementById("ak_" + id);
+    const D = id => document.getElementById("akd_" + id);
+    const val = id => ($(id).value || "").trim();
+
+    function formuKur() {
+        document.getElementById("ak-form").innerHTML = AK_FORM.map((s, i) =>
+            `<div class="ak-sec"><h3><b>${i + 1}</b>${s[0]}</h3><div class="ak-f">` +
+            s[1].map(([id, lab, tip, o]) => {
+                const h = o.price ? 'oninput="akFiyat()"' : (tip === "select" ? 'onchange="akGuncelle()"' : 'oninput="akGuncelle()"');
+                const at = `id="ak_${id}" ${o.ro ? "readonly" : h}` + (o.up ? ' style="text-transform:uppercase;font-weight:700"' : "");
+                const alan = tip === "select"
+                    ? `<select ${at}>${o.opts.map(x => { const v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x; return `<option value="${v}"${v === o.v ? " selected" : ""}>${l}</option>`; }).join("")}</select>`
+                    : `<input type="${tip}" ${at} ${o.ph ? `placeholder="${o.ph}"` : ""} ${o.v ? `value="${o.v}"` : ""} autocomplete="off">`;
+                return `<div${o.w2 ? ' class="w2"' : ""}><label>${lab}</label>${alan}</div>`;
+            }).join("") + `</div></div>`).join("");
+    }
+
+    function sayiYaziya(num) {
+        if (!num || isNaN(num)) return "";
+        const b = ["", "Bir", "İki", "Üç", "Dört", "Beş", "Altı", "Yedi", "Sekiz", "Dokuz"];
+        const o = ["", "On", "Yirmi", "Otuz", "Kırk", "Elli", "Altmış", "Yetmiş", "Seksen", "Doksan"];
+        const bas = ["", "Bin", "Milyon", "Milyar"];
+        let n = Math.floor(Math.abs(num));
+        if (n === 0) return "Sıfır Türk Lirası";
+        const grup = v => {
+            const y = Math.floor(v / 100), on = Math.floor((v % 100) / 10), bi = v % 10;
+            return ((y > 0 ? (y === 1 ? "" : b[y] + " ") + "Yüz " : "") + (on ? o[on] + " " : "") + (bi ? b[bi] + " " : "")).trim();
+        };
+        const p = []; let i = 0;
+        while (n > 0) {
+            const g = n % 1000;
+            if (g > 0) p.unshift(i === 1 && g === 1 ? "Bin" : (grup(g) + (bas[i] ? " " + bas[i] : "")).trim());
+            n = Math.floor(n / 1000); i++;
+        }
+        return p.join(" ") + " Türk Lirası";
+    }
+
+    const trTarih = s => { const p = (s || "").split("-"); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : "...../...../20.."; };
+
+    function varsayilanTarihler() {
+        const t = new Date(), n = new Date(); n.setDate(t.getDate() + 2);
+        $("sdate").value = t.toISOString().split("T")[0];
+        $("edate").value = n.toISOString().split("T")[0];
+    }
+
+    // Sayfaya dinamik sığdırma: yazı boyutu A4'e sığan en büyük değere ayarlanır, önizleme genişliğe göre ölçeklenir
+    let fitBekle = 0;
+    function fitNow() {
+        const p = document.getElementById("ak-paper"), w = p && p.parentElement;
+        if (!p || !w || !w.clientWidth) return;
+        let lo = 5, hi = 11;
+        for (let i = 0; i < 12; i++) {
+            const m = (lo + hi) / 2;
+            p.style.setProperty("--akfs", m + "pt");
+            if (p.scrollHeight > p.clientHeight + 1) hi = m; else lo = m;
+        }
+        p.style.setProperty("--akfs", lo + "pt");
+        const s = Math.min(1, w.clientWidth / p.offsetWidth);
+        p.style.transform = s < 1 ? `scale(${s})` : "";
+        p.style.marginLeft = Math.max(0, (w.clientWidth - p.offsetWidth * s) / 2) + "px";
+        w.style.height = (p.offsetHeight * s) + "px";
+    }
+    window.akFit = function () {
+        cancelAnimationFrame(fitBekle);
+        fitBekle = requestAnimationFrame(fitNow);
+    };
+
+    window.akGuncelle = function () {
+        if (!hazir) return;
+        D("sign_agent").textContent = val("rep") || "EMİN ÜSTÜN";
+        const c = val("carrier");
+        D("carrier").textContent = c || ".......................................................................................................";
+        D("sign_carrier").textContent = c || "-";
+        D("plate").textContent = val("plate") || "-";
+        D("bus").textContent = `${val("brand") || "-"} / ${val("cap") ? val("cap") + " Kişilik" : "-"}`;
+        D("driver").textContent = val("driver") || "-";
+        const src = $("src").value;
+        D("contact").textContent = `${val("dphone") || "-"} ${src ? "(" + src + ")" : ""}`;
+        const a = val("asst");
+        D("asst").textContent = a;
+        D("asst_box").classList.toggle("hid", !a);
+        D("route").textContent = `${val("origin") || "Kalkış Noktası"} ➔ ${val("dest") || "Varış/Tur Güzergahı"} (Hareket: ${$("stime").value})`;
+        D("fuel").textContent = $("fuel").value;
+        const cinfo = [
+            "TC/Vergi No: " + (val("cid") || ".................."),
+            "Tel: " + (val("cphone") || ".................."),
+            "Adres: " + (val("caddr") || "..............................................")
+        ];
+        D("cinfo").textContent = " (" + cinfo.join(" - ") + ")";
+        const pr = val("price"), w = val("words"), ib = val("iban");
+        D("price").textContent = `${pr ? Number(pr).toLocaleString("tr-TR") : ".........."} TL (${w || "..................................................."})`;
+        D("iban").textContent = ib ? ` (Taşımacı IBAN: ${ib})` : "";
+        D("d1").textContent = trTarih($("sdate").value);
+        D("d2").textContent = trTarih($("edate").value);
+        akFit();
+    };
+
+    window.akFiyat = function () {
+        const raw = $("price").value, n = parseFloat(raw);
+        if (!isNaN(n) && n > 0) $("words").value = sayiYaziya(n);
+        else if (!raw) $("words").value = "";
+        akGuncelle();
+    };
+
+    window.akOrnek = function () {
+        const s = (k, v) => { $(k).value = v; };
+        s("carrier", "Akdeniz Lüks Turizm Taşımacılık - Ahmet Akdeniz"); s("cid", "29104829102");
+        s("cphone", "0 (532) 412 88 90"); s("caddr", "Şehitler Cad. No:18 Akdeniz / MERSİN");
+        s("plate", "33 TUR 789"); s("brand", "Mercedes-Benz Travego 15 SHD"); s("cap", "46 + 1 Kişilik");
+        s("driver", "Kemal Yılmaz"); s("dphone", "0 (543) 222 33 44"); s("src", "SRC-2 (Yurtiçi Yolcu)"); s("asst", "Murat Demir");
+        s("origin", "Tarsus Kleopatra Kapısı Önü (06:30 Hareket)");
+        s("dest", "Tarsus ➔ Pozantı ➔ Niğde ➔ Kapadokya (Ürgüp-Göreme-Avanos) ➔ Tarsus");
+        s("price", "48500"); s("iban", "TR56 0006 2000 0001 2948 2019 44"); s("fuel", "ACENTA'ya ait");
+        varsayilanTarihler(); akFiyat();
+    };
+
+    window.akTemizle = function () {
+        ["carrier", "cid", "cphone", "caddr", "plate", "brand", "cap", "driver", "dphone", "asst", "origin", "dest", "price", "words", "iban"].forEach(k => { $(k).value = ""; });
+        $("src").value = "SRC-2 (Yurtiçi Yolcu)"; $("fuel").value = "ACENTA'ya ait";
+        akImzaTemizle(); varsayilanTarihler(); akGuncelle();
+    };
+
+    window.akYazdir = function () {
+        fitNow();
+        document.body.classList.add("arackira-yazdir");
+        const temizle = () => { document.body.classList.remove("arackira-yazdir"); window.removeEventListener("afterprint", temizle); };
+        window.addEventListener("afterprint", temizle);
+        window.print();
+    };
+
+    function imzaKur() {
+        canvas = document.getElementById("ak-pad");
+        ctx = canvas.getContext("2d");
+        const boyutla = () => {
+            if (!canvas.offsetWidth) return;
+            const r = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * r; canvas.height = canvas.offsetHeight * r;
+            ctx.scale(r, r); ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a";
+        };
+        boyutla();
+        window.addEventListener("resize", boyutla);
+        const pos = e => {
+            const rc = canvas.getBoundingClientRect(), t = e.touches ? e.touches[0] : e;
+            return { x: t.clientX - rc.left, y: t.clientY - rc.top };
+        };
+        const basla = e => { drawing = true; const p = pos(e); lx = p.x; ly = p.y; };
+        const ciz = e => {
+            if (!drawing) return; e.preventDefault();
+            const p = pos(e);
+            ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(p.x, p.y); ctx.stroke();
+            lx = p.x; ly = p.y;
+        };
+        const bitir = () => {
+            if (!drawing) return; drawing = false;
+            const im = D("sig"); im.src = canvas.toDataURL("image/png"); im.classList.remove("hid");
+        };
+        canvas.addEventListener("mousedown", basla); canvas.addEventListener("mousemove", ciz);
+        window.addEventListener("mouseup", bitir);
+        canvas.addEventListener("touchstart", basla, { passive: false });
+        canvas.addEventListener("touchmove", ciz, { passive: false });
+        window.addEventListener("touchend", bitir);
+    }
+
+    window.akImzaTemizle = function () {
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const im = D("sig"); im.src = ""; im.classList.add("hid");
+    };
+
+    // Sekme açıldığında çağrılır (tuval görünür olduğunda ölçülebilsin diye ilk açılışta kurulur)
+    window.aracKiraInit = function () {
+        if (!hazir) { formuKur(); hazir = true; varsayilanTarihler(); imzaKur(); window.addEventListener("resize", akFit); }
+        akGuncelle();
+    };
+})();
