@@ -1502,3 +1502,45 @@ button:hover {
     body.arackira-yazdir #aracKiraCard .ak-wrap{overflow:visible;padding:0;height:auto!important}
     body.arackira-yazdir #aracKiraCard #ak-paper{width:210mm;height:296mm;margin:0!important;transform:none!important;box-shadow:none;page-break-inside:avoid}
 }
+
+
+/* ============================================================
+   U-ETDS BAŞLIK & E-DEVLET GİRİŞ BUTONU
+   ============================================================ */
+.uetds-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.uetds-header-bar h2 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.btn-edevlet {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(190, 18, 60, 0.25);
+    transition: all 0.2s ease;
+}
+
+.btn-edevlet:hover {
+    transform: translateY(-1px);
+    opacity: 0.94;
+}
