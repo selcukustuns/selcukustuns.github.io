@@ -4674,7 +4674,7 @@ const PRESET_TEMPLATES = {
         title: "GÜNÜBİRLİK ESKİŞEHİR TURU",
         days: [
             {
-                label: "GÜNÜBİRLİK PROGRAM - ESKİŞEHİR",
+                label: "ESKİŞEHİR",
                 stops: [
                     "Sazova Parkı (Masal Şatosu & Korsan Gemisi)",
                     "Odunpazarı Evleri",
