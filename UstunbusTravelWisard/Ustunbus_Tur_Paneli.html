@@ -1189,15 +1189,30 @@
           <button type="button" class="btn btn-secondary btn-sm" onclick="resetForm()">+ Yeni Boş Tur</button>
         </div>
         <select id="presetTemplatesSelect" onchange="loadPresetTemplate(this.value)">
-          <option value="">Hazır Programlar (8 Tur) --</option>
-          <option value="ankara_eskisehir">1. Ankara - Eskişehir Turu (1 Gece 2 Gün)</option>
-          <option value="dogu_karadeniz">2. Doğu Karadeniz & Batum Turu (4 Gece 5 Gün)</option>
-          <option value="dogu_anadolu">3. Büyük Doğu Anadolu Turu (3 Gece 4 Gün)</option>
-          <option value="bati_karadeniz">4. Batı Karadeniz - Safranbolu & Amasra (1 Gece 2 Gün)</option>
-          <option value="bursa_golyazi">5. Bursa - Gölyazı - Trilye - Cumalıkızık (1 Gece 2 Gün)</option>
-          <option value="eskisehir_gunubirlik">6. Eskişehir Turu (Günübirlik)</option>
-          <option value="gaziantep_gunubirlik">7. Gaziantep Turu (Günübirlik)</option>
-          <option value="gap_turu">8. GAP Turu - Mardin, Diyarbakır, Urfa (1 Gece 2 Gün)</option>
+          <option value="">-- Hazır Programlar (19 Tur) --</option>
+          <optgroup label="🏨 Konaklamalı Turlar">
+            <option value="ankara_eskisehir">1. Ankara – Eskişehir Turu (1 Gece 2 Gün)</option>
+            <option value="dogu_karadeniz">2. Doğu Karadeniz & Batum Turu (4 Gece 5 Gün)</option>
+            <option value="dogu_anadolu">3. Büyük Doğu Anadolu Turu (3 Gece 4 Gün)</option>
+            <option value="bati_karadeniz">4. Batı Karadeniz – Safranbolu & Amasra (1 Gece 2 Gün)</option>
+            <option value="bursa_golyazi">5. Bursa – Gölyazı – Trilye – Cumalıkızık (1 Gece 2 Gün)</option>
+            <option value="gap_turu">6. GAP Turu – Mardin, Diyarbakır, Şanlıurfa (1 Gece 2 Gün)</option>
+            <option value="istanbul_turu">7. İstanbul Turu (2 Gece 3 Gün)</option>
+            <option value="canakkale_bursa">8. Çanakkale – Bursa Turu (1 Gece 2 Gün)</option>
+          </optgroup>
+          <optgroup label="☀️ Günübirlik Turlar">
+            <option value="eskisehir_gunubirlik">9. Eskişehir Turu (Günübirlik)</option>
+            <option value="gaziantep_gunubirlik">10. Gaziantep Turu (Günübirlik)</option>
+            <option value="kapikaya_varda">11. Kapıkaya Kanyonu – Varda Köprüsü Turu (Günübirlik)</option>
+            <option value="belemedik">12. Belemedik Tabiat Parkı Turu (Günübirlik)</option>
+            <option value="kapadokya_gunubirlik">13. Kapadokya Turu (Günübirlik)</option>
+            <option value="malatya_darende_gokpinar">14. Malatya – Darende – Gökpınar Gölü Turu (Günübirlik)</option>
+            <option value="konya_sebi_arus">15. Konya Şeb-i Arus Turu (Günübirlik)</option>
+            <option value="nemrut_diyarbakir_misis">16. Nemrut Güneş Doğuşu – Diyarbakır – Misis Köprüsü (Günübirlik)</option>
+            <option value="sivas_divrigi">17. Sivas – Divriği Kültür Turu (Günübirlik)</option>
+            <option value="sultansazligi_kapuzbasi">18. Sultansazlığı – Kapuzbaşı Şelaleleri Turu (Günübirlik)</option>
+            <option value="mardin_midyat_gunubirlik">19. Mardin – Midyat Turu (Günübirlik)</option>
+          </optgroup>
         </select>
       </div>
 

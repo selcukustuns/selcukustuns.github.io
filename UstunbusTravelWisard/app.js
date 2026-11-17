@@ -4768,6 +4768,384 @@ const PRESET_TEMPLATES = {
             "Sıra Gecesi",
             "Müze ve Ören Yerleri Giriş Ücretleri"
         ]
+    },
+
+    kapikaya_varda: {
+        title: "GÜNÜBİRLİK KAPIKAYA KANYONU – VARDA KÖPRÜSÜ TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Kapıkaya Kanyonu",
+                    "Tarihi Varda (Alman) Köprüsü",
+                    "Yerköprü Mesire Alanı",
+                    "Doğayla İç İçe Serbest Zaman ve Fotoğraf Molası"
+                ]
+            }
+        ],
+        included: [
+            "Gidiş-Dönüş Konforlu Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Koltuk ve Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar",
+            "Programda Belirtilmeyen Ekstra Hizmetler"
+        ]
+    },
+
+    belemedik: {
+        title: "GÜNÜBİRLİK BELEMEDİK TABİAT PARKI TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Belemedik Tabiat Parkı",
+                    "Tarihi Demiryolu Hattı ve Alman Yapıları",
+                    "Doğa Yürüyüşü, Fotoğraf ve Serbest Zaman"
+                ]
+            }
+        ],
+        included: [
+            "Gidiş-Dönüş Konforlu Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Kişisel Harcamalar",
+            "Belirtilmeyen Ekstra Hizmetler"
+        ]
+    },
+
+    kapadokya_gunubirlik: {
+        title: "GÜNÜBİRLİK KAPADOKYA TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Sıcak Hava Balonu Seyir Noktası",
+                    "Paşabağları (Rahipler Vadisi)",
+                    "Avanos Çanak Çömlek Yapım Atölyesi",
+                    "Onyx Taş Atölyesi",
+                    "Avanos Sallanan Köprü",
+                    "ATV Turu (Ekstra)",
+                    "Öğle Yemeği Molası",
+                    "Yöresel Tatlar ve Çerez Alışverişi",
+                    "Yeraltı Şehri",
+                    "Güvercinlik Vadisi"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Araçlarla Gidiş-Dönüş Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪",
+            "Programda Belirtilen Panoramik ve Seyir Noktaları"
+        ],
+        excluded: [
+            "ATV Turu",
+            "Sıcak Hava Balonu Uçuşu",
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Yöresel Ürün ve Çerez Alışverişleri",
+            "Kişisel Harcamalar ve Belirtilmeyen Ekstra Aktiviteler"
+        ]
+    },
+
+    malatya_darende_gokpinar: {
+        title: "GÜNÜBİRLİK MALATYA – DARENDE – GÖKPINAR GÖLÜ TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Zeynel Abidin Türbesi",
+                    "Darende Somuncu Baba Külliyesi",
+                    "Tohma Kanyonu ve Balıklı Göl",
+                    "Gürün Gökpınar Gölü"
+                ]
+            }
+        ],
+        included: [
+            "Gidiş-Dönüş Konforlu Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    konya_sebi_arus: {
+        title: "GÜNÜBİRLİK KONYA ŞEB-İ ARUS TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Konya Şehir Gezisi",
+                    "Mevlânâ Müzesi",
+                    "Tarihi Sille Köyü",
+                    "Konya Tropikal Kelebek Bahçesi",
+                    "Şeb-i Arus Sema Töreni"
+                ]
+            }
+        ],
+        included: [
+            "Gidiş-Dönüş Konforlu Ulaşım",
+            "Şeb-i Arus Sema Töreni Bileti",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Koltuk Ferdi Kaza Sigortası",
+            "Otobüs İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    nemrut_diyarbakir_misis: {
+        title: "GÜNÜBİRLİK NEMRUT GÜNEŞ DOĞUŞU – DİYARBAKIR – MİSİS KÖPRÜSÜ TURU",
+        days: [
+            {
+                label: "NEMRUT DAĞI & NİSSİBİ KÖPRÜSÜ",
+                stops: [
+                    "Nemrut Dağı Zirvesi ve Güneşin Doğuşu",
+                    "Kommagene Krallığı Tümülüsü ve Dev Heykeller",
+                    "Nissibi Köprüsü (Kahvaltı ve Fotoğraf Molası)"
+                ]
+            },
+            {
+                label: "DİYARBAKIR & MİSİS KÖPRÜSÜ",
+                stops: [
+                    "Diyarbakır Surları",
+                    "Hevsel Bahçeleri",
+                    "Diyarbakır Ulu Camii",
+                    "On Gözlü Köprü",
+                    "Hasanpaşa Hanı",
+                    "Tarihi Çarşı ve Sokaklarda Serbest Zaman",
+                    "Misis (Yakapınar) Köprüsü"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Araçlarla Gidiş-Dönüş Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Nemrut Dağı Minibüs Transfer Ücreti",
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    istanbul_turu: {
+        title: "2 GECE 3 GÜN – İSTANBUL TURU",
+        days: [
+            {
+                label: "1. GÜN – TARİHİ YARIMADA & EYÜP SULTAN",
+                stops: [
+                    "Pierre Loti Tepesi",
+                    "Eyüp Sultan Camii ve Türbesi",
+                    "Sultanahmet Camii",
+                    "Ayasofya-i Kebir Cami-i Şerifi",
+                    "Yerebatan Sarnıcı",
+                    "Topkapı Sarayı",
+                    "Otele Geçiş ve Konaklama"
+                ]
+            },
+            {
+                label: "2. GÜN – BEYOĞLU, EMİNÖNÜ & BOĞAZ TURU",
+                stops: [
+                    "Galata Kulesi",
+                    "İstiklal Caddesi",
+                    "Taksim Meydanı",
+                    "Eminönü ve Mısır Çarşısı (Serbest Zaman)",
+                    "İstanbul Boğaz Turu",
+                    "Otele Geçiş ve Konaklama"
+                ]
+            },
+            {
+                label: "3. GÜN – PRENS ADALARI & ÇAMLICA",
+                stops: [
+                    "Adalar Turu (Büyükada ve Heybeliada)",
+                    "Çamlıca Tepesi",
+                    "Mersin’e Dönüş Yolculuğu"
+                ]
+            }
+        ],
+        included: [
+            "Karayolu Ulaşımları",
+            "2 Gece Otel Konaklaması",
+            "Otelde 2 Sabah Kahvaltısı",
+            "Profesyonel Rehberlik Hizmeti",
+            "Seyahat Sağlık ve Ferdi Kaza Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "İlk Gün Sabah Kahvaltısı, Öğle ve Akşam Yemekleri",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Boğaz Tekne Turu",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    canakkale_bursa: {
+        title: "1 GECE 2 GÜN – ÇANAKKALE & BURSA TURU",
+        days: [
+            {
+                label: "1. GÜN – ÇANAKKALE",
+                stops: [
+                    "Eceabat",
+                    "Seyit Onbaşı Anıtı",
+                    "Şahindere Şehitliği",
+                    "Çanakkale Şehitler Abidesi",
+                    "Yahya Çavuş Şehitliği",
+                    "57. Alay Şehitliği",
+                    "Conkbayırı",
+                    "Truva Atı",
+                    "Aynalı Çarşı",
+                    "Otele Geçiş, Akşam Yemeği ve Konaklama"
+                ]
+            },
+            {
+                label: "2. GÜN – BURSA",
+                stops: [
+                    "Osman Gazi ve Orhan Gazi Türbeleri",
+                    "Tarihi Saat Kulesi ve Tophane",
+                    "Bursa Ulu Camii",
+                    "Tarihi Koza Han",
+                    "Dönüş Yolculuğu"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Araçlarla Ulaşım",
+            "1 Gece Otel Konaklaması",
+            "Otelde 1 Akşam Yemeği ve 1 Sabah Kahvaltısı",
+            "Bölgeye Özel Profesyonel Rehberlik Hizmeti",
+            "Seyahat ve Koltuk Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "1. Gün Sabah Kahvaltısı",
+            "Öğle Yemekleri",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    sivas_divrigi: {
+        title: "GÜNÜBİRLİK SİVAS – DİVRİĞİ TURU",
+        days: [
+            {
+                label: "SİVAS MERKEZ",
+                stops: [
+                    "Sivas Tarihi Kent Meydanı",
+                    "Çifte Minareli Medrese",
+                    "Şifaiye Medresesi",
+                    "Sivas Atatürk ve Kongre Müzesi"
+                ]
+            },
+            {
+                label: "DİVRİĞİ",
+                stops: [
+                    "Divriği Ulu Camii ve Darüşşifası",
+                    "Divriği Kalesi",
+                    "Divriği Tarihi Konakları ve Evleri",
+                    "Divriği Cam Teras ve Seyir Noktası",
+                    "Divriği Şehir Merkezi"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Araçlarla Gidiş-Dönüş Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar",
+            "Belirtilmeyen Ekstra Ücretler"
+        ]
+    },
+
+    sultansazligi_kapuzbasi: {
+        title: "GÜNÜBİRLİK SULTANSAZLIĞI – KAPUZBAŞI ŞELALELERİ TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Sultansazlığı Milli Parkı (Kuş Cenneti)",
+                    "Kapuzbaşı Şelaleleri",
+                    "Kapuzbaşı Şelaleleri Serbest Zaman ve Fotoğraf Molası",
+                    "Mersin’e Dönüş Yolculuğu"
+                ]
+            },
+            {
+                label: "🚍 KALKIŞ NOKTALARIMIZ",
+                stops: [
+                    "05:00 Mersin Vipol",
+                    "05:10 Mersin Forum",
+                    "05:15 Eski Devlet Hastanesi",
+                    "06:00 Tarsus"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Araçlarla Gidiş-Dönüş Ulaşım",
+            "Profesyonel Rehberlik Hizmeti",
+            "Üstünbus Turizm Refakati",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi Sıcak ve Soğuk İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Tüm Kişisel Harcamalar"
+        ]
+    },
+
+    mardin_midyat_gunubirlik: {
+        title: "GÜNÜBİRLİK MARDİN – MİDYAT TURU",
+        days: [
+            {
+                label: "MİDYAT & MARDİN GEZİ PROGRAMI",
+                stops: [
+                    "Midyat Konukevi (Sıla Konağı)",
+                    "Tarihi Midyat ve Mardin Sokakları",
+                    "Telkâriciler Çarşısı",
+                    "Deyrulzafaran Manastırı veya Mor Gabriel Manastırı",
+                    "Kasımiye Medresesi",
+                    "Eski Mardin Evleri",
+                    "Mardin Ulu Camii"
+                ]
+            }
+        ],
+        included: [
+            "Gidiş-Dönüş Konforlu Ulaşım",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Koltuk ve Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Sabah Kahvaltısı ve Öğle Yemeği",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
     }
 };
 
