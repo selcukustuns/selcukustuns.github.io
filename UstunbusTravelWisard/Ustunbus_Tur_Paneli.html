@@ -30,6 +30,7 @@
     <button id="tabMesafe" class="ust-panel-tab" onclick="panelSekmesiDegistir('mesafe')">🧭 Mesafe Ölçer</button>
     <button id="tabKdv" class="ust-panel-tab" onclick="panelSekmesiDegistir('kdv')">🧮 KDV Hesaplayıcı</button>
     <button id="tabSozlesme" class="ust-panel-tab" onclick="panelSekmesiDegistir('sozlesme')">📑 Acente-Rehber Sözleşmesi</button>
+    <button id="tabTurProgrami" class="ust-panel-tab" onclick="panelSekmesiDegistir('turprogrami')">🌏 Tur Programı Oluşturucu</button>
     <button id="tabAracKira" class="ust-panel-tab" onclick="panelSekmesiDegistir('arackira')">🚙 Araç Kira Sözleşmesi</button>
     <button id="tabOperator" class="ust-panel-tab" onclick="panelSekmesiDegistir('operator')">🔐 Operatör Girişi</button>
     <button id="tabDosya" class="ust-panel-tab" onclick="panelSekmesiDegistir('dosya')">📂 Dosya Yükleme</button>
@@ -1164,6 +1165,115 @@
             </a>
         </div>
     </div>
+</div>
+
+<!-- 5.1 TUR PROGRAMI OLUŞTURUCU MODÜLÜ -->
+<div id="turProgramiCard" style="display:none;">
+  <!-- Üst Menü -->
+  <header class="topbar">
+    <h1>🚌 Öz Üstünbus Turizm | Tur Programı Oluşturucu</h1>
+    <div class="topbar-actions">
+      <span class="page-badge" id="pageCountBadge">Toplam: 1 Sayfa</span>
+      <button type="button" class="btn btn-success" onclick="fastPrint()">🖨️ PDF İndir / Yazdır</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- SOL PANEL: DÜZENLEYİCİ -->
+    <section class="editor-panel" id="editorPanel">
+
+      <!-- Hazır Tur Şablonları -->
+      <div class="section-box" style="background: #eff6ff; border-color: #93c5fd;">
+        <div class="section-title">
+          <span>📋 Hazır Tur Şablonları</span>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="resetForm()">+ Yeni Boş Tur</button>
+        </div>
+        <select id="presetTemplatesSelect" onchange="loadPresetTemplate(this.value)">
+          <option value="">-- Hazır bir tur şablonu seçin (8 Tur) --</option>
+          <option value="ankara_eskisehir">1. Ankara - Eskişehir Turu (1 Gece 2 Gün)</option>
+          <option value="dogu_karadeniz">2. Doğu Karadeniz & Batum Turu (4 Gece 5 Gün)</option>
+          <option value="dogu_anadolu">3. Büyük Doğu Anadolu Turu (3 Gece 4 Gün)</option>
+          <option value="bati_karadeniz">4. Batı Karadeniz - Safranbolu & Amasra (1 Gece 2 Gün)</option>
+          <option value="bursa_golyazi">5. Bursa - Gölyazı - Trilye - Cumalıkızık (1 Gece 2 Gün)</option>
+          <option value="eskisehir_gunubirlik">6. Eskişehir Turu (Günübirlik)</option>
+          <option value="gaziantep_gunubirlik">7. Gaziantep Turu (Günübirlik)</option>
+          <option value="gap_turu">8. GAP Turu - Mardin, Diyarbakır, Urfa (1 Gece 2 Gün)</option>
+        </select>
+      </div>
+
+      <!-- Tur Görselleri (Header ile Başlık Arasına) -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🖼️ Tur Görselleri (İsteğe Bağlı)</span>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="clearImages()">Temizle</button>
+        </div>
+        <div class="img-upload-box">
+          <input type="file" id="tourImagesInput" accept="image/*" multiple onchange="handleImagesUpload(event)" />
+          <div class="img-controls-row">
+            <span>Görsel Yüksekliği:</span>
+            <input type="range" id="imgHeightRange" min="80" max="240" value="135" oninput="updateImageHeight(this.value)" />
+            <span id="imgHeightLabel">135px</span>
+          </div>
+        </div>
+        <div class="editor-thumbs" id="editorThumbs"></div>
+      </div>
+
+      <!-- Tur Başlığı -->
+      <div class="section-box">
+        <div class="section-title">✨ Tur Başlığı</div>
+        <input type="text" id="tourTitleInput" placeholder="Örn: ANKARA - ESKİŞEHİR TURU" oninput="scheduleRenderPages()" />
+      </div>
+
+      <!-- Günler ve Gezilecek Noktalar -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🌏 Gezilecek Noktalar</span>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addDay()">+ Gün Ekle</button>
+        </div>
+        <div id="daysContainer"></div>
+      </div>
+
+      <!-- Fiyata Dahil Olan Hizmetler -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🌟 Fiyata Dâhil Olan Hizmetler</span>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addService('included', '')">+ Madde</button>
+        </div>
+        <div class="chips">
+          <span class="chip" onclick="addService('included', 'Konforlu Ulaşım')">+ Konforlu Ulaşım</span>
+          <span class="chip" onclick="addService('included', 'Profesyonel Rehberlik')">+ Rehberlik</span>
+          <span class="chip" onclick="addService('included', 'Zorunlu Koltuk Sigortası')">+ Koltuk Sigortası</span>
+          <span class="chip" onclick="addService('included', 'Araç İçi İkramlar ☕🍪')">+ İkramlar</span>
+          <span class="chip" onclick="addService('included', 'Otel Konaklaması')">+ Otel Konaklaması</span>
+          <span class="chip" onclick="addService('included', 'Sabah Kahvaltısı')">+ Sabah Kahvaltısı</span>
+          <span class="chip" onclick="addService('included', 'Akşam Yemeği')">+ Akşam Yemeği</span>
+        </div>
+        <div id="includedContainer"></div>
+      </div>
+
+      <!-- Fiyata Dahil Olmayanlar -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🍽️ Fiyata Dâhil Olmayanlar</span>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addService('excluded', '')">+ Madde</button>
+        </div>
+        <div class="chips">
+          <span class="chip red" onclick="addService('excluded', 'Müze Giriş Ücretleri')">+ Müze Girişleri</span>
+          <span class="chip red" onclick="addService('excluded', 'Öğle Yemekleri')">+ Öğle Yemekleri</span>
+          <span class="chip red" onclick="addService('excluded', 'Kişisel Harcamalar')">+ Kişisel Harcamalar</span>
+          <span class="chip red" onclick="addService('excluded', 'Otel Ücreti (Grup Kendi Otel İmkanını Sağlayacaktır.)')">+ Otel Ücreti (Grup)</span>
+        </div>
+        <div id="excludedContainer"></div>
+      </div>
+
+    </section>
+
+    <!-- SAĞ PANEL: OTOMATİK SAYFALANAN A4 BELGE ÖNİZLEMESİ -->
+    <section class="preview-wrapper" id="pagesPreviewContainer"></section>
+  </main>
+
+  <!-- Yükseklik Ölçümü İçin Gizli Alan -->
+  <div id="measureStaging"></div>
 </div>
 
 <!-- 6. ARAÇ KİRA SÖZLEŞMESİ MODÜLÜ -->

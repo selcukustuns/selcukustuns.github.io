@@ -695,6 +695,7 @@ function panelSekmesiDegistir(sekme) {
     const uetdsCard = document.getElementById("uetdsCard");
     const durakCard = document.getElementById("durakListesiCard");
     const sozlesmeCard = document.getElementById("sozlesmeCard");
+    const turProgramiCard = document.getElementById("turProgramiCard");
     const aracKiraCard = document.getElementById("aracKiraCard");
     const personelCard = document.getElementById("personelPaneliCard");
     const hizliMesajCard = document.getElementById("hizliMesajBariCard");
@@ -711,6 +712,7 @@ function panelSekmesiDegistir(sekme) {
     const uetdsTab = document.getElementById("tabUetds");
     const durakTab = document.getElementById("tabDurak");
     const sozlesmeTab = document.getElementById("tabSozlesme");
+    const turProgramiTab = document.getElementById("tabTurProgrami");
     const aracKiraTab = document.getElementById("tabAracKira");
 
     if (personelTab) personelTab.classList.remove("active");
@@ -725,6 +727,7 @@ function panelSekmesiDegistir(sekme) {
     if (uetdsTab) uetdsTab.classList.remove("active");
     if (durakTab) durakTab.classList.remove("active");
     if (sozlesmeTab) sozlesmeTab.classList.remove("active");
+    if (turProgramiTab) turProgramiTab.classList.remove("active");
     if (aracKiraTab) aracKiraTab.classList.remove("active");
 
     if (loginCard) loginCard.style.display = "none";
@@ -739,6 +742,7 @@ function panelSekmesiDegistir(sekme) {
     if (uetdsCard) uetdsCard.style.display = "none";
     if (durakCard) durakCard.style.display = "none";
     if (sozlesmeCard) sozlesmeCard.style.display = "none";
+    if (turProgramiCard) turProgramiCard.style.display = "none";
     if (aracKiraCard) aracKiraCard.style.display = "none";
     if (personelCard) personelCard.style.display = "none";
     if (hizliMesajCard) hizliMesajCard.style.display = "none";
@@ -795,6 +799,13 @@ function panelSekmesiDegistir(sekme) {
     if (sekme === "sozlesme") {
         if (sozlesmeTab) sozlesmeTab.classList.add("active");
         if (sozlesmeCard) sozlesmeCard.style.display = "block";
+        return;
+    }
+
+    if (sekme === "turprogrami") {
+        if (turProgramiTab) turProgramiTab.classList.add("active");
+        if (turProgramiCard) turProgramiCard.style.display = "block";
+        renderPages();
         return;
     }
 
@@ -4363,3 +4374,879 @@ window.addEventListener("DOMContentLoaded", () => {
         akGuncelle();
     };
 })();
+
+/* ============================================================
+   TUR PROGRAMI OLUŞTURUCU MODÜLÜ
+   ============================================================ */
+// Logo Önbelleği (Tek sefer decode edilip bellekte tutulur, baskı önizlemesinde sayfa geçişlerini hızlandırır)
+const CACHED_LOGOS = {
+    ustunbus: "icons/ustunbuslogo.png",
+    tursab: "icons/tursab-logo.png"
+};
+
+function preloadAndCacheLogos() {
+    const cacheOne = (key, src, maxH) => {
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const canvas = document.createElement("canvas");
+                const scale = Math.min(1, maxH / img.height);
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                CACHED_LOGOS[key] = canvas.toDataURL("image/png");
+                renderPages();
+            } catch (e) {
+                // file:// protokolünde canvas taint olursa orijinal yolu koru
+            }
+        };
+        img.src = src;
+    };
+    cacheOne("ustunbus", "icons/ustunbuslogo.png", 140);
+    cacheOne("tursab", "icons/tursab-logo.png", 130);
+}
+
+// Hazır Tur Şablonları Veritabanı
+const PRESET_TEMPLATES = {
+    ankara_eskisehir: {
+        title: "ANKARA - ESKİŞEHİR TURU",
+        days: [
+            {
+                label: "1. GÜN",
+                stops: [
+                    "Anıtkabir",
+                    "I. TBMM (Kurtuluş Savaşı Müzesi)",
+                    "II. TBMM (Cumhuriyet Müzesi)",
+                    "Öğle Yemeği",
+                    "Etnografya Müzesi",
+                    "Otele Geçiş"
+                ]
+            },
+            {
+                label: "2. GÜN",
+                stops: [
+                    "Odunpazarı Evleri & Kurşunlu Külliyesi",
+                    "Balmumu Heykel Müzesi",
+                    "Öğle Yemeği",
+                    "Sazova Parkı Masal Şatosu",
+                    "Porsuk Çayı Serbest Zaman"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Ulaşım",
+            "Profesyonel Rehberlik",
+            "Zorunlu Koltuk Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Müze Giriş Ücretleri",
+            "Öğle Yemekleri",
+            "Kişisel Harcamalar",
+            "Otel Ücreti (Grup Kendi Otel İmkanını Sağlayacaktır.)"
+        ]
+    },
+
+    dogu_karadeniz: {
+        title: "4 GECE 5 GÜN - DOĞU KARADENİZ TURU (Boydan Boya Doya Doya Doğu Karadeniz)",
+        days: [
+            {
+                label: "1. GÜN",
+                stops: [
+                    "Sümela Manastırı",
+                    "Trabzon Atatürk Evi",
+                    "Trabzon Ayasofya Camii",
+                    "Çeçeva (Haremtepe) Çay Bahçeleri",
+                    "Ayder Otele Geçiş, Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "2. GÜN",
+                stops: [
+                    "Ayder Yaylası & Gelin Tülü Şelalesi",
+                    "Huser Sis Denizi (Bulut Denizi)",
+                    "Fırtına Vadisi & Çinçiva Köprüsü",
+                    "Zil Kale & Palovit Şelalesi",
+                    "Zipline & Rafting & Salıncak Aktiviteleri",
+                    "Rize Bezi Atölyesi",
+                    "Otele Geçiş ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "3. GÜN",
+                stops: [
+                    "Borçka Karagöl",
+                    "Batum: Poseidon Heykeli & Piazza Meydanı",
+                    "Batum: St. Nicholas Kilisesi & Medea Anıtı",
+                    "Batum: Ali ve Nino Heykeli & Tekne Turu (Ekstra)",
+                    "Otele Yerleşme ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "4. GÜN",
+                stops: [
+                    "Çay Fabrikası",
+                    "Uzungöl",
+                    "Sürmene Bıçağı",
+                    "Yöresel Lezzetler & Ürünler Mağazası",
+                    "Ordu Teleferik",
+                    "Otele Geçiş, Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "5. GÜN",
+                stops: [
+                    "Samsun: İlk Adım Anıtı, Bandırma Vapuru & Atatürk Heykeli",
+                    "Trabzon Ekmeği Satış Noktası",
+                    "Amasya Yalıboyu Evleri",
+                    "Kral Kaya Mezarları",
+                    "Ferhat ile Şirin Parkı"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Ulaşım",
+            "4 Gece Otelde Konaklama",
+            "Otelde Alınan 4 Sabah Kahvaltısı ve 4 Akşam Yemeği",
+            "Profesyonel Rehberlik ve Refakat Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Öğle Yemekleri",
+            "Kişisel Harcamalar",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Minibüsler ile Yapılan Yayla ve Batum Transfer Ücretleri",
+            "Batum Yurt Dışı Çıkış Harç Ücreti"
+        ]
+    },
+
+    dogu_anadolu: {
+        title: "3 GECE 4 GÜN - BÜYÜK DOĞU ANADOLU TURU (Boydan Boya Doya Doya Doğu Anadolu)",
+        days: [
+            {
+                label: "1. GÜN - VAN",
+                stops: [
+                    "Ahlat Selçuklu Mezarlığı",
+                    "Adır Adası & Akdamar Adası (Akdamar Kilisesi)",
+                    "Van Kedi Evi",
+                    "Van Kalesi (Panoramik)",
+                    "Van Telkari Sanatı Atölyesi",
+                    "Van'da Otele Geçiş, Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "2. GÜN - VAN - AĞRI - IĞDIR - KARS",
+                stops: [
+                    "Muradiye Şelalesi",
+                    "Doğubayazıt & İshak Paşa Sarayı",
+                    "Ağrı Dağı Panoramik Seyir",
+                    "Iğdır Tuz Mağaraları",
+                    "Kars'ta Otele Geçiş, Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "3. GÜN - KARS - SARIKAMIŞ - ERZURUM",
+                stops: [
+                    "Ani Harabeleri",
+                    "Kümbet Camii (12 Havariler Kilisesi)",
+                    "Kanlı Tabya & Kars Kalesi (Panoramik)",
+                    "Sarıkamış Şehitlik Alanı ve Serbest Zaman",
+                    "Erzurum'da Otele Geçiş, Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "4. GÜN - ERZURUM",
+                stops: [
+                    "Çifte Minareli Medrese & Üç Kümbetler",
+                    "Erzurum Kalesi (Panoramik)",
+                    "Taşhan (Rüstem Paşa Bedesteni) & Oltu Taşı Atölyeleri",
+                    "Erzurum Merkez Gezisi & Meşhur Cağ Kebabı Molası (Ekstra)",
+                    "Program Sonunda Dönüş Yolculuğu"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Turizm Araçları ile Ulaşım",
+            "3 Gece Otel Konaklaması",
+            "3 Sabah Kahvaltısı ve 3 Akşam Yemeği",
+            "Profesyonel Rehberlik Hizmeti",
+            "Araç İçi İkramlar ☕🍪",
+            "Seyahat Sigortası & Çevre Gezileri"
+        ],
+        excluded: [
+            "İlk Gün Sabah Kahvaltısı",
+            "Öğle Yemekleri",
+            "Tüm Müze ve Ören Yeri Giriş Ücretleri",
+            "Akdamar Adası Tekne Ücreti",
+            "Cağ Kebabı ve Ekstra Yiyecek-İçecekler",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    bati_karadeniz: {
+        title: "BATI KARADENİZ TURU (1 Gece • 2 Gün)",
+        days: [
+            {
+                label: "1. GÜN - SAFRANBOLU & AMASRA",
+                stops: [
+                    "Safranbolu: Safran Lokumlarının Tadımı ve Alışveriş",
+                    "Eski Safranbolu Sokakları",
+                    "Amasra: Amastris Kalesi",
+                    "Çekiciler Çarşısı'nda Serbest Zaman",
+                    "Tarihi Kemere Köprüsü",
+                    "4★ Devrek Otel Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "2. GÜN - BOLU",
+                stops: [
+                    "Yedigöller Milli Parkı",
+                    "Gölcük Gölü",
+                    "Mersin’e Dönüş Yolculuğu"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Araçlarla Ulaşım",
+            "Araçta Sıcak & Soğuk İkramlar ☕🍪",
+            "1 Gece Otelde Yarım Pansiyon Konaklama",
+            "Otelde Akşam Yemeği ve Sabah Kahvaltısı",
+            "Profesyonel Rehberlik Hizmeti",
+            "Koltuk & Seyahat Sigortası"
+        ],
+        excluded: [
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Öğle Yemekleri",
+            "Yedigöller Transferi",
+            "Tüm Kişisel Harcamalar"
+        ]
+    },
+
+    bursa_golyazi: {
+        title: "BURSA – GÖLYAZI – TRİLYE – MUDANYA – CUMALIKIZIK TURU",
+        days: [
+            {
+                label: "1. GÜN",
+                stops: [
+                    "Gölyazı (Uluabat Gölü & Ağlayan Çınar)",
+                    "Trilye (Tarihi Rum Evleri)",
+                    "Mudanya (Sahil & Mudanya Mütarekesi Evi)",
+                    "Otele Yerleşme – Konaklama"
+                ]
+            },
+            {
+                label: "2. GÜN",
+                stops: [
+                    "Bursa Merkez (Ulu Camii, Koza Han & Kapalı Çarşı)",
+                    "Tophane (Osman Gazi & Orhan Gazi Türbeleri)",
+                    "Cumalıkızık (Tarihi Köy Gezisi)",
+                    "Dönüş Yolculuğu"
+                ]
+            },
+            {
+                label: "🚍 KALKIŞ NOKTALARIMIZ",
+                stops: [
+                    "17:00 Mersin Vipol",
+                    "17:10 Mersin Forum",
+                    "17:15 Eski Devlet Hastanesi",
+                    "18:00 Tarsus",
+                    "19:00 Duygu Kafe Adana"
+                ]
+            }
+        ],
+        included: [
+            "1 Gece Otel Konaklama",
+            "1 Akşam Yemeği & 1 Sabah Kahvaltısı",
+            "Konforlu Ulaşım (Lüks Araçlarla)",
+            "Rehberlik Hizmeti",
+            "Zorunlu Seyahat Sigortası"
+        ],
+        excluded: [
+            "Öğle Yemekleri",
+            "Kişisel Harcamalar",
+            "Müze & Ören Yeri Giriş Ücretleri"
+        ]
+    },
+
+    eskisehir_gunubirlik: {
+        title: "GÜNÜBİRLİK ESKİŞEHİR TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK PROGRAM - ESKİŞEHİR",
+                stops: [
+                    "Sazova Parkı (Masal Şatosu & Korsan Gemisi)",
+                    "Odunpazarı Evleri",
+                    "Yılmaz Büyükerşen Balmumu Heykeller Müzesi",
+                    "Kurşunlu Külliyesi",
+                    "Atlıhan El Sanatları Çarşısı",
+                    "Devrim Arabası",
+                    "Porsuk Çayı Serbest Zaman",
+                    "Dönüş Yolculuğu"
+                ]
+            }
+        ],
+        included: [
+            "Lüks Araçlarla Ulaşım",
+            "Profesyonel Rehberlik Hizmeti",
+            "Zorunlu Seyahat Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Öğle Yemekleri",
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Kişisel Harcamalar"
+        ]
+    },
+
+    gaziantep_gunubirlik: {
+        title: "GÜNÜBİRLİK GAZİANTEP TURU",
+        days: [
+            {
+                label: "GÜNÜBİRLİK GEZİ PROGRAMI",
+                stops: [
+                    "Gaziantep Hayvanat Bahçesi",
+                    "Zeugma Mozaik Müzesi",
+                    "Panorama 25 Aralık Müzesi",
+                    "Öğle Yemeği",
+                    "Gaziantep Şehir Merkezi (Serbest Zaman)",
+                    "Tarihi Bakırcılar Çarşısı"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Ulaşım",
+            "Profesyonel Rehberlik Hizmeti",
+            "Zorunlu Koltuk Sigortası",
+            "Araç İçi İkramlar ☕🍪"
+        ],
+        excluded: [
+            "Müze ve Ören Yeri Giriş Ücretleri",
+            "Öğle Yemeği",
+            "Kişisel Harcamalar",
+            "Sıra Gecesi"
+        ]
+    },
+
+    gap_turu: {
+        title: "GAP TURU (DİYARBAKIR – MARDİN – MİDYAT – BALIKLIGÖL – GÖBEKLİTEPE – ŞANLIURFA)",
+        days: [
+            {
+                label: "1. GÜN - MİDYAT & MARDİN",
+                stops: [
+                    "Midyat Devlet Konukevi & Gümüşçüler Çarşısı",
+                    "Deyrulzaferan Manastırı",
+                    "Mezopotamya Ovası Manzarası",
+                    "Kasımiye Medresesi",
+                    "Eski Mardin Evleri & Tarihi Postane",
+                    "Otel Konaklama ve Akşam Yemeği"
+                ]
+            },
+            {
+                label: "2. GÜN - DİYARBAKIR & ŞANLIURFA",
+                stops: [
+                    "Diyarbakır: Hasanpaşa Hanı & Ulu Cami",
+                    "Diyarbakır: Hevsel Bahçeleri, On Gözlü Köprü & Cahit Sıtkı Tarancı Evi",
+                    "Şanlıurfa: Göbeklitepe & Urfa Kalesi",
+                    "Şanlıurfa: Balıklıgöl & Ayn-ı Zeliha Gölü",
+                    "Şanlıurfa: Halil-ür Rahman Camii, Hz. İbrahim Makamı & Rızvaniye Camii"
+                ]
+            }
+        ],
+        included: [
+            "Konforlu Ulaşım",
+            "Araç İçi İkramlar ☕🍪",
+            "Profesyonel Rehberlik & Refakat Hizmeti",
+            "1 Gece Otel Konaklama, 1 Akşam Yemeği ve 1 Sabah Kahvaltısı",
+            "Zorunlu Koltuk Sigortası"
+        ],
+        excluded: [
+            "İlk Gün Sabah Kahvaltısı",
+            "Öğle Yemekleri",
+            "Kişisel Harcamalar",
+            "Sıra Gecesi",
+            "Müze ve Ören Yerleri Giriş Ücretleri"
+        ]
+    }
+};
+
+// Uygulama Durumu (State)
+let tourData = {
+    title: "",
+    images: [],
+    imageHeight: 135,
+    days: [],
+    included: [],
+    excluded: []
+};
+
+let renderTimer = null;
+
+// Sayfa Açılışında Başlatma
+window.addEventListener("DOMContentLoaded", () => {
+    preloadAndCacheLogos();
+    resetForm();
+});
+
+// Yazarken gereksiz yeniden çizimleri önleyen hafif zamanlayıcı
+function scheduleRenderPages() {
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(renderPages, 60);
+}
+
+// Baskı penceresi açılırken ağır editör DOM'unu geçici gizleyip sıfır gecikme sağla
+function fastPrint() {
+    renderPages();
+    const editorEl = document.getElementById("editorPanel");
+    if (editorEl) editorEl.style.display = "none";
+    document.body.classList.add("turprogrami-yazdir");
+    const temizle = () => {
+        document.body.classList.remove("turprogrami-yazdir");
+        if (editorEl) editorEl.style.display = "";
+        window.removeEventListener("afterprint", temizle);
+    };
+    window.addEventListener("afterprint", temizle);
+    requestAnimationFrame(() => {
+        window.print();
+    });
+}
+
+// Hazır Şablon Yükleme
+function loadPresetTemplate(key) {
+    if (!key) {
+        resetForm();
+        return;
+    }
+    if (!PRESET_TEMPLATES[key]) return;
+    const tpl = JSON.parse(JSON.stringify(PRESET_TEMPLATES[key]));
+    tourData = {
+        title: tpl.title,
+        images: tourData.images || [],
+        imageHeight: tourData.imageHeight || 135,
+        days: tpl.days,
+        included: tpl.included,
+        excluded: tpl.excluded
+    };
+    syncFormFromState();
+}
+
+// Görselleri Hafif Boyuta Sıkıştırarak Yükleme
+function compressImageFile(file, maxWidth = 800, quality = 0.75) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+async function handleImagesUpload(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    for (const file of files) {
+        const compressedDataUrl = await compressImageFile(file);
+        tourData.images.push(compressedDataUrl);
+    }
+
+    renderImagesEditor();
+    renderPages();
+    event.target.value = "";
+}
+
+function removeImage(idx) {
+    tourData.images.splice(idx, 1);
+    renderImagesEditor();
+    renderPages();
+}
+
+function clearImages() {
+    tourData.images = [];
+    renderImagesEditor();
+    renderPages();
+}
+
+function updateImageHeight(val) {
+    tourData.imageHeight = parseInt(val, 10) || 135;
+    document.getElementById("imgHeightLabel").textContent = `${tourData.imageHeight}px`;
+    scheduleRenderPages();
+}
+
+function renderImagesEditor() {
+    const container = document.getElementById("editorThumbs");
+    if (!container) return;
+    container.innerHTML = "";
+    tourData.images.forEach((src, idx) => {
+        const div = document.createElement("div");
+        div.className = "thumb-item";
+        div.innerHTML = `
+          <img src="${src}" alt="Tur Görseli ${idx + 1}" />
+          <button type="button" class="thumb-remove" title="Görseli kaldır" onclick="removeImage(${idx})">×</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function resetForm() {
+    tourData = {
+        title: "",
+        images: [],
+        imageHeight: 135,
+        days: [{ label: "1. GÜN", stops: [""] }],
+        included: [],
+        excluded: []
+    };
+    const presetSelect = document.getElementById("presetTemplatesSelect");
+    if (presetSelect) presetSelect.value = "";
+    syncFormFromState();
+}
+
+// Gün ve Durak İşlemleri
+function addDay() {
+    const nextNum = tourData.days.length + 1;
+    tourData.days.push({ label: `${nextNum}. GÜN`, stops: [""] });
+    renderEditor();
+    renderPages();
+}
+
+function removeDay(dayIdx) {
+    tourData.days.splice(dayIdx, 1);
+    renderEditor();
+    renderPages();
+}
+
+function updateDayLabel(dayIdx, val) {
+    tourData.days[dayIdx].label = val;
+    scheduleRenderPages();
+}
+
+function addStop(dayIdx) {
+    tourData.days[dayIdx].stops.push("");
+    renderEditor();
+    renderPages();
+}
+
+function updateStop(dayIdx, stopIdx, val) {
+    tourData.days[dayIdx].stops[stopIdx] = val;
+    scheduleRenderPages();
+}
+
+function removeStop(dayIdx, stopIdx) {
+    tourData.days[dayIdx].stops.splice(stopIdx, 1);
+    renderEditor();
+    renderPages();
+}
+
+function moveStop(dayIdx, stopIdx, dir) {
+    const stops = tourData.days[dayIdx].stops;
+    const target = stopIdx + dir;
+    if (target < 0 || target >= stops.length) return;
+    [stops[stopIdx], stops[target]] = [stops[target], stops[stopIdx]];
+    renderEditor();
+    renderPages();
+}
+
+// Hizmet Maddeleri İşlemleri
+function addService(type, text) {
+    if (text && tourData[type].includes(text)) return;
+    tourData[type].push(text);
+    renderEditor();
+    renderPages();
+}
+
+function updateService(type, idx, val) {
+    tourData[type][idx] = val;
+    scheduleRenderPages();
+}
+
+function removeService(type, idx) {
+    tourData[type].splice(idx, 1);
+    renderEditor();
+    renderPages();
+}
+
+// Formu State'ten Çizme
+function syncFormFromState() {
+    const titleInput = document.getElementById("tourTitleInput");
+    if (!titleInput) return;
+    titleInput.value = tourData.title || "";
+    const h = tourData.imageHeight || 135;
+    document.getElementById("imgHeightRange").value = h;
+    document.getElementById("imgHeightLabel").textContent = `${h}px`;
+    if (!Array.isArray(tourData.images)) tourData.images = [];
+    renderImagesEditor();
+    renderEditor();
+    renderPages();
+}
+
+function renderEditor() {
+    // Günler
+    const daysContainer = document.getElementById("daysContainer");
+    if (!daysContainer) return;
+    daysContainer.innerHTML = "";
+    tourData.days.forEach((day, dIdx) => {
+        const card = document.createElement("div");
+        card.className = "day-card";
+
+        let stopsHtml = "";
+        day.stops.forEach((stop, sIdx) => {
+            stopsHtml += `
+            <div class="stop-row">
+              <span>📌</span>
+              <input type="text" value="${escapeHtml(stop)}" placeholder="Gezilecek nokta..."
+                oninput="updateStop(${dIdx}, ${sIdx}, this.value)" />
+              <div class="move-btns">
+                <button type="button" class="btn btn-secondary btn-sm" title="Yukarı" onclick="moveStop(${dIdx}, ${sIdx}, -1)">↑</button>
+                <button type="button" class="btn btn-secondary btn-sm" title="Aşağı" onclick="moveStop(${dIdx}, ${sIdx}, 1)">↓</button>
+                <button type="button" class="btn btn-danger" title="Sil" onclick="removeStop(${dIdx}, ${sIdx})">×</button>
+              </div>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="day-header">
+            <input type="text" value="${escapeHtml(day.label)}" oninput="updateDayLabel(${dIdx}, this.value)" />
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addStop(${dIdx})">+ Durak</button>
+            <button type="button" class="btn btn-danger" onclick="removeDay(${dIdx})">Günü Sil</button>
+          </div>
+          ${stopsHtml}
+        `;
+        daysContainer.appendChild(card);
+    });
+
+    // Dahil Olanlar
+    const incContainer = document.getElementById("includedContainer");
+    if (incContainer) {
+        incContainer.innerHTML = "";
+        tourData.included.forEach((item, idx) => {
+            incContainer.innerHTML += `
+              <div class="stop-row">
+                <span>✅</span>
+                <input type="text" value="${escapeHtml(item)}" placeholder="Hizmet yazın..."
+                  oninput="updateService('included', ${idx}, this.value)" />
+                <button type="button" class="btn btn-danger" onclick="removeService('included', ${idx})">×</button>
+              </div>
+            `;
+        });
+    }
+
+    // Dahil Olmayanlar
+    const excContainer = document.getElementById("excludedContainer");
+    if (excContainer) {
+        excContainer.innerHTML = "";
+        tourData.excluded.forEach((item, idx) => {
+            excContainer.innerHTML += `
+              <div class="stop-row">
+                <span>❎</span>
+                <input type="text" value="${escapeHtml(item)}" placeholder="Hariç tutulan madde..."
+                  oninput="updateService('excluded', ${idx}, this.value)" />
+                <button type="button" class="btn btn-danger" onclick="removeService('excluded', ${idx})">×</button>
+              </div>
+            `;
+        });
+    }
+}
+
+// YARDIMCI HTML ŞABLONLARI
+function getHeaderHtml() {
+    const cleanTitle = (tourData.title || "").trim() || "TUR PROGRAMI";
+    let galleryHtml = "";
+    if (tourData.images && tourData.images.length > 0) {
+        const h = tourData.imageHeight || 135;
+        galleryHtml = `
+          <div class="doc-gallery">
+            ${tourData.images.map(src => `<div class="doc-gallery-item"><img src="${src}" style="height:${h}px;" alt="Tur Görseli" /></div>`).join("")}
+          </div>
+        `;
+    }
+    return `
+        <div class="doc-header">
+          <img src="${CACHED_LOGOS.ustunbus}" class="doc-logo-left" alt="Öz Üstünbus Turizm" />
+          <img src="${CACHED_LOGOS.tursab}" class="doc-logo-right" alt="TÜRSAB" />
+        </div>
+        ${galleryHtml}
+        <div class="doc-title">✨ ${escapeHtml(cleanTitle)} ✨</div>
+      `;
+}
+
+function getDisclaimerHtml() {
+    return `
+        <div class="doc-disclaimer">
+          <strong>ÖNEMLİ BİLGİLENDİRME:</strong> Acenta ve görevli profesyonel turist rehberi; hava muhalefeti, yol ve trafik durumu, müze ve ören yerlerinin tadilat, restorasyon veya kapalı olma halleri ile olağanüstü ve mücbir sebepler gibi operasyonel gerekliliklerin ortaya çıkması durumunda, tur içeriğini ve gezilecek yerlerin bütünlüğünü bozmamak kaydıyla gezi güzergâhında, ziyaret sıralamasında ve program saatlerinde değişiklik yapma hakkını saklı tutar. (1618 Sayılı Kanun ve Paket Tur Sözleşmeleri Yönetmeliği uyarınca düzenlenmiştir.)
+        </div>
+      `;
+}
+
+function getFooterHtml() {
+    return `
+        <footer class="doc-footer">
+          <img src="${CACHED_LOGOS.tursab}" class="footer-logo-left" alt="TÜRSAB" />
+          <div class="footer-info">
+            <div class="footer-phones">0850 532 80 00 - 0532 560 89 19</div>
+            <div class="footer-address">Şehitler Tepesi Mah. 3631 Sk. Kılınç Apt. No:5A Tarsus / Mersin</div>
+          </div>
+          <img src="${CACHED_LOGOS.ustunbus}" class="footer-logo-right" alt="Öz Üstünbus Turizm" />
+        </footer>
+      `;
+}
+
+// OTOMATİK A4 SAYFALAMA MOTORU (Tüm Başlık ve Gün Grupları Bütün Olarak Taşınır)
+function renderPages() {
+    const titleInput = document.getElementById("tourTitleInput");
+    const container = document.getElementById("pagesPreviewContainer");
+    const staging = document.getElementById("measureStaging");
+    if (!titleInput || !container || !staging) return;
+
+    tourData.title = titleInput.value;
+
+    // 1. BÖLÜNMEZ ATOMİK GRUP BLOKLARI OLUŞTURMA
+    const atomicGroups = [];
+
+    const activeDays = tourData.days
+        .map(d => ({
+            label: d.label.trim(),
+            stops: d.stops.filter(s => s.trim() !== "")
+        }))
+        .filter(d => d.label !== "" || d.stops.length > 0);
+
+    activeDays.forEach((day, idx) => {
+        const mainHeading = (idx === 0)
+            ? `<div class="doc-section-heading">🌏 Gezilecek Noktalar:</div>`
+            : "";
+        const dayTitle = day.label
+            ? `<div class="doc-day-title">📅 ${escapeHtml(day.label)}</div>`
+            : "";
+        const stopsHtml = day.stops
+            .map(s => `<div class="doc-item-row">📌 ${escapeHtml(s)}</div>`)
+            .join("");
+
+        atomicGroups.push(`
+          <div class="atomic-group">
+            ${mainHeading}
+            ${dayTitle}
+            ${stopsHtml}
+          </div>
+        `);
+    });
+
+    const validInc = tourData.included.filter(i => i.trim() !== "");
+    if (validInc.length > 0) {
+        const incItems = validInc.map(item => `<div class="doc-service-row">✅ ${escapeHtml(item)}</div>`).join("");
+        atomicGroups.push(`
+          <div class="atomic-group">
+            <div class="doc-section-heading">🌟 Fiyata Dâhil Olan Hizmetler:</div>
+            ${incItems}
+          </div>
+        `);
+    }
+
+    const validExc = tourData.excluded.filter(i => i.trim() !== "");
+    if (validExc.length > 0) {
+        const excItems = validExc.map(item => `<div class="doc-service-row">❎ ${escapeHtml(item)}</div>`).join("");
+        atomicGroups.push(`
+          <div class="atomic-group">
+            <div class="doc-section-heading">🍽️ Fiyata Dâhil Olmayanlar:</div>
+            ${excItems}
+          </div>
+        `);
+    }
+
+    // 2. Ölçüm sahnesinde yükseklikleri tek seferde hesapla
+    staging.innerHTML = `
+        <div id="mHeader">${getHeaderHtml()}</div>
+        <div id="mDisclaimer">${getDisclaimerHtml()}</div>
+        <div id="mFooter">${getFooterHtml()}</div>
+        <div id="mGroups">${atomicGroups.join("")}</div>
+      `;
+
+    const TOTAL_SHEET_INNER_PX = 1044;
+    const headerHeight = document.getElementById("mHeader").offsetHeight + 6;
+    const disclaimerHeight = document.getElementById("mDisclaimer").offsetHeight;
+    const footerHeight = document.getElementById("mFooter").offsetHeight + 6;
+
+    const groupEls = Array.from(document.getElementById("mGroups").children);
+    const groupHeights = groupEls.map(el => el.offsetHeight + 11);
+
+    // 3. Bütünlüğü bozmadan sayfalara dağıtma
+    const pages = [];
+    let currentPageGroups = [];
+    let currentUsedHeight = headerHeight;
+
+    for (let i = 0; i < atomicGroups.length; i++) {
+        const h = groupHeights[i];
+        const isLastGroup = (i === atomicGroups.length - 1);
+        const reservedBottom = isLastGroup ? (disclaimerHeight + footerHeight) : footerHeight;
+
+        if (currentPageGroups.length > 0 && (currentUsedHeight + h + reservedBottom > TOTAL_SHEET_INNER_PX)) {
+            pages.push(currentPageGroups);
+            currentPageGroups = [];
+            currentUsedHeight = 0;
+        }
+
+        currentPageGroups.push(atomicGroups[i]);
+        currentUsedHeight += h;
+    }
+
+    pages.push(currentPageGroups);
+
+    if (currentUsedHeight + disclaimerHeight + footerHeight > TOTAL_SHEET_INNER_PX && currentPageGroups.length > 1) {
+        const lastPage = pages[pages.length - 1];
+        const movedGroup = lastPage.pop();
+        pages.push([movedGroup]);
+    }
+
+    // 4. Gerçek A4 Sayfalarını Ekrana Bas
+    const fragment = document.createDocumentFragment();
+    pages.forEach((pageGroups, idx) => {
+        const isFirstPage = (idx === 0);
+        const isLastPage = (idx === pages.length - 1);
+
+        const sheet = document.createElement("div");
+        sheet.className = "a4-sheet";
+
+        sheet.innerHTML = `
+          <div class="sheet-body">
+            ${isFirstPage ? getHeaderHtml() : ""}
+            ${pageGroups.join("")}
+          </div>
+          <div class="sheet-bottom">
+            ${isLastPage ? getDisclaimerHtml() : ""}
+            ${getFooterHtml()}
+          </div>
+        `;
+        fragment.appendChild(sheet);
+    });
+
+    container.innerHTML = "";
+    container.appendChild(fragment);
+    document.getElementById("pageCountBadge").textContent = `Toplam: ${pages.length} Sayfa`;
+    staging.innerHTML = "";
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
